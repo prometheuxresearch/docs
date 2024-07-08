@@ -64,6 +64,7 @@ const config: Config = {
         className: 'my-2',
         alt: 'Prometheux Logo',
         src: 'img/logotype.svg',
+        srcDark: 'img/logotype-dark.svg',
       },
       items: [
         {

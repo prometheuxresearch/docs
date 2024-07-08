@@ -1,7 +1,12 @@
 # What is Vadalog?
 
-This is a short user manual for **Vadalog Parallel**, the parallel and distributed logic reasoner based on the **Vadalog Language**.
+This is a short user manual for **Vadalog**, the language underpinning Prometheux's
+reasoning engine.
 
-**Vadalog Parallel** is an intelligent data processing system, able to process **logic programs** also known as **ontologies**, expressed in **Vadalog**, a language of the Datalog +/- family.
+As a language of the Datalog +/- family, and is declarative and highly expressive.
 
-The processing of such logic programs is also known as **reasoning** and, with AI terminology, we can therefore say that Vadalog Parallel is a **reasoner**.
+Because it's so expressive, _**all**_ SQL and Cypher queries can be expressed simply
+in Vadalog.
+
+With Vadalog, you can express recursive statements and represent facts not in
+your database as variables to be deduced.

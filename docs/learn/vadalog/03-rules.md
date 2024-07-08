@@ -13,10 +13,11 @@ department(Y,X) :- employee(X).
 ```
 
 For each employee X there exists a department Y.
-The expected result is
+The expected result is:
 
-```prolog showLineNumbers
-department(z1,1). department(z2,2).
+```prolog
+department(z1,1).
+department(z2,2).
 ```
 
 ## Facts
@@ -53,7 +54,7 @@ canWork(X,Y,Z) :- employee(X), department(Y).
 
 Any employee X can work in any department Y on some unknown project Z. The expected result is:
 
-```prolog showLineNumbers
+```prolog
 canWork("Jack","science",z1).
 canWork("Jack","finance",z2).
 canWork("Ruth","science",z3).
@@ -76,7 +77,13 @@ contract(X,"basic",20) :- employee(X),junior(X).
 @output("contract").
 ```
 
-A junior employee will have a "basic" contract, with stipend 20. The expected result is: `contract("Mark","basic",20).`
+A junior employee will have a "basic" contract, with stipend 20. The expected result is:
+
+```
+contract("Mark","basic",20).
+```
+
+For this next example:
 
 ```prolog showLineNumbers {3,4}
 employee("Mark","junior").
@@ -91,9 +98,10 @@ Any senior employee X will have an "advanced" contract with stipend 40.
 Basically, the constants filter the facts to which the rules apply, in such a way
 that the one for basic contracts applies only to Mark, and the one for
 advanced contracts applies only to Ruth.
+
 The expected result is:
 
-```prolog showLineNumbers
+```prolog
 contract("Mark","basic",20).
 contract("Ruth","advanced",40).
 ```

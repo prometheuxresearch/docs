@@ -1,6 +1,6 @@
 # Explanations with the Chase Graph
 
-DP Vadalog natively supports full explanations of logical processes for output generation in reasoning tasks by via the materialization of the chase graph during its parallel and distributed evaluation.
+DP Vadalog natively supports full explanations of logical processes for output generation in reasoning tasks via the materialization of the chase graph during its parallel and distributed evaluation.
 
 The chase graph mode is activated using the `@chase` annotation and is materialized in a parallel and distributed fashion into datasources such as CSV files or Neo4j databases.
 

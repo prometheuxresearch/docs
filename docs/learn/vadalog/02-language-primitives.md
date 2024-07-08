@@ -12,7 +12,7 @@ only contains constants. A ground atom is also known as **fact**.
 ## Rules and programs
 
 A rule is an expression of the form
-`h :- b1, …, bn` where `b1, …, bn` are the atoms of the _body_ and `h` is
+`h :- b1, … , bn` where `b1, … , bn` are the atoms of the _body_ and `h` is
 the atom of the _head_.
 
 The variables in the body are universally quantified, while the variables that appear in the head, but not in the body are existentially quantified.
@@ -29,11 +29,11 @@ a(X) :- b(X).
 It generates facts for atom `a`, given facts for atom `b`. `X` is a variable.
 
 ```
-a(X,Z) :- b(X,Y),c(Y,Z).
+a(X,Z) :- b(X,Y), c(Y,Z).
 ```
 
 ```
-a(X,Z) :- a(X,Y),a(Y,Z).
+a(X,Z) :- a(X,Y), a(Y,Z).
 ```
 
 Given two facts for `a`, it generates a third one.
@@ -45,7 +45,7 @@ The following is an example shows a simple Vadalog program.
 ```prolog showLineNumbers
 a(1).
 c(1,2).
-b(Y,X) :- a(X),c(X,Y).
+b(Y,X) :- a(X), c(X,Y).
 @output("b").
 ```
 
@@ -147,7 +147,8 @@ manager(Y,X) :- employee(X).
 This ontology represents that every employee has a manager. The expected result is:
 
 ```prolog
-manager(z1,1). manager(z2,2).
+manager(z1,1).
+manager(z2,2).
 ```
 
 where `z1` and `z2` are marked nulls, representing that there must be a manager for each of the employees, but their identity is unknown.
@@ -176,5 +177,6 @@ Observe that the name of the manager is unknown throughout the entire processing
 The expected result is:
 
 ```prolog
-contractSigned("Jack"). contractSigned("Ruth").
+contractSigned("Jack").
+contractSigned("Ruth").
 ```

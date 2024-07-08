@@ -11,7 +11,8 @@ They appear in specific parts of a Vadalog program, namely in
 
 ## Operators
 
-Vadalog supports built-in operations over values of data types. These operations allow to compare values, perform arithmetics, manipulate strings and datetime values.
+Vadalog supports built-in operations over values of data types. These operations
+allow to compare values, perform arithmetics, manipulate strings and datetime values.
 Operations are supported through symbolic operators, which can be
 _prefix_, _infix_ or _functional-style_.
 
@@ -22,12 +23,12 @@ and _multi-facts operators_ (called **aggregation operators**).
 
 | Data type     | Operators                                                                                                |
 | ------------- | -------------------------------------------------------------------------------------------------------- |
-| all           | `==,>,<,>=,<=,<>`                                                                                        |
+| all           | `==, >, <, >= , <=, <>, !=`                                                                              |
 | string / list | `substring`, `contains`, `starts_with`, `ends_with`, `concat`, `index_of` (string only), `string_length` |
-| integer       | (monadic) `-, *,/,+,-, ( )`                                                                              |
-| double        | (monadic) `-, *,/,+,-, ( )`                                                                              |
-| Boolean       | `&&` (and), &#124; &#124; (or), `not`, `( )` for associativity                                           |
-| set           | &#124; (union), & (intersection), `( )` for associativity, _TBD_                                         |
+| integer       | (monadic) `-, *, /, +, -, ( )`                                                                           |
+| double        | (monadic) `-, *, /, +, -, ( )`                                                                           |
+| Boolean       | `&&` (and), `\|\|` (or), `not`, `( )` for associativity                                                  |
+| set           | `\|` (union), `&` (intersection), `( )` for associativity                                                |
 
 ### Comparison operators
 
@@ -50,15 +51,16 @@ the same marked null).
 ### Arithmetic operators
 
 The arithmetic operators are `_` (multiplication), `/` (division), `+` (addition), `-` (subtraction).
-Infix `_`,`/`,`+`,`-` can be applied to all numeric (integer and double) operands, with an implicit upcast to double if any double is involved.
+Infix `_`, `/`, `+`, `-` can be applied to all numeric (integer and double) operands, with an implicit upcast to double if any double is involved.
 
 The operator `+` (plus) also performs string concatination with an implicit upcast to string if any string is involved.
 
-The operator `-` (minus) also exists in its monadic version, which simply inverts the signum of a numeric value.
+The operator `-` (minus) also exists in its monadic version, which simply inverts the sign of a numeric value.
 
 Division by 0 always fails, causing the program to abort.
 
 Operations associate to the left, except that multiplication and division operators have higher precedence than addition and subtraction operators.
+
 Precedence can be altered with parentheses.
 
 ### Boolean operators
@@ -70,7 +72,11 @@ Boolean data types.
 
 The String operators are `substring`, `contains`, `starts_with`, `ends_with`, `concat`, `+`, `index_of` and `string_length`. They can be used to combine values of types String.
 
-A rule with an assignment with a `substring` operator has the general form, and returns the substring, using a zero-based index. `start` and `end` represent integers, respectively the start and the end of substring returned: `q(K1, K2, Kn, J) :- body, J = substring(x, start, end).`
+A rule with an assignment with a `substring` operator has the general form, and returns the substring, using a zero-based index. `start` and `end` represent integers, respectively the start and the end of substring returned:
+
+```
+q(K1, K2, Kn, J) :- body, J = substring(x, start, end).
+```
 
 Here is an example for `substring`:
 
@@ -125,13 +131,13 @@ q(X,Y,J) :- a(X), b(Y), J = ends_with(X,Y).
 
 The expected output is:
 
-```prolog
+```
 q("prometheux","theux",#T).
 ```
 
 A rule with an assignment using the `concat` operator has the general form, and returns the concatenation `string`+`concat_string`:
 
-```prolog
+```
 q(K1, K2, Kn, J) :- body, J = concat(string, concat_string).
 ```
 
@@ -205,8 +211,8 @@ The List operators are `contains` and `concat`.
 
 ```prolog showLineNumbers
 a([1]).
-b(Y) :- a(X), Z=()|2, Y = concat(X, Z)
-@output("b")
+b(Y) :- a(X), Z=([2]) Y=concat(X, Z).
+@output("b").
 ```
 
 The expected output is:
@@ -221,13 +227,13 @@ The Boolean list operator `contains(List, Element)` returns true if `List` conta
 a([0, 1, 2, 3, 4, 5]).
 b(3).
 b(2).
-c(Y,J) :- a(X), b(Y), J = contains(X,Y).
+c(Y,J) :- a(X), b(Y), J=contains(X,Y).
 @output("c").
 ```
 
 The expected output is:
 
-```prolog
+```
 c(3, #T).
 c(2, #F).
 ```
@@ -258,14 +264,17 @@ These functions are allowed in recursive rules. The currently supported function
 - `mmin(X, K1, K2, …)` for the incremental computation of minimal
 - `mmax(X, K1, K2, …)` for the incremental computation of maximal
 
-Upon invocation, all functions return the currently accumulated value for the respective aggregate. All functions, except `count`, take as first argument the value to be used in the incremental computation of the aggregation. For `sum` and `prod`, the second argument is the list of group-by variables, and the third argument is the list of contributors.
+Upon invocation, all functions return the currently accumulated value for the respective aggregate. All functions, except `count`, take as first argument the value to be used in the incremental computation of the aggregation.
 
-Finally, all functions besides `sum` and `prod` take a list of values, called keys, to be used as a group identifier
-(i.e. they play the role of group by variables in standard SQL).
+For `msum` and `mprod`, the second argument is the list of group-by variables, and the third argument is the list of contributors.
+
+Finally, all functions besides `msum` and `mprod` take a list of values,
+called keys, to be used as a group identifier (i.e. they play the role of group
+by variables in standard SQL).
 
 As an example consider the following program:
 
-```prolog showLineNumbers {}
+```prolog showLineNumbers {12-17}
 a("one", 3, "a", 10).
 a("one", 6, "c", 30).
 a("one", 1, "b", 20).
@@ -810,7 +819,14 @@ Company control is a staple of the analysis of ownership structure;
 it concerns decision power, i.e., when a subject can direct the decisions of
 another company via the control of the majority of the shares.
 
-This scenario consists in determining who takes decisions in a company network, that is, who controls the majority of votes for each company. A company X controls a company Y, if: (i) X directly owns more than 50% of Y; or, (ii) X controls a set of companies that jointly, and possibly together with 𝑐1 itself, own more than 50% of Y [20]. This problem can be modeled via the following set of recursive Vadalog rules.
+This scenario consists in determining who takes decisions in a company network, that is, who controls the majority of votes for each company.
+
+A company X controls a company Y, if:
+
+1. X directly owns more than 50% of Y; or,
+1. X controls a set of companies that jointly, and possibly together with C1 itself, own more than 50% of Y.
+
+This problem can be modeled via the following set of recursive Vadalog rules.
 
 ```prolog showLineNumbers
 % input company graph, described as ownerships edges
@@ -831,25 +847,27 @@ own(1,10,0.9).
 own(19,5,1.0).
 own(10,19,0.5).
 
-% base case: if a company X owns Y with shares Q then there is direct a controlled_share relationship from X to Y with share Q %
+% base case: if a company X owns Y with shares Q then there is direct a
+% controlled_share relationship from X to Y with share Q
 controlled_shares(X,Y,Y,Q) :- own(X,Y,Q), X<>Y.
 
 % recursive case: if a company X controls Y with shares K
-and the company Y owns Z with share Q, then there there is a indirect controlled_share relationship from X to Z with share Q%
-controlled_shares(X,Z,Y,Q) :- control(X,Z,K), own(Z,Y,Q), X<>Z, Z<>Y, X<>Y.
+% and the company Y owns Z with share Q, then there there is a indirect
+% controlled_share relationship from X to Z with share Q
+controlled_shares(X,Z,Y,Q) :- control(X,Y,K), own(Y,Z,Q), X<>Z, Z<>Y, X<>Y.
 
-% if X has controlled_shares of Y, passing per Z with shares Q, then the total
+% if X has controlled_shares of Y, via any company Z with shares Q, then the total
 % controlled share are computed with a monotonic aggreagation msum, that groups
 % by X and Z and aggregates the sum of Q
-total_controlled_shares(X,Y,J) :- controlled_shares(X,Z,Y,Q), J=msum(Q).
+total_controlled_shares(X,Y,S) :- controlled_shares(X,Y,Z,Q), S=msum(Q).
 
-% if the total controlled shares Q of X over Y is greater than 0.5, then X
+% if the total controlled shares Q of Y by X is greater than 0.5, then X
 % control Y with shares Q.
 control(X,Y,Q) :- total_controlled_shares(X,Y,Q), Q>0.5.
 
 % if group by the company X and Y over the max value of Q then the maximum
 % control is M
-controlMax(X,Y,M) :- control(X,Y,Q), M = mmax(Q).
+controlMax(X,Y,M) :- control(X,Y,Q), M=mmax(Q).
 
 @output("controlMax").
 ```
@@ -916,7 +934,7 @@ controlMax(19, 20, 1).
 This scenario consists in determining whether there exists a (direct
 or indirect) link between two companies, based on a high overlap of shares.
 
-Formally, two companies 𝑐1 and 𝑐2 are close links if: (i) X (resp. Y) owns
+Formally, two companies 𝑐1 and 𝑐2 are close links if X (resp. Y) owns
 directly or indirectly, through one or more other companies, 20% or more of
 the share of Y (resp. X).
 

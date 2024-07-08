@@ -2,16 +2,16 @@
 
 ## Relational database source
 
-Vadalog Parallel can read and write to the following relational databases: PostgreSQL and SQLite. Please refer to the [configuration](#configuring-prometheuxengine) section for connecting to your database. Then, refer to the [Bind and Mappings](#bind-mappings-and-qbind) section for instructions on how to read, update and delete data from these data sources.
+Vadalog Parallel can read and write to the following relational databases: PostgreSQL and SQLite. Please refer to the [configuration](/docs/learn/on-prem/configuring-prometheux-engine) section for connecting to your database. Then, refer to the [Bind and Mappings](/docs/learn/vadalog/annotations#bind-mappings-and-qbind) section for instructions on how to read, update and delete data from these data sources.
 
 ## CSV data source
 
 Vadalog supports CSV files as data source, both for reading and writing.
 
 The default CSV binding (`"csv"`) is thus suitable for processing big CSV files.
-It does not make a guess about the input schema. Therefore, if no schema ([@mapping](#mapping)) is provided,
+It does not make a guess about the input schema. Therefore, if no schema ([@mapping](/docs/learn/vadalog/annotations#mapping)) is provided,
 all fields are treated as strings.
-Values `\N` are treated as `null` values and interpreted as [Marked Nulls](#marked-nulls) while reading the CSV file.
+Values `\N` are treated as `null` values and interpreted as [Marked Nulls](/docs/learn/vadalog/language-primitives#marked-nulls) while reading the CSV file.
 
 ### Configuration (Bind Command)
 

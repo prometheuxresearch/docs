@@ -1,4 +1,4 @@
-# Configuring DP Vadalog
+# Configuring Prometheux Engine
 
 In DP Vadalog evaluation, there are several properties that needs to be configured properly. These are are prefixed by `dist` special word. The property names are inherited by the ones declared in the Apache Spark framework.
 Property name | Default value | What is it?

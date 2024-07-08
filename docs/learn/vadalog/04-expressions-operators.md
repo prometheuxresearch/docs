@@ -418,7 +418,7 @@ found(2).
 In this example, all the intermediate results have been simply discarded by introducing
 the threshold, technically a condition, `J>2`.
 
-In addition, Vadalog Parallel provides an annotation mechanism that allows to introduce special behaviors, pre-processing and post-processing features. A post-processing annotation can be used to filter only the maximum (or minimum) values for each group as follows (see the section on [Post-processing](#post-processing) for more details).
+In addition, Vadalog Parallel provides an annotation mechanism that allows to introduce special behaviors, pre-processing and post-processing features. A post-processing annotation can be used to filter only the maximum (or minimum) values for each group as follows (see the section on [Post-processing](/docs/learn/vadalog/annotations#post-processing) for more details).
 
 ```prolog showLineNumbers {9}
 s(1.0,"a").

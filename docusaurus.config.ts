@@ -4,7 +4,7 @@ import type * as Preset from '@docusaurus/preset-classic';
 import tailwindPlugin from './plugins/tailwind-plugin'
 
 // Set the /<baseUrl>/ pathname under which your site is served
-  // For GitHub pages deployment, it is often '/<projectName>/'
+// For GitHub pages deployment, it is often '/<projectName>/'
 const baseUrl = '/docs'
 
 const config: Config = {
@@ -61,7 +61,6 @@ const config: Config = {
     navbar: {
       title: '',
       logo: {
-        className: 'my-2',
         alt: 'Prometheux Logo',
         src: 'img/logotype.svg',
         srcDark: 'img/logotype-dark.svg',

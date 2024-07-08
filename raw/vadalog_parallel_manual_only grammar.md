@@ -1,4 +1,3 @@
-
 # Vadalog Parallel Manual
 
 ## Copyright Information
@@ -18,76 +17,75 @@ The processing of such logic programs is also known as **reasoning** and, with A
 # Table of Contents
 
 - [The Vadalog language](#the-vadalog-language)
-  * [Preliminaries](#preliminaries)
-  * [Rules and programs](#rules-and-programs)
-  * [Data types](#data-types)
-  * [Constants](#constants)
-  * [Comments](#comments)
-  * [Variables](#variables)
-  * [Marked Nulls](#marked-nulls)
+  - [Preliminaries](#preliminaries)
+  - [Rules and programs](#rules-and-programs)
+  - [Data types](#data-types)
+  - [Constants](#constants)
+  - [Comments](#comments)
+  - [Variables](#variables)
+  - [Marked Nulls](#marked-nulls)
 - [Rules](#rules)
-  * [Linear rules](#linear-rules)
-  * [Facts](#facts)
-  * [Join rules](#datalog-rules)
-  * [Constants within rules](#constants-within-rules)
+  - [Linear rules](#linear-rules)
+  - [Facts](#facts)
+  - [Join rules](#datalog-rules)
+  - [Constants within rules](#constants-within-rules)
 - [Expressions and operators](#expressions-and-operators)
-  * [Operators](#operators)
-  * [Single-fact operators](#single-fact-operators)
-  * [Monotonic aggregates](#monotonic-aggregates)
-  * [Aggregation operators](#aggregation-operators)
-  * [Conditions](#conditions)
-  * [Assignment](#assignment)
-  * [Recursion](#recursion)
-  * [Negation](#negation)
+  - [Operators](#operators)
+  - [Single-fact operators](#single-fact-operators)
+  - [Monotonic aggregates](#monotonic-aggregates)
+  - [Aggregation operators](#aggregation-operators)
+  - [Conditions](#conditions)
+  - [Assignment](#assignment)
+  - [Recursion](#recursion)
+  - [Negation](#negation)
 - [Annotations](#annotations)
-  * [Input](#input)
-  * [Output](#output)
-  * [Bind, Mappings and Qbind](#bind-mappings-and-qbind)
-    + [@bind](#bind)
-    + [@mapping](#mapping)
-    + [@qbind](#qbind)
-    + [@delete](#delete)
-    + [@update](#update)
-    + [@implement](#implement)
-  * [Post-processing](#post-processing)
-    + [Order by](#order-by)
-    + [Min](#min)
-    + [Max](#max)
-    + [Argmin](#argmin)
-    + [Argmax](#argmax)
-    + [Unique](#unique)
-    + [Certain](#certain)
-    + [Limit and Prelimit](#limit-and-prelimit)
-  * [Library imports](#library-imports)
-  * [Relaxed Safety](#relaxed-safety)
-  * [Modularity](#modularity)
-    + [Module](#module)
-    + [Include](#include)
+  - [Input](#input)
+  - [Output](#output)
+  - [Bind, Mappings and Qbind](#bind-mappings-and-qbind)
+    - [@bind](#bind)
+    - [@mapping](#mapping)
+    - [@qbind](#qbind)
+    - [@delete](#delete)
+    - [@update](#update)
+    - [@implement](#implement)
+  - [Post-processing](#post-processing)
+    - [Order by](#order-by)
+    - [Min](#min)
+    - [Max](#max)
+    - [Argmin](#argmin)
+    - [Argmax](#argmax)
+    - [Unique](#unique)
+    - [Certain](#certain)
+    - [Limit and Prelimit](#limit-and-prelimit)
+  - [Library imports](#library-imports)
+  - [Relaxed Safety](#relaxed-safety)
+  - [Modularity](#modularity)
+    - [Module](#module)
+    - [Include](#include)
 - [Data sources](#data-sources)
-  * [Relational database source](#relational-database-source)
-  * [CSV data source](#csv-data-source)
-  * [Neo4j data source](#neo4j-data-source)
+  - [Relational database source](#relational-database-source)
+  - [CSV data source](#csv-data-source)
+  - [Neo4j data source](#neo4j-data-source)
 - [The Knowledge Base Repository](#the-knowledge-base-repository)
 - [Using the Vadalog Parallel](#using-prometheuxengine)
-  * [Using the Engine as a Java Library](#using-the-engine-as-a-java-library)
-  * [Connecting to the Engine via REST API](#connecting-to-the-engine-via-rest-api)
-    + [`evaluate` endpoint](#evaluate-endpoint)
-    + [`evaluateFromRepoWithParams` endpoint](#evaluatefromrepowithparams-endpoint)
+  - [Using the Engine as a Java Library](#using-the-engine-as-a-java-library)
+  - [Connecting to the Engine via REST API](#connecting-to-the-engine-via-rest-api)
+    - [`evaluate` endpoint](#evaluate-endpoint)
+    - [`evaluateFromRepoWithParams` endpoint](#evaluatefromrepowithparams-endpoint)
 - [Distributed and Parallel Reasoning](#distributed-and-parallel-dp-reasoning)
-  * [Parallel Semi Naive Evaluation](#parallel-semi-naive-evaluation)
-  * [Parallel Semi Naive Evaluation](#parallel-semi-naive-aggregate-evaluation-p-sna)
-  * [Connectors for external sources](#connectors-for-external-sources)
-  * [Configuring Vadalog Parallel](#configuring-prometheux-engine)
-    + [Possible values for dist.master](#possible-values-for-distmaster)
-    + [Vadalog Parallel with Yarn](#prometheux-engine-with-yarn)
-    + [Vadalog Parallel with Kubernetes](#prometheux-engine-with-Kubernetes)
-
+  - [Parallel Semi Naive Evaluation](#parallel-semi-naive-evaluation)
+  - [Parallel Semi Naive Evaluation](#parallel-semi-naive-aggregate-evaluation-p-sna)
+  - [Connectors for external sources](#connectors-for-external-sources)
+  - [Configuring Vadalog Parallel](#configuring-prometheux-engine)
+    - [Possible values for dist.master](#possible-values-for-distmaster)
+    - [Vadalog Parallel with Yarn](#prometheux-engine-with-yarn)
+    - [Vadalog Parallel with Kubernetes](#prometheux-engine-with-Kubernetes)
 
 # The Vadalog language
 
 ## Preliminaries
 
-Let *C*, *V*, *N* be sets of **constants**, **variables** or **marked nulls**, respectively.
+Let _C_, _V_, _N_ be sets of **constants**, **variables** or **marked nulls**, respectively.
 
 The elements of such sets are known as **terms**.
 A syntactic expression of the form r(t1, t2, ..., tn) is known as **atom**,
@@ -97,13 +95,13 @@ only contains constants. A ground atom is also known as **fact**.
 ## Rules and programs
 
 A rule is an expression of the form
-`h :- b1, ..., bn` where `b1, ..., bn` are the atoms of the *body* and `h` is
-the atom of the *head*.
+`h :- b1, ..., bn` where `b1, ..., bn` are the atoms of the _body_ and `h` is
+the atom of the _head_.
 
 The variables in the body are universally quantified, while the variables that appear in the head, but not in the body are existentially quantified.
 
 A successful assignment of all the variables of the body of a rule results in a derivation for the rule head predicate, which is a successful activation of the rule. Vadalog programs use the set semantics, defined in a standard way in presence of existential quantification
-by the *chase procedure*.
+by the _chase procedure_.
 
 Let us present some examples of rules.
 
@@ -146,21 +144,20 @@ b(Y,X) :- a(X),c(X,Y).
 Observe that `@output("b")` is an annotation and specifies
 that the facts for b are in the output.
 
-
 ## Data types
 
 The table below shows the data types supported by Vadalog, along with the literals for the respective constants.
 
-Data type | Examples of constant literals
------------- | -------------
-string | "string literal", "a string", ""
-integer | 1, 3, 5, -2, 0
-double | 1.22, 1.0, -2.3, 0.0
-date | 2012-10-20, 2013-09-19 11:10:00
-boolean | #T, #F
-set | {1}, {1,2}, {}, {"a"}, {2.0,30}
-list | \[1\], \[1,2\], \[\], \["a"\], \[2.0,30\]
-unknown | /
+| Data type | Examples of constant literals             |
+| --------- | ----------------------------------------- |
+| string    | "string literal", "a string", ""          |
+| integer   | 1, 3, 5, -2, 0                            |
+| double    | 1.22, 1.0, -2.3, 0.0                      |
+| date      | 2012-10-20, 2013-09-19 11:10:00           |
+| boolean   | #T, #F                                    |
+| set       | {1}, {1,2}, {}, {"a"}, {2.0,30}           |
+| list      | \[1\], \[1,2\], \[\], \["a"\], \[2.0,30\] |
+| unknown   | /                                         |
 
 ## Comments
 
@@ -188,8 +185,8 @@ Specifically, a good interpretation is the following.
 
 For example, consider the following statements:
 
-* "For any man X there exists a father Y"
-* "Every father X is a man"
+- "For any man X there exists a father Y"
+- "Every father X is a man"
 
 These statements can be true or false depending on how we choose to instantiate X and Y, which means, what specific concrete values we choose. There are quantifiers "for any", "every" (or "for all"), namely universal quantification, and "there exists", namely existential quantification.
 
@@ -197,7 +194,7 @@ It should be noted that a Vadalog variable is **local** to the rule in which it 
 
 Variables cannot occur in facts.
 
-A variable such as X is just a *placeholder*. In order to use it in a computation, we must instantiate it, i.e., replace it with a concrete value. The value is called the *instantiation* or **binding**.
+A variable such as X is just a _placeholder_. In order to use it in a computation, we must instantiate it, i.e., replace it with a concrete value. The value is called the _instantiation_ or **binding**.
 
 There are several ways in which a Vadalog variable can be instantiated.
 
@@ -205,7 +202,7 @@ If the variable occurs in an atom in the body of a rule, the variable can then b
 
 In general, a bound variable should be **positively bound**, i.e., it should have a binding occurrence that is not in the scope of a negation.
 
-*Note on syntax*: Variables in vadalog need to be capitalized, and can contain underscores.
+_Note on syntax_: Variables in vadalog need to be capitalized, and can contain underscores.
 
 ## Anonymous Variables
 
@@ -222,6 +219,7 @@ b(X) :- t(X, _, _).
 
 A marked null represents an identifier for an unknown value.
 Marked nulls are produced as a result of:
+
 1. nulls in the data sources (unless the data source supports marked nulls, all of them are assumed to have different identifiers);
 2. existential quantification.
 
@@ -229,7 +227,6 @@ The type of a marked null is always unknown.
 
 The following two examples show possible uses of marked nulls. Many more are indeed
 possible and important in ontological reasoning.
-
 
 **Example 5**
 
@@ -269,7 +266,7 @@ The expected result is: `contractSigned("Jack"). contractSigned("Ruth").`
 
 ## Linear rules
 
-*Linear rules* are rules with one single atom in the body. They define facts of the head
+_Linear rules_ are rules with one single atom in the body. They define facts of the head
 predicate, given facts of the single body predicate.
 
 **Example 7**
@@ -297,7 +294,7 @@ employee("Ruth").
 
 ## Join rules
 
-*Join rules* are rules with multiple atoms in the body. They basically define facts of the
+_Join rules_ are rules with multiple atoms in the body. They basically define facts of the
 head predicate, given facts of the body.
 
 **Example 9**
@@ -376,22 +373,21 @@ They appear in specific parts of a Vadalog program, namely in
 
 Vadalog supports built-in operations over values of data types. These operations allow to compare values, perform arithmetics, manipulate strings and datetime values.
 Operations are supported through symbolic operators, which can be
-*prefix*, *infix* or *functional-style*.
+_prefix_, _infix_ or _functional-style_.
 
-Vadalog supports *single-fact operators* (simply called operators)
-and *multi-facts operators* (called **aggregation operators**).
-
+Vadalog supports _single-fact operators_ (simply called operators)
+and _multi-facts operators_ (called **aggregation operators**).
 
 ## Single-fact operators
 
-Data type | Operators
------------- | -------------
-all | `==,>,<,>=,<=,<>`
-string / list | `substring`, `contains`, `starts_with`, `ends_with`, `concat`, `index_of` (string only), `string_length`
-integer | (monadic) `-, *,/,+,-, ( )`
-double | (monadic) `-, *,/,+,-, ( )`
-Boolean | `&&` (and), &#124; &#124; (or), `not`, `( )` for associativity
-set | &#124; (union), & (intersection), `( )` for associativity,  *TBD*
+| Data type     | Operators                                                                                                |
+| ------------- | -------------------------------------------------------------------------------------------------------- |
+| all           | `==,>,<,>=,<=,<>`                                                                                        |
+| string / list | `substring`, `contains`, `starts_with`, `ends_with`, `concat`, `index_of` (string only), `string_length` |
+| integer       | (monadic) `-, *,/,+,-, ( )`                                                                              |
+| double        | (monadic) `-, *,/,+,-, ( )`                                                                              |
+| Boolean       | `&&` (and), &#124; &#124; (or), `not`, `( )` for associativity                                           |
+| set           | &#124; (union), & (intersection), `( )` for associativity, _TBD_                                         |
 
 **Comparison operators**
 
@@ -413,8 +409,8 @@ the same marked null).
 
 **Arithmetic operators**
 
-The arithmetic operators are * (multiplication), / (division), + (addition), - (subtraction).
-Infix *,/,+,- can be applied to all numeric (integer and double) operands, with an implicit upcast to double if any double is involved.
+The arithmetic operators are _ (multiplication), / (division), + (addition), - (subtraction).
+Infix _,/,+,- can be applied to all numeric (integer and double) operands, with an implicit upcast to double if any double is involved.
 
 The operator + (plus) also performs string concatination with an implicit upcast to string if any string is involved.
 
@@ -477,7 +473,8 @@ q(X,Y,J) :- a(X), b(Y), J = ends_with(X,Y).
 
 The expected output is: `q("prometheux","theux",#T).`
 
-A rule with an assignment using the `concat` operator has the general form, and returns the concatenation `string`+`concat_string`: `q(K1, K2, Kn, J) :- body, J = concat(string, concat_string).`
+A rule with an assignment using the `concat` operator has the general form, and returns the concatenation `string`+`concat_string`:
+`q(K1, K2, Kn, J) :- body, J = concat(string, concat_string).`
 
 An example for `concat`:
 
@@ -489,7 +486,6 @@ q(X,Y,J) :- a(X), b(Y), J = concat(X,Y).
 ```
 
 The expected output is: `q("prometheux","engine","prometheuxengine").`
-
 
 A rule with an assignment using the `string_length` operator has the general form, and returns an integer representing the length of the string: `q(K1, K2, Kn, J) :- body, J = string_length(string).`
 
@@ -503,34 +499,34 @@ q(X,J) :- a(X), J=string_length(X).
 
 The expected output is: `q("prometheux",10).`
 
-
 **Math operators**
 
 It is implemented in the library, `math`. The supported mathematical operators:
-* `mod`: computes a modulo between two parameters provided, returning a single integer value.
-* `sqrt(X)`: computes square root of `X`, returning a single double value.
-* `abs(X)`: computes the absolute value of `X`.
-* `min(X1, ..., Xn)`: computes the minimum value among `X1, ..., Xn`. These parameters must be of the same type.
-* `max(X1, ..., Xn)`: computes the maximum value among `X1, ..., Xn`. These parameters must be of the same type.
-* `log10(X)`: computes the lograrithm of `X` to base 10.
-* `log(X)`: computes the natural logarithm of `X`.
-* `pow(X,Y)`: computes `X` to the power of `Y`. Returns a value of type double.
-* `exp(X)`: computes `e^X`.
-* `round(X)`: returns the closest integer to `X`.
-* `ceil(X)`: computes the smallest integer `Y` that is equal to or greater than `X`.
-* `floor(X)`: computes the largest integer `Y` that is equal to or smaller than `X`.
-* `sin(X), cos(X), tan(X)`: the usual trigonometric functions.
-* `PI(X)`: gives the number Pi.
-* `E(X)`: gives the e number.
-* `rand(X)`: produces a random double number greater than or equal to `0.0` and less than `1.0`.
 
+- `mod`: computes a modulo between two parameters provided, returning a single integer value.
+- `sqrt(X)`: computes square root of `X`, returning a single double value.
+- `abs(X)`: computes the absolute value of `X`.
+- `min(X1, ..., Xn)`: computes the minimum value among `X1, ..., Xn`. These parameters must be of the same type.
+- `max(X1, ..., Xn)`: computes the maximum value among `X1, ..., Xn`. These parameters must be of the same type.
+- `log10(X)`: computes the lograrithm of `X` to base 10.
+- `log(X)`: computes the natural logarithm of `X`.
+- `pow(X,Y)`: computes `X` to the power of `Y`. Returns a value of type double.
+- `exp(X)`: computes `e^X`.
+- `round(X)`: returns the closest integer to `X`.
+- `ceil(X)`: computes the smallest integer `Y` that is equal to or greater than `X`.
+- `floor(X)`: computes the largest integer `Y` that is equal to or smaller than `X`.
+- `sin(X), cos(X), tan(X)`: the usual trigonometric functions.
+- `PI(X)`: gives the number Pi.
+- `E(X)`: gives the e number.
+- `rand(X)`: produces a random double number greater than or equal to `0.0` and less than `1.0`.
 
 **Hash operators**
 
 The `hashCode` library provides support for computing various hash functions. Currently supported are the following cryptographic hash functions:
-* `hash(X1, ..., Xn)`
-* `md5(X1, ..., Xn)`
-* `sha1(X1, ..., Xn)`
+
+- `hash(X1, ..., Xn)`
+- `md5(X1, ..., Xn)`
+- `sha1(X1, ..., Xn)`
 
 **List operators**
 
@@ -554,39 +550,38 @@ The expected output is:
 
 `c(3, #T). c(2, #F).`
 
-
 **Collections**
 
-The library `collections` implements functions for basic manipulation of collections, such as lists and sets.. 
+The library `collections` implements functions for basic manipulation of collections, such as lists and sets..
 
-* `size(X)`: returns the size of the collection `X`.
-* `contains(X, Y)`: returns `true` if `Y` is in `X`, `false` otherwise.
-* `containsAll(X, Y)`: returns `true` if collection X contains all the elements of collection Y, `false` otherwise.
-* `sort(X)`: returns a copy of the list `X` with elements sorted in ascending order.
-* `add(X, Y)`: returns a copy of the collection `X` with the element `Y` added to the collection. In case 'X' is a list, 'Y' is added to the end of 'X'.
-* `union(X, Y)`: returns the union of collections `X` and `Y`. In case both `X` and `Y` are lists, `Y` is appended to `X`.
-* `intersection(X, Y)`: returns a copy of the collection `X` which contains elements from the collection `Y`.
-* `difference(X, Y)`: returns a copy of the collection `X` which does not contain elements from the collection `Y`.
+- `size(X)`: returns the size of the collection `X`.
+- `contains(X, Y)`: returns `true` if `Y` is in `X`, `false` otherwise.
+- `containsAll(X, Y)`: returns `true` if collection X contains all the elements of collection Y, `false` otherwise.
+- `sort(X)`: returns a copy of the list `X` with elements sorted in ascending order.
+- `add(X, Y)`: returns a copy of the collection `X` with the element `Y` added to the collection. In case 'X' is a list, 'Y' is added to the end of 'X'.
+- `union(X, Y)`: returns the union of collections `X` and `Y`. In case both `X` and `Y` are lists, `Y` is appended to `X`.
+- `intersection(X, Y)`: returns a copy of the collection `X` which contains elements from the collection `Y`.
+- `difference(X, Y)`: returns a copy of the collection `X` which does not contain elements from the collection `Y`.
 
 ## Monotonic Aggregates
 
-Monotonic aggregations are functions for incremental and recursion-friendly 
+Monotonic aggregations are functions for incremental and recursion-friendly
 computation of aggregate values.
 
 These functions are allowed in recursive rules. The currently supported functions include:
 
-* `msum(X, [K1, ..., Kn], [C1, ..., Cm])` for the incremental computation of sums
-* `mprod(X, [K1, ..., Kn], [C1, ..., Cm])` for the incremental computation of products
-* `mcount(K1, K2, ...)` for the incremental computation of counts
-* `mmin(X, K1, K2, ...)` for the incremental computation of minimal
-* `mmax(X, K1, K2, ...)` for the incremental computation of maximal
+- `msum(X, [K1, ..., Kn], [C1, ..., Cm])` for the incremental computation of sums
+- `mprod(X, [K1, ..., Kn], [C1, ..., Cm])` for the incremental computation of products
+- `mcount(K1, K2, ...)` for the incremental computation of counts
+- `mmin(X, K1, K2, ...)` for the incremental computation of minimal
+- `mmax(X, K1, K2, ...)` for the incremental computation of maximal
 
-Upon invocation, all functions return the currently accumulated value for the respective aggregate. All functions, 
-except `count`, take as first argument the value to be used in the incremental computation of the 
+Upon invocation, all functions return the currently accumulated value for the respective aggregate. All functions,
+except `count`, take as first argument the value to be used in the incremental computation of the
 aggregation. For `sum` and `prod`, the second argument is the list of group-by variables, and the third argument
-is the list of contributors. 
+is the list of contributors.
 
-Finally, all functions besides `sum` and `prod` take a list of values, called keys, to be used as a group identifier 
+Finally, all functions besides `sum` and `prod` take a list of values, called keys, to be used as a group identifier
 (i.e. they play the role of group by variables in standard SQL).
 
 As an example consider the following program:
@@ -619,13 +614,12 @@ ccount_other(X, Sum) :- a(X, Y, Z, U), Sum = mcount(X).
 ```
 
 After execution, the relation `ssum` could contain the following tuples:
+
 ```
 ssum("one", 12.0)
 
 ssum("two", 19.0)
 ```
-
-
 
 A rule with an assignment using an aggregation operator has the general form: `q(K1, K2, Kn, J) :- body, J = maggr(x,<C1,...,Cm>)` where `K1, . . . , Kn` are zero or more group by arguments, `body` is the rule body, `maggr` is a placeholder for an aggregation function (`mmin`, `mmax`, `msum`, `mprod`), `C1,...,Cm` are zero or more variables of the body (with Ci ≠ Kj, 1 ≤ i ≤ m, 1 ≤ j ≤ n), which we call contributor arguments, `x` is a Constant, a body variable or an expression containing only single-fact operators.
 
@@ -636,7 +630,7 @@ for each vector (C1 , . . . , Cm ) the current minimum (or maximum) value of x. 
 
 The following assumption is made:
 
-* if a position *pos* in a head for predicate *p* is calculated with an aggregate function, whenever a head for *p* appears in any other rule, *pos* must be existentially quantified and calculated with the same aggregate function.
+- if a position _pos_ in a head for predicate _p_ is calculated with an aggregate function, whenever a head for _p_ appears in any other rule, _pos_ must be existentially quantified and calculated with the same aggregate function.
 
 This assumption guarantees the homogeneity of the facts with existentially aggregated functions.
 
@@ -669,9 +663,8 @@ For each activation of the rule, the current result is produced. Since the
 aggregations are monotonic, we are certain that the maximum (minimum) value
 for each group is deterministically the correct aggregate.
 On the other hand, the intermediate values
-for partial aggregates are *non-deterministic*, since they depend on the
+for partial aggregates are _non-deterministic_, since they depend on the
 specific execution order.
-
 
 Let us now consider contributors through the following example.
 
@@ -741,6 +734,7 @@ f(J,Y) :- s(X,Y), J = msum(X).
 
 The aggregates `min` and `max` have the expected semantics with the difference that they produce no intermediate results.
 Consider for example the following program.
+
 ```
 b(1,2).
 b(1,3).
@@ -773,6 +767,7 @@ The expected result is `b_sum(1, 5). b_sum(2, 12).`
 
 The aggregate `mcount` has the expected semantics and does not produce any intermediate results.
 Consider for example the following program.
+
 ```
 b(1,2).
 b(1,3).
@@ -814,6 +809,7 @@ path(X,Z) :- path(X,Y),edge(Y,Z).
 
 @output("path").
 ```
+
 After execution, the relation `path` contains the following tuples:
 
 ```
@@ -870,13 +866,12 @@ X	Z
 2	5
 ```
 
-
 ### Monotonic Aggregations in Financial Applications
 
-
 ## Company control
-Company control is a staple of the analysis of ownership structure; 
-it concerns decision power, i.e., when a subject can direct the decisions of 
+
+Company control is a staple of the analysis of ownership structure;
+it concerns decision power, i.e., when a subject can direct the decisions of
 another company via the control of the majority of the shares.
 
 This scenario consists in determining who takes decisions in a company network, that is, who controls the majority of votes for each company. A company X controls a company Y, if: (i) X directly owns more than 50% of Y; or, (ii) X controls a set of companies that jointly, and possibly together with 𝑐1 itself, own more than 50% of Y [20]. This problem can be modeled via the following set of recursive Vadalog rules.
@@ -919,6 +914,7 @@ controlMax(X,Y,M) :- control(X,Y,Q), M = mmax(Q).
 ```
 
 After execution, the relation `controlMax` contains the following tuples:
+
 ```
 controlMax
 X	Y	M
@@ -976,6 +972,7 @@ X	Y	M
 ```
 
 ## Close Link
+
 This scenario consists in determining whether there exists a (direct
 or indirect) link between two companies, based on a high overlap of shares. Formally, two companies 𝑐1 and 𝑐2 are close links if: (i) X (resp. Y) owns directly or indirectly, through one
 or more other companies, 20% or more of the share of Y (resp. X) Determining whether two companies are closely-linked is extremely important for banking
@@ -1009,6 +1006,7 @@ close_link(X,Y,W) :- close_link_sum(X,Y,W), W >= 0.2.
 ```
 
 After execution, the relation `close_link` contains the following tuples:
+
 ```
 close_link
 X	Y	W
@@ -1022,7 +1020,6 @@ B	C	0.36
 C	A	0.54
 D	A	0.9
 ```
-
 
 ## Conditions
 
@@ -1109,21 +1106,20 @@ the balanceItems (as I1 and I2 appear in the body), whereas `Z=X+Y` and `A=(X+Y)
 
 The expected result is: `operations(z_,43,21.5).`
 
-
 ## Recursion
 
 We say that a Vadalog program or ontology is **recursive** if the
 dependency graph implied by the rules is cyclical. The simplest
 form of recursion is that in which the head of a rule also appears in the body
-(*self-recursive rules*).
+(_self-recursive rules_).
 
 Recursion is particularly powerful as it allows for inference based
 on previously inferred results.
 
 In self-recursive rules, in case of bodies with two atoms, we distinguish between:
 
-1. *left recursion*, where the recursive atom is the left-most;  
-2. *right recursion*, where the recursive atom is the right-most.
+1. _left recursion_, where the recursive atom is the left-most;
+2. _right recursion_, where the recursive atom is the right-most.
 
 Some examples follow.
 
@@ -1215,7 +1211,7 @@ Here we combine recursion and negation and recursively generate f, by negating b
 # Annotations
 
 Annotations are special facts that allow to inject specific behaviors into Vadalog programs.
-They can be *stand-alone*, *rule level* or *fact level*.
+They can be _stand-alone_, _rule level_ or _fact level_.
 
 Stand-alone annotations adopt the following syntax: `@annotationName(p1, ..., pn).`
 
@@ -1246,7 +1242,6 @@ It is assumed that an atom annotated with `@input`:
 
 The full details of the external source must be specified with the `@bind`, `@mapping` and `@qbind` annotations.
 
-
 ## Output
 
 It specifies that the facts for an atom of the program will be exported to an external target, for example the standard output or a relational database.
@@ -1266,11 +1261,9 @@ It is assumed that an atom annotated with `@output`:
 
 If the `@output` annotation is used without any `@bind` annotation, it is assumed that the default target is the standard output. Annotations `@bind` and `@mapping` can be used to customize the target system.
 
-
 ## Bind, Mappings and Qbind
 
 These annotations (`@bind`, `@mapping`, `@qbind`) allow to customize the data sources for the `@input` annotation or the targets for the `@output` annotation.
-
 
 ### @bind
 
@@ -1296,7 +1289,7 @@ m(X) :- b(X),q(X).
 
 This example reads the facts for `m` from a Postgres data source, specifically from
 schema `doctors_source` and table `Metprescriptions`, reads facts for `q` from a SQLite (in SQLite the schema is ignored)
-data source and performs a join. 
+data source and performs a join.
 
 ### bind multiple sources to an input predicate
 
@@ -1313,7 +1306,6 @@ path(X,Z) :- edge(X,Y),path(Y,Z).
 @output("path").
 ```
 
-
 ### @mapping
 
 `@mapping` maps specific columns of the input/output source to a position of an atom.
@@ -1322,7 +1314,7 @@ An atom that appears in a `@mapping` annotation must also appear in a `@bind` an
 The syntax is the following: `@mapping("atomName",positionInAtom,"columnName","columnType").`
 
 where `atomName` is the atom we want to map, `positionInAtom` is an integer (from 0)
-denoting the position of the atom that we want to map; `columnName` is the name of the column in the source (or equivalent data structure), `columnType` is an indication of the type in the source. The following types can be specified: *string*, *int*, *double*, *boolean* and *date*.
+denoting the position of the atom that we want to map; `columnName` is the name of the column in the source (or equivalent data structure), `columnType` is an indication of the type in the source. The following types can be specified: _string_, _int_, _double_, _boolean_ and _date_.
 
 **Example 33**
 
@@ -1339,8 +1331,7 @@ denoting the position of the atom that we want to map; `columnName` is the name 
 
 In this example, we map the columns of the `Medprescriptions` table.
 
-Observe that *mappings can be omitted* for both `@input` and `@output` atoms. In such case they are automatically inferred from the source (target); the result can be however unsatisfactory depending on the sources, since some of them do not support positional reference to the attributes.
-
+Observe that _mappings can be omitted_ for both `@input` and `@output` atoms. In such case they are automatically inferred from the source (target); the result can be however unsatisfactory depending on the sources, since some of them do not support positional reference to the attributes.
 
 ### @qbind
 
@@ -1382,7 +1373,6 @@ You can also use multiple parameters within a parametric `@qbind`:
 ```
 
 where `${1}` and `${2}` are the first and second parameters of all `t` results.
-
 
 ## Post-processing
 
@@ -1455,7 +1445,7 @@ p(X,Y,Z) :- t(X,Y,Z).
 
 The expected result is:
 
-` p(1,"b",1). p(1,"c",1). `
+`p(1,"b",1). p(1,"c",1).`
 
 Note that the min value is computed according to the lexicographic order over tuples obtained by projecting on the positions in the post-processing annotation.
 
@@ -1465,13 +1455,12 @@ Note that the min value is computed according to the lexicographic order over tu
 t(1,"b",1).
 t(2,"c",1).
 t(1,"a",1).
-q(X,Y,Z) :- t(X,Y,Z).		
+q(X,Y,Z) :- t(X,Y,Z).
 @output("q").
 @post("q","min(1,2)").
 ```
 
-Then the expected result is ` p(1,"a",1). ` Indeed, all the three tuples `(1,"b")`, `(2,"c")` and `(1,"a")` fall within one group, and `(1,"a")` is a minimal tuple among them according to the lexicographic order.
-
+Then the expected result is `p(1,"a",1).` Indeed, all the three tuples `(1,"b")`, `(2,"c")` and `(1,"a")` fall within one group, and `(1,"a")` is a minimal tuple among them according to the lexicographic order.
 
 ### Max
 
@@ -1508,12 +1497,12 @@ Note that the max value is computed according to the lexicographic order over tu
 t(2,"b",1).
 t(1,"c",1).
 t(2,"a",1).
-q(X,Y,Z) :- t(X,Y,Z).		
+q(X,Y,Z) :- t(X,Y,Z).
 @output("q").
 @post("q","max(2,1)").
 ```
 
-Then the expected result is ` p(1,"c",1). ` Indeed, all the three tuples `("b",2)`, `("c",1)` and `("a",2)` fall within one group, and `("c",1)` is a maximal tuple among them according to the lexicographic order.
+Then the expected result is `p(1,"c",1).` Indeed, all the three tuples `("b",2)`, `("c",1)` and `("a",2)` fall within one group, and `("c",1)` is a maximal tuple among them according to the lexicographic order.
 
 ### Argmin
 
@@ -1543,7 +1532,7 @@ f(3,6,"b", 9).
 g(X,Y,Z,K) :- f(X,Y,Z,K).
 ```
 
-The expected result is: ` g(1,3,"a",3). g(2,6,"b",7). `
+The expected result is: `g(1,3,"a",3). g(2,6,"b",7).`
 
 ### Argmax
 
@@ -1555,6 +1544,7 @@ The syntax is the following:
 ```
 @post("atomName", "argmax(p, <p1,..., pn>)").
 ```
+
 where `atomName` is the atom at hand, `p` is the position to maximise (from 1) and `p1, ..., pn` are integers denoting the positions that individuate a specific group.
 
 **Example 43**
@@ -1590,15 +1580,14 @@ where `atomName` is the name of the atom at hand.
 
 ### Limit
 
-Sometimes it is useful to limit an output relation to a fixed number of tuples. 
-One can achieve this in two different way with the use of the post-processing 
-annotations `limit` as shown below. 
+Sometimes it is useful to limit an output relation to a fixed number of tuples.
+One can achieve this in two different way with the use of the post-processing
+annotations `limit` as shown below.
 
 ```
 @post("atomName", "limit(N)").
 ```
 
-	
 # Data sources
 
 ## Relational database source
@@ -1610,13 +1599,14 @@ Vadalog Parallel can read and write to the following relational databases: Postg
 Vadalog supports CSV files as data source, both for reading and writing.
 
 The default CSV binding (`"csv"`) is thus suitable for processing big CSV files.
-It does not make a guess about the input schema. Therefore, if no schema ([@mapping](#mapping)) is provided, 
+It does not make a guess about the input schema. Therefore, if no schema ([@mapping](#mapping)) is provided,
 all fields are treated as strings.
 Values `\N` are treated as `null` values and interpreted as [Marked Nulls](#marked-nulls) while reading the CSV file.
 
 ### Configuration (Bind Command)
 
 The bind command allows for the configuration of reading and writing cvs files. The syntax is as follows:
+
 ```
 @bind("relation", "csv option_1 = 'value_1', option_2 = 'value_2', ... , option_n = 'value_n'", "filepath", "filename").
 ```
@@ -1627,10 +1617,10 @@ The options that are available are
 - `delimiter`: Specifies the character that is used to seperate single entries
 - `recordSeparator`: Specifies how the record are seperated
 - `quoteMode`: Defines quoting behavior. Possible values are:
-    * `ALL`: Quotes all fields.
-    * `MINIMAL`: Quotes fields which contain special characters such as a the field delimiter, quote character or any of the characters in the line separator string.
-    * `NON_NUMERIC`: Quotes all non-numeric fields.
-    * `NONE`: Never quotes fields.
+  - `ALL`: Quotes all fields.
+  - `MINIMAL`: Quotes fields which contain special characters such as a the field delimiter, quote character or any of the characters in the line separator string.
+  - `NON_NUMERIC`: Quotes all non-numeric fields.
+  - `NONE`: Never quotes fields.
 - `nullString`: Value can be any string, which replaces null values in the csv file.
 - `selectedColumns`: Value is a list of the form `[c1;...;cn]` to select only the columns `c1,...,cn` from the csv file. Each value in the list is either a column name (enclosed with single quotes 'column name') which is present in the csv's header, or is an integer starting from 0 denoting the column index. It is also possible to specify ranges; e.g. `selectedColumns=[0:4]` reads only the five columns `0,1,2,3,4`. It is allowed to mix the values in the list, e.g. `selectedColumns=[0:3; 'Column_5']` would select columns `0,1,2,3` and the column with the name `Column_5`. Note that in order to select columns by name, a header line in the csv must be present.
 
@@ -1641,6 +1631,7 @@ An example for a csv bind command with configuration would be the following:
 ```
 @bind("relation", "csv useHeaders=false, delimiter='\t', recordSeparator='\n'", "filepath", "filename").
 ```
+
 ### Examples
 
 In the examples below we use a sample CSV file with the following content: `a,b,c\nd,e,f`
@@ -1675,6 +1666,7 @@ au(X,Y,Z) :- ou(X,Y,Z).
 **Example for `selectedColumns`**
 
 The following reads only the the four columns with indices `0,1,2,4` from the CSV file, excluding the column `3`.
+
 ```
 au(W, X,Y,Z) :- ou(W, X,Y,Z).
 @input("ou").
@@ -1697,4 +1689,4 @@ au(X,Y,Z) :- ou(X,Y,Z).
 @bind("au","csv","/Users/.../Desktop","result.csv").
 ```
 
-Furthermore, Vadalog support the CSV file data source via http GET. in Example 47 we read a CSV file via http. In Example 49, we write the result into a local CSV file  (Evaluate and store entry point).
+Furthermore, Vadalog support the CSV file data source via http GET. in Example 47 we read a CSV file via http. In Example 49, we write the result into a local CSV file (Evaluate and store entry point).

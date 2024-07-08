@@ -4,9 +4,9 @@ import type * as Preset from '@docusaurus/preset-classic';
 import tailwindPlugin from './plugins/tailwind-plugin'
 
 const config: Config = {
-  title: 'Prometheux Docs',
+  title: 'Prometheux',
   tagline: '',
-  favicon: 'img/favicon.ico',
+  favicon: 'img/logo.svg',
 
   // Set the production url of your site here
   url: 'https://your-docusaurus-site.example.com',
@@ -41,14 +41,7 @@ const config: Config = {
           // Please change this to your repo.
           // Remove this to remove the "edit this page" links.
           editUrl:
-            'https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/',
-        },
-        blog: {
-          showReadingTime: true,
-          // Please change this to your repo.
-          // Remove this to remove the "edit this page" links.
-          editUrl:
-            'https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/',
+            'https://github.com/prometheux/docs/tree/main/packages/create-docusaurus/templates/shared/',
         },
         theme: {
           customCss: './src/css/custom.css',
@@ -61,22 +54,29 @@ const config: Config = {
     // Replace with your project's social card
     image: 'img/docusaurus-social-card.jpg',
     navbar: {
-      title: 'My Site',
+      title: '',
       logo: {
-        alt: 'My Site Logo',
-        src: 'img/logo.svg',
+        className: 'my-2',
+        alt: 'Prometheux Logo',
+        src: 'img/logotype.svg',
       },
       items: [
         {
           type: 'docSidebar',
-          sidebarId: 'tutorialSidebar',
+          sidebarId: 'learn',
           position: 'left',
-          label: 'Tutorial',
+          label: 'Learn',
         },
-        {to: '/blog', label: 'Blog', position: 'left'},
         {
-          href: 'https://github.com/facebook/docusaurus',
-          label: 'GitHub',
+          type: 'docSidebar',
+          sidebarId: 'sdk',
+          position: 'left',
+          label: 'SDK',
+        },
+    
+        {
+          href: 'https://prometheux.co.uk',
+          label: 'Back to homepage',
           position: 'right',
         },
       ],
@@ -115,20 +115,19 @@ const config: Config = {
           items: [
             {
               label: 'Blog',
-              to: '/blog',
-            },
-            {
-              label: 'GitHub',
-              href: 'https://github.com/facebook/docusaurus',
+              to: '/',
             },
           ],
         },
       ],
-      copyright: `Copyright © ${new Date().getFullYear()} My Project, Inc. Built with Docusaurus.`,
+      copyright: `Copyright © ${new Date().getFullYear()} Prometheux. All rights reserved.`,
     },
     prism: {
       theme: prismThemes.github,
       darkTheme: prismThemes.dracula,
+      additionalLanguages: ['prolog', 'bash', 'cypher'],
+      defaultLanguage: 'prolog',
+      
     },
   } satisfies Preset.ThemeConfig,
 };

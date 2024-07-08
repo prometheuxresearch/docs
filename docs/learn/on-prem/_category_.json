@@ -1,0 +1,10 @@
+{
+  "position": 3,
+  "label": "On-Premise Installs",
+  "collapsible": true,
+  "collapsed": true,
+  "link": {
+    "type": "doc",
+    "id": "intro"
+  }
+}

@@ -3,6 +3,10 @@ import type {Config} from '@docusaurus/types';
 import type * as Preset from '@docusaurus/preset-classic';
 import tailwindPlugin from './plugins/tailwind-plugin'
 
+// Set the /<baseUrl>/ pathname under which your site is served
+  // For GitHub pages deployment, it is often '/<projectName>/'
+const baseUrl = '/docs'
+
 const config: Config = {
   title: 'Prometheux',
   tagline: '',
@@ -10,9 +14,8 @@ const config: Config = {
 
   // Set the production url of your site here
   url: 'https://prometheuxresearch.github.io',
-  // Set the /<baseUrl>/ pathname under which your site is served
-  // For GitHub pages deployment, it is often '/<projectName>/'
-  baseUrl: '/docs',
+  
+  baseUrl,
 
   // GitHub pages deployment config.
   // If you aren't using GitHub pages, you don't need these.
@@ -43,7 +46,7 @@ const config: Config = {
           // Please change this to your repo.
           // Remove this to remove the "edit this page" links.
           editUrl:
-            'https://github.com/prometheux/docs/tree/main/packages/create-docusaurus/templates/shared/',
+            'https://github.com/prometheuxresearch/docs/tree/main/packages/create-docusaurus/templates/shared/',
         },
         theme: {
           customCss: './src/css/custom.css',
@@ -91,11 +94,11 @@ const config: Config = {
           items: [
             {
               label: 'Learn',
-              to: '/docs/learn/getting-started/intro',
+              to: `${baseUrl}/docs/learn/getting-started/intro`,
             },
             {
               label: 'SDK',
-              to: '/docs/sdk/intro',
+              to: `${baseUrl}/docs/sdk/intro`,
             },
           ],
         },

@@ -115,6 +115,10 @@ const config: Config = {
               label: 'Research',
               to: 'https://www.prometheux.co.uk/#research-section',
             },
+            {
+              label: 'LinkedIn',
+              to: 'https://www.linkedin.com/company/prometheux'
+            }
           ],
         },
       ],

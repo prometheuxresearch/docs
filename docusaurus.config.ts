@@ -109,7 +109,11 @@ const config: Config = {
           items: [
             {
               label: 'Home',
-              to: 'https://prometheux.co.uk',
+              to: 'https://www.prometheux.co.uk',
+            },
+            {
+              label: 'Research',
+              to: 'https://www.prometheux.co.uk/#research-section',
             },
           ],
         },

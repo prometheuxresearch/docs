@@ -8,32 +8,33 @@ type FeatureItem = {
 
 const FeatureList: FeatureItem[] = [
   {
-    title: 'Easy to Use',
+    title: 'Create a knowledge graph',
     Svg: require('@site/static/img/undraw_docusaurus_mountain.svg').default,
     description: (
       <>
-        Docusaurus was designed from the ground up to be easily installed and
-        used to get your website up and running quickly.
+        Unify and integrate data across siloed enterprise sources, without data migration.<br />
+        Seamless integration with diverse data sources.
       </>
     ),
   },
   {
-    title: 'Focus on What Matters',
+    title: 'Reason over your data',
     Svg: require('@site/static/img/undraw_docusaurus_tree.svg').default,
     description: (
       <>
-        Docusaurus lets you focus on your docs, and we&apos;ll do the chores. Go
-        ahead and move your docs into the <code>docs</code> directory.
+        Augment data with complex derived knowledge for exploratory and arbitrarily 
+hard data analysis.<br />
+        Perform in-memory distributed big data processing up to 10000x faster.
       </>
     ),
   },
   {
-    title: 'Powered by React',
+    title: '100% Confident explanations',
     Svg: require('@site/static/img/undraw_docusaurus_react.svg').default,
     description: (
       <>
-        Extend or customize your website layout by reusing React. Docusaurus can
-        be extended while reusing the same header and footer.
+        Step-by-step logical explanation for every result.<br />
+        Identify and fix missing data via provenance.
       </>
     ),
   },

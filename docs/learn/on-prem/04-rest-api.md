@@ -1,6 +1,6 @@
 # REST API
 
-The Vadalog Engine offers a simple RESTful API, which allows you to carry out its main operations.
+The Prometheux Engine offers a simple RESTful API, which allows you to carry out its main operations.
 
 Below is a list of the provided endpoints:
 
@@ -18,8 +18,32 @@ It evaluates a Vadalog program and returns the results as a JSON blob.
   - `400 BAD_REQUEST`: Indicates a malformed Vadalog program in the request body. The response includes an error message detailing the issue.
   - `500 INTERNAL_SERVER_ERROR`: Occurs when the evaluation encounters runtime or other exceptions. The response contains an error message specifying the encountered exception.
 
-- **Sample Call**: `curl -X POST 'http://localhost:8080/evaluate' --data 'program=a(1,3).b(X,Y):-a(X,Y).@output("b").'` gives the following response: `{"id":1,"resultSet":{"b":[[1,3]]},"types":{"b":["INT","INT"]},"columnNames":{"b":["X","Y"]}}`
-- **Sample Call with modules**: `curl 'http://localhost:8080/evaluate?program=@module(%22m1%22).@include(%22m2%22).a(1).&otherPrograms=@module(%22m2%22).b(X):-a(X).@output(%22b%22).&modules=@module(%22m3%22).b(X):-a(X).@output(%22b%22).'` gives the following response: `{"id":1,"resultSet":{"b":[[1]]},"types":{"b":["INT"]},"columnNames":{"b":["X"]}}`
+- **Sample Call**:
+  ```bash
+  curl -X POST 'http://localhost:8080/evaluate' --data 'program=a(1,3).b(X,Y):-a(X,Y).@output("b").'
+  ```
+  gives the following response:
+  ```json
+  {
+    "id": 1,
+    "resultSet": { "b": [[1, 3]] },
+    "types": { "b": ["INT", "INT"] },
+    "columnNames": { "b": ["X", "Y"] }
+  }
+  ```
+- **Sample Call with modules**:
+  ```bash
+  curl 'http://localhost:8080/evaluate?program=@module(%22m1%22).@include(%22m2%22).a(1).&otherPrograms=@module(%22m2%22).b(X):-a(X).@output(%22b%22).&modules=@module(%22m3%22).b(X):-a(X).@output(%22b%22).'
+  ```
+  gives the following response:
+  ```json
+  {
+    "id": 1,
+    "resultSet": { "b": [[1]] },
+    "types": { "b": ["INT"] },
+    "columnNames": { "b": ["X"] }
+  }
+  ```
 
 ### `/evaluateFromRepoWithParams`
 

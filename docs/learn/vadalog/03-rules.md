@@ -2,8 +2,8 @@
 
 ## Linear rules
 
-_Linear rules_ are rules with one single atom in the body. They define facts of the head
-predicate, given facts of the single body predicate.
+_Linear rules_ are rules with one single atom in the body. They define facts of
+the head predicate, given facts of the single body predicate.
 
 ```prolog showLineNumbers {3}
 employee(1).
@@ -12,8 +12,7 @@ department(Y,X) :- employee(X).
 @output("department").
 ```
 
-For each employee X there exists a department Y.
-The expected result is:
+For each employee X there exists a department Y. The expected result is:
 
 ```prolog
 department(z1,1).
@@ -31,14 +30,15 @@ employee("Ruth").
 
 ## Join rules
 
-_Join rules_ are rules with multiple atoms in the body. They basically define facts of the
-head predicate, given facts of the body.
+_Join rules_ are rules with multiple atoms in the body. They basically define
+facts of the head predicate, given facts of the body.
 
 ```prolog
 project(Z,X) :- employee(X), department(Y,X).
 ```
 
-For each employee X in a department Y, there exists a project Z in which he participates.
+For each employee X in a department Y, there exists a project Z in which he
+participates.
 
 If the atoms in the body do not have variables in common, the Cartesian product
 is assumed.
@@ -52,7 +52,8 @@ canWork(X,Y,Z) :- employee(X), department(Y).
 @output("canWork").
 ```
 
-Any employee X can work in any department Y on some unknown project Z. The expected result is:
+Any employee X can work in any department Y on some unknown project Z. The
+expected result is:
 
 ```prolog
 canWork("Jack","science",z1).
@@ -65,10 +66,11 @@ canWork("Ruth","finance",z4).
 
 Constants can appear in the atoms of the rules.
 
-When they appear in the head, they denote specific constant values to be generated in the head facts.
+When they appear in the head, they denote specific constant values to be
+generated in the head facts.
 
-When they appear in the body, they denote specific filters, or selection criteria,
-to be applied to the facts considered in the rule.
+When they appear in the body, they denote specific filters, or selection
+criteria, to be applied to the facts considered in the rule.
 
 ```prolog showLineNumbers {3}
 employee("Mark").
@@ -77,7 +79,8 @@ contract(X,"basic",20) :- employee(X),junior(X).
 @output("contract").
 ```
 
-A junior employee will have a "basic" contract, with stipend 20. The expected result is:
+A junior employee will have a "basic" contract, with stipend 20. The expected
+result is:
 
 ```
 contract("Mark","basic",20).
@@ -93,11 +96,11 @@ contract(X,"advanced",40) :- employee(X,"senior").
 @output("contract").
 ```
 
-Any junior employee X will have a "basic" contract with stipend 20.
-Any senior employee X will have an "advanced" contract with stipend 40.
-Basically, the constants filter the facts to which the rules apply, in such a way
-that the one for basic contracts applies only to Mark, and the one for
-advanced contracts applies only to Ruth.
+Any junior employee X will have a "basic" contract with stipend 20. Any senior
+employee X will have an "advanced" contract with stipend 40. Basically, the
+constants filter the facts to which the rules apply, in such a way that the one
+for basic contracts applies only to Mark, and the one for advanced contracts
+applies only to Ruth.
 
 The expected result is:
 

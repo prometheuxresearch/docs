@@ -44,8 +44,6 @@ jobs:
     name: Deploy to S3
     needs: build
 
-    permissions
-
     runs-on: ubuntu-latest
     steps:
       - name: Configure AWS credentials

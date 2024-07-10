@@ -5,6 +5,9 @@ on:
     branches:
       - main
 
+permissions:
+  id-token: write # This is required for requesting the JWT
+
 jobs:
   build:
     name: Build Docusaurus
@@ -38,21 +41,22 @@ jobs:
           path: build
 
   deploy:
-    name: Deploy to GitHub Pages
+    name: Deploy to S3
     needs: build
 
-    # Grant GITHUB_TOKEN the permissions required to make a Pages deployment
-    permissions:
-      pages: write # to deploy to Pages
-      id-token: write # to verify the deployment originates from an appropriate source
-
-    # Deploy to the github-pages environment
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+    permissions
 
     runs-on: ubuntu-latest
     steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          managed-session-policies: arn:aws:iam::aws:policy/AmazonS3FullAccess
+          aws-region: eu-north-1
+      - name: Upload to s3
+        run: aws s3 sync ./.docusaurus s3://prometheux-docs
+      - name: Invalidate cloudfront
+        run: |-
+          aws cloudfront create-invalidation \
+            --distribution-id E9X11W9SXSFDG \
+            --paths "/*"

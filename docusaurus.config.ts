@@ -3,9 +3,6 @@ import type {Config} from '@docusaurus/types';
 import type * as Preset from '@docusaurus/preset-classic';
 import tailwindPlugin from './plugins/tailwind-plugin'
 
-// Set the /<baseUrl>/ pathname under which your site is served
-// For GitHub pages deployment, it is often '/<projectName>/'
-const baseUrl = '/docs'
 
 const config: Config = {
   title: 'Prometheux',
@@ -13,9 +10,10 @@ const config: Config = {
   favicon: 'img/logo.svg',
 
   // Set the production url of your site here
-  url: 'https://prometheuxresearch.github.io',
-  
-  baseUrl,
+  url: 'https://prometheux.co.uk/docs',
+  // Set the /<baseUrl>/ pathname under which your site is served
+  // For GitHub pages deployment, it is often '/<projectName>/'
+  baseUrl: '/',
 
   // GitHub pages deployment config.
   // If you aren't using GitHub pages, you don't need these.
@@ -94,7 +92,7 @@ const config: Config = {
           items: [
             {
               label: 'Learn',
-              to: `${baseUrl}/docs/learn/getting-started/intro`,
+              to: `/docs/learn/getting-started/intro`,
             },
             // {
             //   label: 'SDK',

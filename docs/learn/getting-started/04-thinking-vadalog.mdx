@@ -687,41 +687,67 @@ that might require multiple joins or hops.
 
 ### From SQL to Vadalog
 
-To compose data in relational database management systems (RDBMS), you often need
-to reach around the abstraction of business entities that tables provide. Answering
-complex then requires unweildy joins across many different tables.
+To compose data in relational database management systems (RDBMS), you often
+need to reach around the abstraction of business entities that tables provide.
+Answering complex then requires unweildy joins across many different tables.
 
-A simple way to think in Vadalog, is that multiple body predicates separated
-by commas **are** indeed a join between each predicate:
+A simple way to think in Vadalog, is that multiple body predicates separated by
+commas **are** indeed a join between each predicate. Instead of thinking about
+which tables to join, you simply combine the rules that define the binding to
+the database.
 
 <Tabs>
   <TabItem value="vadalog" label="Vadalog" default>
-    ```
-    @bind(owns, )
+    ```prolog showLineNumbers
+    @qbind("controls", "postgresql", "database", "select controller,controllee from controls").
+    @qbind("owns", "postgresql", "database", "select owner,owned,shares from ownership").
+
     has_shares(Conglomerate, Intermediary, SomeBrand, Shares) :-
       controls(Conglomerate, Intermediary, IntermediateShares),
       owns(Intermediary, SomeBrand, Shares).
     ```
 </TabItem>
   <TabItem value="sql" label="SQL" default>
-    ```sql
+    ```sql showLineNumbers
     SELECT 
-      "controls"."controller" as 'Congolomerate',
-      "controls"."controllee" as 'Intermediary',
-      "owns"."owned" as 'SomeBrand',
-      "owns"."shares",
-      FROM "owns" INNER JOIN "controls"
+      "controls"."controller" AS Congolomerate,
+      "controls"."controllee" AS Intermediary,
+      "ownership"."owned" AS SomeBrand,
+      "ownership"."shares",
+      FROM "ownership" INNER JOIN "controls"
       ON "controls"."controllee" = "owns"."owner";
     ```
   </TabItem>
 </Tabs>
 
-But instead of writing the actual tables 
-
 ### From Cypher to Vadalog
+
+:::info
+Coming soon!
+:::
 
 ## Modelling time
 
+To model time, simply add a time variable to your predicates so that 
+time can flow through your entire program. 
+
+Assuming the `event` predicate is backed by some data with timestamps:
+
+```prolog showLineNumbers
+% These event facts should eventually come from a database, but we handwrite
+% them here as a mock dataset.
+event(1, 1720643380, "hello").
+event(2, 1720643402, "world").
+event(3, 1720643409, ".").
+
+% Initialise the state
+state("", 0).
+
+% Next state is defined by the current state with the next event applied to it.
+state(NewValue, NewTime) :- state(Value, Time), 
+                            event(EventId, EventTime, Payload), 
+                            NewTime = EventTime,
+                            NewValue = Value + Payload,
+                            EventTime > Time.
 ```
 
-```

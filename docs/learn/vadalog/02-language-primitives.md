@@ -6,7 +6,9 @@ Let _C_, _V_, _N_ be sets of **constants**, **variables** or **marked nulls**,
 respectively.
 
 The elements of such sets are known as **terms**. A syntactic expression of the
-form r(t1, t2, …, tn) is known as **atom**, where t1, t2, … tn are terms. An
+form `r(t1, t2, …, tn)` is known as **atom**, where `t1, t2, …, tn` are terms.
+
+An
 atom is said to be **ground** if it only contains constants. A ground atom is
 also known as **fact**.
 

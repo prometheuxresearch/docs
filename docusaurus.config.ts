@@ -96,10 +96,10 @@ const config: Config = {
               label: 'Learn',
               to: `${baseUrl}/docs/learn/getting-started/intro`,
             },
-            {
-              label: 'SDK',
-              to: `${baseUrl}/docs/sdk/intro`,
-            },
+            // {
+            //   label: 'SDK',
+            //   to: `${baseUrl}/docs/sdk/intro`,
+            // },
           ],
         },
     

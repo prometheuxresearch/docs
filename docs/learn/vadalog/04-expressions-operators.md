@@ -295,7 +295,7 @@ functions include:
 - `mmax(X, K1, K2, …)` for the incremental computation of maximal
 
 Upon invocation, all functions return the currently accumulated value for the
-respective aggregate. All functions, except `count`, take as first argument the
+respective aggregate. All functions, except `mcount`, take as first argument the
 value to be used in the incremental computation of the aggregation.
 
 For `msum` and `mprod`, the second argument is the list of group-by variables,
@@ -907,7 +907,7 @@ that is, who controls the majority of votes for each company.
 A company X controls a company Y, if:
 
 1. X directly owns more than 50% of Y; or,
-1. X controls a set of companies that jointly, and possibly together with C1
+1. X controls a set of companies that jointly, and possibly together with X
    itself, own more than 50% of Y.
 
 This problem can be modeled via the following set of recursive Vadalog rules.
@@ -937,11 +937,11 @@ controlled_shares(X,Y,Y,Q) :- own(X,Y,Q), X<>Y.
 
 % recursive case: if a company X controls Y with shares K
 % and the company Y owns Z with share Q, then there there is a indirect
-% controlled_share relationship from X to Z with share Q
-controlled_shares(X,Z,Y,Q) :- control(X,Y,K), own(Y,Z,Q), X<>Z, Z<>Y, X<>Y.
+% controlled_share relationship from X to Y via Z with share Q
+controlled_shares(X,Z,Y,Q) :- control(X,Z,K), own(Y,Z,Q), X<>Z, Z<>Y, X<>Y.
 
 % if X has controlled_shares of Y, via any company Z with shares Q, then the total
-% controlled share are computed with a monotonic aggreagation msum, that groups
+% controlled share are computed with a monotonic aggregation msum, that groups
 % by X and Z and aggregates the sum of Q
 total_controlled_shares(X,Y,S) :- controlled_shares(X,Y,Z,Q), S=msum(Q).
 

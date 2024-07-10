@@ -467,11 +467,25 @@ used. The syntax follows:
 
 where `atomName` is the name of the atom at hand.
 
-### Limit
+### Certain
+
+As Vadalog Parallel handles marked nulls, it is possible that the facts of some output atoms contain such values. Sometimes this may be not desired, for example when the result needs to be stored into a relational database.
+
+The `certain` post-processing annotation filters out, for a given atom, all the facts containing any marked nulls.
+
+The syntax is as follows:
+
+```
+@post("atomName", "certain").
+```
+
+where `atomName` is the name of the atom at hand.
+
+### Limit and Prelimit
 
 Sometimes it is useful to limit an output relation to a fixed number of tuples.
 One can achieve this in two different way with the use of the post-processing
-annotations `limit` as shown below.
+annotations `limit` and `prelimit` as shown below.
 
 ```
 @post("atomName", "limit(N)").

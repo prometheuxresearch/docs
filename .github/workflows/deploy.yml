@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   build:
-    name: Build Docusaurus
+    name: Build and sync with s3
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -35,17 +35,6 @@ jobs:
       - name: Build website
         run: pnpm build
 
-      - name: Upload Build Artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: build
-
-  deploy:
-    name: Deploy to S3
-    needs: build
-
-    runs-on: ubuntu-latest
-    steps:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:

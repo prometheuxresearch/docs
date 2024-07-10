@@ -216,6 +216,12 @@ It is implemented in the library, `math`. The supported mathematical operators:
 - `rand(X)`: produces a random double number greater than or equal to `0.0` and
   less than `1.0`.
 
+To use any of these, add the library prefix `math:`. For example:
+
+```
+rule(X, SomeValue) :- fact(X), SomeValue=math:rand(Y).
+```
+
 ### Hash operators
 
 The `hashCode` library provides support for computing various hash functions.
@@ -224,6 +230,12 @@ Currently supported are the following cryptographic hash functions:
 - `hash(X1, …, Xn)`
 - `md5(X1, …, Xn)`
 - `sha1(X1, …, Xn)`
+
+To use any of these, add the library prefix `hashCode:`. For example:
+
+```
+rule(X,Hash) :- fact(X), Hash = hashCode:md5(X).
+```
 
 ### List operators
 
@@ -278,6 +290,12 @@ collections, such as lists and sets..
   elements from the collection `Y`.
 - `difference(X, Y)`: returns a copy of the collection `X` which does not
   contain elements from the collection `Y`.
+
+  To use any of these, add the library prefix `collections:`. For example:
+
+```
+rule(X,Size) :- fact(X), Size = collections:size(X).
+```
 
 ## Monotonic Aggregates
 
@@ -562,7 +580,6 @@ b(2,9).
 h(X,Z) :- b(X,Y), Z = mcount(Y), X > 0.
 
 @output("h").
-
 ```
 
 The expected output is
@@ -574,7 +591,7 @@ h(2, 3).
 
 ## Transitive Closure
 
-<!-- TODO: Add a definition of Transitive Closure -->
+<!-- TODO: Move this somewhere else -->
 
 Find the pairwise connectivities of all nodes in a graph
 
@@ -701,7 +718,7 @@ Y and Z and report an error E for the identifier I of such an item. The expected
 result is:
 
 ```
-error(z_,2).
+error(z_, 2).
 ```
 
 This next example selects the senior English players.
@@ -721,7 +738,6 @@ team("Chelsea").
 team("Bayern").
 seniorEnglish(X) :- player(X,Y), team(Y), age(X,A), Y="Chelsea", A>20.
 @output("seniorEnglish").
-
 ```
 
 They are those who play with Chelsea with age greater than 20. The expected
@@ -764,7 +780,7 @@ The expected result is:
 <!-- TODO: Explain the z_ -->
 
 ```
-operations(z_,43,21.5).
+operations(z_, 43, 21.5).
 ```
 
 ## Recursion

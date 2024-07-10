@@ -498,12 +498,10 @@ s(3.0,"b").
 
 f(J,Y) :- s(X,Y), J = msum(X).
 @output("f").
-@post("f","max(1)").
+@post("f","mmax(1)").
 ```
 
-<!-- TODO: Add an explanation distinguishing mmax and max -->
-
-The aggregates `min` and `max` have the expected semantics with the difference
+The aggregates `mmin` and `mmax` have the expected semantics with the difference
 that they produce no intermediate results.
 
 Consider for example the following program.
@@ -513,7 +511,7 @@ b(1,2).
 b(1,3).
 b(2,5).
 b(2,7).
-h(X,Z) :- b(X,Y), Z = max(Y), X > 0.
+h(X,Z) :- b(X,Y), Z = mmax(Y), X > 0.
 
 @output("h").
 ```

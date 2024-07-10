@@ -49,12 +49,14 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          managed-session-policies: arn:aws:iam::aws:policy/AmazonS3FullAccess
-          aws-region: eu-north-1
+          role-to-assume: arn:aws:iam::094284551733:role/GitHubActionsRoleStack-Role-gIAWAFX1UbPp
+          aws-region: us-east-1
+
       - name: Upload to s3
-        run: aws s3 sync ./.docusaurus s3://prometheux-docs
+        run: aws s3 sync ./build s3://prometheux-docs
+
       - name: Invalidate cloudfront
         run: |-
           aws cloudfront create-invalidation \
             --distribution-id E9X11W9SXSFDG \
-            --paths "/*"
+            --paths "/docs/*"

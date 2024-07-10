@@ -4,7 +4,7 @@
 
 Vadalog Parallel can read and write to the following relational databases:
 PostgreSQL and SQLite. Please refer to the
-[configuration](../on-prem/configuring-prometheux-engine) section for connecting
+[configuration](../on-prem/03-configuring-prometheux.md) section for connecting
 to your database. Then, refer to the [Bind and
 Mappings](./annotations#bind-mappings-and-qbind) section for instructions on how
 to read, update and delete data from these data sources.

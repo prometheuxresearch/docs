@@ -4,7 +4,7 @@
 
 Prometheux is a fast and intelligent AI platform powered by a research-backed
 parallel and distributed logic reasoning engine based on the
-[**Vadalog**](../vadalog) Language.
+[**Vadalog**](./vadalog) Language.
 
 More than just a big-data processing system, it lets you harness the power of
 your business rules by expressing them as **logical programs** in Vadalog.

@@ -16,7 +16,7 @@ function HomepageHeader() {
         <div className="flex items-center justify-center">
           <Link
             className="button button--secondary button--lg"
-            to={`/learn/getting-started/intro`}>
+            to={`/learn/getting-started`}>
             Get started - 5min ⏱️
           </Link>
         </div>

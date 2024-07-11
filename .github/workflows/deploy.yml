@@ -42,7 +42,7 @@ jobs:
           aws-region: us-east-1
 
       - name: Upload to s3
-        run: aws s3 sync ./build s3://prometheux-documentation --delete
+        run: aws s3 sync ./build s3://www.prometheux.co.uk/docs --delete
 
       - name: Invalidate cloudfront
         run: |-

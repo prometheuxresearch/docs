@@ -28,7 +28,7 @@ At the core of Prometheux is an Ontology. This is the set of business rules that
 you write to define how the entities in your system relate to each other, and
 how entities are connected to your real data.
 
-These rules are written in [**Vadalog**](../vadalog/intro).
+These rules are written in [**Vadalog**](../vadalog).
 
 ### Data Binding
 

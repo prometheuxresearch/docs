@@ -72,7 +72,7 @@ const config: Config = {
           label: 'Learn',
         },    
         {
-          href: 'https://prometheux.co.uk',
+          href: 'https://www.prometheux.co.uk',
           label: 'Back to homepage',
           position: 'right',
         },

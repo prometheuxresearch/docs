@@ -15,8 +15,8 @@ department(Y,X) :- employee(X).
 For each employee X there exists a department Y. The expected result is:
 
 ```prolog
-department(z1,1).
-department(z2,2).
+department(y1, 1).
+department(y2, 2).
 ```
 
 ## Facts
@@ -33,12 +33,12 @@ employee("Ruth").
 _Join rules_ are rules with multiple atoms in the body. They basically define
 facts of the head predicate, given facts of the body.
 
-```prolog
+```
 project(Z,X) :- employee(X), department(Y,X).
 ```
 
-For each employee X in a department Y, there exists a project Z in which he
-participates.
+For each employee X in a department Y, there exists a project Z in which they
+participate.
 
 If the atoms in the body do not have variables in common, the Cartesian product
 is assumed.
@@ -48,7 +48,7 @@ employee("Jack").
 employee("Ruth").
 department("science").
 department("finance").
-canWork(X,Y,Z) :- employee(X), department(Y).
+canWork(X, Y, Z) :- employee(X), department(Y).
 @output("canWork").
 ```
 
@@ -56,10 +56,10 @@ Any employee X can work in any department Y on some unknown project Z. The
 expected result is:
 
 ```prolog
-canWork("Jack","science",z1).
-canWork("Jack","finance",z2).
-canWork("Ruth","science",z3).
-canWork("Ruth","finance",z4).
+canWork("Jack", "science", z1).
+canWork("Jack", "finance", z2).
+canWork("Ruth", "science", z3).
+canWork("Ruth", "finance", z4).
 ```
 
 ## Constants within rules
@@ -75,7 +75,7 @@ criteria, to be applied to the facts considered in the rule.
 ```prolog showLineNumbers {3}
 employee("Mark").
 junior("Mark").
-contract(X,"basic",20) :- employee(X),junior(X).
+contract(X, "basic", 20) :- employee(X), junior(X).
 @output("contract").
 ```
 
@@ -83,7 +83,7 @@ A junior employee will have a "basic" contract, with stipend 20. The expected
 result is:
 
 ```
-contract("Mark","basic",20).
+contract("Mark", "basic", 20).
 ```
 
 For this next example:
@@ -91,8 +91,8 @@ For this next example:
 ```prolog showLineNumbers {3,4}
 employee("Mark","junior").
 employee("Ruth","senior").
-contract(X,"basic",20) :- employee(X,"junior").
-contract(X,"advanced",40) :- employee(X,"senior").
+contract(X,"basic", 20) :- employee(X, "junior").
+contract(X,"advanced", 40) :- employee(X, "senior").
 @output("contract").
 ```
 
@@ -105,6 +105,6 @@ applies only to Ruth.
 The expected result is:
 
 ```prolog
-contract("Mark","basic",20).
-contract("Ruth","advanced",40).
+contract("Mark", "basic", 20).
+contract("Ruth", "advanced", 40).
 ```

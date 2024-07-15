@@ -23,21 +23,19 @@ _multi-facts operators_ (called **aggregation operators**).
 
 | Data type     | Operators                                                                                                |
 | ------------- | -------------------------------------------------------------------------------------------------------- |
-| all           | `==, >, <, >= , <=, <>, !=`                                                                              |
+| all           | `==`, `>`, `<`, `>=` , `<=`, `<>`, `!=`                                                                  |
 | string / list | `substring`, `contains`, `starts_with`, `ends_with`, `concat`, `index_of` (string only), `string_length` |
-| integer       | (monadic) `-, *, /, +, -, ( )`                                                                           |
-| double        | (monadic) `-, *, /, +, -, ( )`                                                                           |
+| integer       | (monadic) `-`, `*`, `/`, `+`, `-`, `( )`                                                                 |
+| double        | (monadic) `-`, `*`, `/`, `+`, `-`, `( )`                                                                 |
 | Boolean       | `&&` (and), `\|\|` (or), `not`, `( )` for associativity                                                  |
 | set           | `\|` (union), `&` (intersection), `( )` for associativity                                                |
 
 ### Comparison operators
 
-The comparison operators are `==,>,<,>=,<=,<>` (alternate syntax `!=`). They can
-be used to compare literals of any data type and return a Boolean, depending
-whether the comparison is satisfied or not. Only values of the same type can be
-compared. Marked nulls can be compared only with marked nulls, since they are
-the only ones having unknown data type. Marked nulls are equal when they have
-the same identifier (i.e., the same marked null).
+The comparison operators are `==`,`>`,`<`,`>=`,`<=`,`<>` (alternate syntax
+`!=`). They can be used to compare literals of any data type and return a
+Boolean, depending whether the comparison is satisfied or not. Only values of
+the same type can be compared.
 
 - `==` : equals to
 - `>` : greater than
@@ -46,6 +44,10 @@ the same identifier (i.e., the same marked null).
 - `<=` : less or equal
 - `<>` : not equal
 - `!=` : not equal
+
+Marked nulls can be compared only with marked nulls, since they are the only
+ones having unknown data type. Marked nulls are equal when they have the same
+identifier (i.e. they are the same marked null).
 
 ### Arithmetic operators
 
@@ -70,8 +72,7 @@ Precedence can be altered with parentheses.
 ### Boolean operators
 
 The Boolean operators are and (`&&`), or (`||`) or `not`. They can be used to
-combine
-Boolean data types.
+combine Boolean data types.
 
 ### String operators
 
@@ -136,14 +137,14 @@ An example for `ends_with`:
 ```prolog showLineNumbers {3}
 a("prometheux").
 b("theux").
-q(X,Y,J) :- a(X), b(Y), J = ends_with(X,Y).
+q(X, Y, J) :- a(X), b(Y), J = ends_with(X,Y).
 @output("q").
 ```
 
 The expected output is:
 
 ```
-q("prometheux","theux",#T).
+q("prometheux", "theux", #T).
 ```
 
 A rule with an assignment using the `concat` operator has the general form, and
@@ -179,27 +180,28 @@ An example for `string_length`:
 
 ```prolog showLineNumbers {2}
 a("prometheux").
-q(X,J) :- a(X), J = string_length(X).
+q(X, J) :- a(X), J = string_length(X).
 @output("q").
 ```
 
 The expected output is:
 
 ```prolog
-q("prometheux",10).
+q("prometheux", 10).
 ```
 
 ### Math operators
 
-It is implemented in the library, `math`. The supported mathematical operators:
+These are implemented in the library, `math`. The supported mathematical
+operators are:
 
 - `mod`: computes a modulo between two parameters provided, returning a single
   integer value.
 - `sqrt(X)`: computes square root of `X`, returning a single double value.
 - `abs(X)`: computes the absolute value of `X`.
-- `min(X1, …, Xn)`: computes the minimum value among `X1, …, Xn`. These
+- `min(X1, …, Xn)`: computes the minimum value among `X1, … , Xn`. These
   parameters must be of the same type.
-- `max(X1, …, Xn)`: computes the maximum value among `X1, …, Xn`. These
+- `max(X1, …, Xn)`: computes the maximum value among `X1, … , Xn`. These
   parameters must be of the same type.
 - `log10(X)`: computes the lograrithm of `X` to base 10.
 - `log(X)`: computes the natural logarithm of `X`.
@@ -234,7 +236,7 @@ Currently supported are the following cryptographic hash functions:
 To use any of these, add the library prefix `hashCode:`. For example:
 
 ```
-rule(X,Hash) :- fact(X), Hash = hashCode:md5(X).
+rule(X, Hash) :- fact(X), Hash = hashCode:md5(X).
 ```
 
 ### List operators
@@ -250,7 +252,7 @@ b(Y) :- a(X), Z=([2]) Y=concat(X, Z).
 The expected output is:
 
 ```prolog
-b([1,2]).
+b([1, 2]).
 ```
 
 The Boolean list operator `contains(List, Element)` returns true if `List`
@@ -260,7 +262,7 @@ contains `Element`:
 a([0, 1, 2, 3, 4, 5]).
 b(3).
 b(2).
-c(Y,J) :- a(X), b(Y), J=contains(X,Y).
+c(Y,J) :- a(X), b(Y), J = contains(X,Y).
 @output("c").
 ```
 
@@ -291,10 +293,10 @@ collections, such as lists and sets..
 - `difference(X, Y)`: returns a copy of the collection `X` which does not
   contain elements from the collection `Y`.
 
-  To use any of these, add the library prefix `collections:`. For example:
+To use any of these, add the library prefix `collections:`. For example:
 
 ```
-rule(X,Size) :- fact(X), Size = collections:size(X).
+rule(X, Size) :- fact(X), Size = collections:size(X).
 ```
 
 ## Monotonic Aggregates
@@ -362,36 +364,36 @@ ssum("two", 19.0)
 A rule with an assignment using an aggregation operator has the general form:
 
 ```prolog
-q(K1, K2, Kn, J) :- body, J = maggr(x,<C1, …,Cm>)
+q(K1, …, Kn, J) :- body, J = maggr(x, <C1, …, Cm>)
 ```
 
-where
+where:
 
 - `K1, …, Kn` are zero or more group by arguments
 - `body` is the rule body,
 - `maggr` is a placeholder for an aggregation function (`mmin`, `mmax`, `msum`,
   `mprod`),
-- `C1, …,Cm` are zero or more variables of the body (with `Ci ≠ Kj, 1 ≤ i ≤ m, 1
-≤ j ≤ n`), which we call contributor arguments
-- `x` is a Constant, a body variable or an expression containing only
+- `C1, …, Cm` are zero or more variables of the body (with `Ci ≠ Kj, 1 ≤ i ≤ m,
+1 ≤ j ≤ n`), which we call contributor arguments
+- `x` is a constant, a body variable or an expression containing only
   single-fact operators.
 
-For each distinct n-tuple of `K1, …, Kn`, a monotonic decreasing (increasing)
+For each distinct n-tuple of `K1, …, Kn`, a monotonic increasing (or decreasing)
 aggregate function `maggr` maps an input multi-set of vectors G, each of the
-form `gi = (C1, …, Cm, xi)` into a set D of values, such that xi is in D if xi is
-less (greater) than the previously observed value for the sub-vector of
+form `gi = (C1, … , Cm, xi)` into a set D of values, such that xi is in D if xi
+is less (greater) than the previously observed value for the sub-vector of
 contributors (`C1, …, Cٖm`).
 
-Such aggregation functions are monotonic w.r.t. set containment and can be used
-in Vadalog together with recursive rules to calculate aggregates without
-resorting to stratification (separation of the program into ordered levels on
-the basis of the dependencies between rules).
+Such aggregation functions are monotonic with respect to the set containment and
+can be used in Vadalog together with recursive rules to calculate aggregates
+without resorting to stratification (separation of the program into ordered
+levels on the basis of the dependencies between rules).
 
 In the execution of a program, for each aggregation, the aggregation memorizes
-for each vector (`C1, …, Cٖm`) the current minimum (or maximum) value of x. Then,
-for each activation of a rule with the monotonic aggregation at hand, an updated
-value for the group selected by `K1, …, Km` is calculated by combining all the
-values in D for the various vectors of contributors.
+for each vector (`C1, …, Cٖm`) the current minimum (or maximum) value of x.
+Then, for each activation of a rule with the monotonic aggregation at hand, an
+updated value for the group selected by `K1, …, Km` is calculated by combining
+all the values in D for the various vectors of contributors.
 
 The kind of combination specifically depends on the semantics of `maggr` (e.g.
 minimum, maximum, sum, product, count) and, provided the monotonicity of the
@@ -411,21 +413,21 @@ aggregated functions.
 Let us start with a basic example.
 
 ```prolog showLineNumbers {7}
-s(1.0,"a").
-s(2.0,"a").
-s(3.0,"a").
-s(4.0,"b").
-s(3.0,"b").
+s(1.0, "a").
+s(2.0, "a").
+s(3.0, "a").
+s(4.0, "b").
+s(3.0, "b").
 
-f(J,Y) :- s(X,Y), J = msum(X).
+f(J, Y) :- s(X, Y), J = msum(X).
 @output("f").
 ```
 
 The expected output is:
 
-```prolog
-f(6,"a").
-f(7,"b").
+```
+f(6, "a").
+f(7, "b").
 ```
 
 For each activation of the aggregation operator `msum`, we calculate the current
@@ -435,8 +437,8 @@ aggregate, for each group, denoted by variable Y in f. So for the first group,
 
 This example gives the flavour of how monotonic aggregations work. For each
 activation of the rule, the current result is produced. Since the aggregations
-are monotonic, we are certain that the maximum (minimum) value for each group is
-deterministically the correct aggregate.
+are monotonic, we are certain that the maximum (or minimum) value for each group
+is deterministically the correct aggregate.
 
 On the other hand, the intermediate values for partial aggregates are
 _non-deterministic_, since they depend on the specific execution order.
@@ -444,13 +446,13 @@ _non-deterministic_, since they depend on the specific execution order.
 Let us now consider contributors through the following example.
 
 ```prolog showLineNumbers {7}
-s(0.1,2,"a").
-s(0.2,2,"a").
-s(0.5,3,"a").
-s(0.6,4,"b").
-s(0.5,5,"b").
+s(0.1, 2, "a").
+s(0.2, 2, "a").
+s(0.5, 3, "a").
+s(0.6, 4, "b").
+s(0.5, 5, "b").
 
-f(J,Z) :- s(X,Y,Z), J = mprod(X,<Y>).
+f(J, Z) :- s(X, Y, Z), J = mprod(X,<Y>).
 @output("f").
 ```
 
@@ -487,8 +489,8 @@ edge(3,2).
 edge(5,2).
 edge(3,1).
 edge(2,5).
-indegree(Y,J) :- edge(X,Y),J=msum(1,<X>).
-found(X) :- indegree(X,J),J>2.
+indegree(Y, J) :- edge(X, Y), J = msum(1, <X>).
+found(X) :- indegree(X, J), J > 2.
 @output("found").
 ```
 
@@ -499,7 +501,7 @@ found(2).
 ```
 
 In this example, all the intermediate results have been simply discarded by
-introducing the threshold, technically a condition, `J>2`.
+introducing the threshold, technically a condition, `J > 2`.
 
 In addition, Vadalog Parallel provides an annotation mechanism that allows to
 introduce special behaviors, pre-processing and post-processing features. A
@@ -508,15 +510,15 @@ values for each group as follows (see the section on
 [Post-processing](./annotations#post-processing) for more details).
 
 ```prolog showLineNumbers {9}
-s(1.0,"a").
-s(2.0,"a").
-s(3.0,"a").
-s(4.0,"b").
-s(3.0,"b").
+s(1.0, "a").
+s(2.0, "a").
+s(3.0, "a").
+s(4.0, "b").
+s(3.0, "b").
 
-f(J,Y) :- s(X,Y), J = msum(X).
+f(J, Y) :- s(X, Y), J = msum(X).
 @output("f").
-@post("f","mmax(1)").
+@post("f", "mmax(1)").
 ```
 
 The aggregates `mmin` and `mmax` have the expected semantics with the difference
@@ -525,11 +527,11 @@ that they produce no intermediate results.
 Consider for example the following program.
 
 ```prolog showLineNumbers {5}
-b(1,2).
-b(1,3).
-b(2,5).
-b(2,7).
-h(X,Z) :- b(X,Y), Z = mmax(Y), X > 0.
+b(1, 2).
+b(1, 3).
+b(2, 5).
+b(2, 7).
+h(X, Z) :- b(X, Y), Z = mmax(Y), X > 0.
 
 @output("h").
 ```
@@ -547,14 +549,14 @@ operations without intermediate results.
 For example, the following program computes the sum of positive values.
 
 ```prolog showLineNumbers {7,8}
-b(1,2).
-b(1,3).
+b(1, 2).
+b(1, 3).
 
-b(2,5).
-b(2,7).
+b(2, 5).
+b(2, 7).
 
-b_msum(X,Z):- b(X, Y), Z = msum(Y).
-b_sum(X,Z) :- b_msum(X, Y), Z = mmax(Y).
+b_msum(X, Z):- b(X, Y), Z = msum(Y).
+b_sum(X, Z) :- b_msum(X, Y), Z = mmax(Y).
 
 @output("b_sum").
 ```
@@ -572,12 +574,12 @@ intermediate results.
 Consider for example the following program.
 
 ```prolog showLineNumbers {6}
-b(1,2).
-b(1,3).
-b(2,5).
-b(2,7).
-b(2,9).
-h(X,Z) :- b(X,Y), Z = mcount(Y), X > 0.
+b(1, 2).
+b(1, 3).
+b(2, 5).
+b(2, 7).
+b(2, 9).
+h(X, Z) :- b(X, Y), Z = mcount(Y), X > 0.
 
 @output("h").
 ```
@@ -707,9 +709,9 @@ rich("Jeff").
 Consider this next example:
 
 ```prolog showLineNumbers {3}
-balanceItem(1,7,2,5).
-balanceItem(2,2,2,7).
-error(E,I) :- balanceItem(I,X,Y,Z),X<>Y+Z.
+balanceItem(1, 7, 2, 5).
+balanceItem(2, 2, 2, 7).
+error(E, I) :- balanceItem(I, X, Y, Z), X <> Y+Z.
 @output("error").
 ```
 
@@ -718,25 +720,25 @@ Y and Z and report an error E for the identifier I of such an item. The expected
 result is:
 
 ```
-error(z_, 2).
+error(_e, 2).
 ```
 
 This next example selects the senior English players.
 
 ```prolog showLineNumbers {13}
-player(1,"Chelsea").
-age(1,24).
-player(2,"Bayern").
+player(1, "Chelsea").
+age(1, 24).
+player(2, "Bayern").
 team("Chelsea").
-age(2,25).
-player(2,"Bayern").
+age(2, 25).
+player(2, "Bayern").
 team("Chelsea").
-age(2,25).
-player(3,"Chelsea").
-age(3,18).
+age(2, 25).
+player(3, "Chelsea").
+age(3, 18).
 team("Chelsea").
 team("Bayern").
-seniorEnglish(X) :- player(X,Y), team(Y), age(X,A), Y="Chelsea", A>20.
+seniorEnglish(X) :- player(X, Y), team(Y), age(X, A), Y="Chelsea", A > 20.
 @output("seniorEnglish").
 ```
 
@@ -762,10 +764,10 @@ distinguished, since the LHS of the equation appears only in the head.
 Each rule can have multiple comma-separated assignments.
 
 ```prolog showLineNumbers {3,4}
-balanceItem("loans",23.0).
-balanceItem("deposits",20.0).
-operations(Q,Z,A) :- balanceItem(I1,X), balanceItem(I2,Y),
-                     I1="loans", I2="deposits", Z=X+Y, A=(X+Y)/2.
+balanceItem("loans", 23.0).
+balanceItem("deposits", 20.0).
+operations(Q, Z, A) :- balanceItem(I1,X), balanceItem(I2,Y),
+                       I1="loans", I2="deposits", Z=X+Y, A=(X+Y)/2.
 @output("operations").
 ```
 
@@ -780,7 +782,7 @@ The expected result is:
 <!-- TODO: Explain the z_ -->
 
 ```
-operations(z_, 43, 21.5).
+operations(_q, 43, 21.5).
 ```
 
 ## Recursion
@@ -801,24 +803,24 @@ between:
 Some examples follow.
 
 ```prolog showLineNumbers {6}
-edge(1,2).
-edge(2,3).
-edge(1,4).
-edge(4,5).
-path(X,Y) :- edge(X,Y).
-path(X,Z) :- path(Y,Z), edge(X,Y).
+edge(1, 2).
+edge(2, 3).
+edge(1, 4).
+edge(4, 5).
+path(X, Y) :- edge(X, Y).
+path(X, Z) :- path(Y, Z), edge(X, Y).
 @output("path").
 ```
 
 The expected results are:
 
 ```
-path(1,3).
-path(1,2).
-path(1,5).
-path(2,3).
-path(1,4).
-path(4,5).
+path(1, 3).
+path(1, 2).
+path(1, 5).
+path(2, 3).
+path(1, 4).
+path(4, 5).
 ```
 
 The examples above show reachability in graphs with left recursion, in the
@@ -869,8 +871,8 @@ safeProjects(X,P) :- project(X,P), not contractor(P).
 The expected result is:
 
 ```
-safeProjects(2,"Ruth").
-safeProjects(3,"Jane").
+safeProjects(2, "Ruth").
+safeProjects(3, "Jane").
 ```
 
 Here we select the safe projects, which are those run by a person who is not a
@@ -881,17 +883,17 @@ contractor.
 Consider this next example:
 
 ```prolog showLineNumbers {10,11}
-s(1,2).
-s(2,3).
-s(3,5).
-s(4,6).
-b(6,2).
-b(4,2).
-b(2,2).
+s(1, 2).
+s(2, 3).
+s(3, 5).
+s(4, 6).
+b(6, 2).
+b(4, 2).
+b(2, 2).
 c(2).
 
-f(X,Y) :- s(X,Y), not b(Y,Z).
-f(Y,X) :- f(X,Y), not b(X,Z).
+f(X, Y) :- s(X, Y), not b(Y, Z).
+f(Y, X) :- f(X, Y), not b(X, Z).
 
 @output("f").
 ```
@@ -899,9 +901,9 @@ f(Y,X) :- f(X,Y), not b(X,Z).
 The expected result is:
 
 ```
-f(5,3).
-f(2,3).
-f(3,5).
+f(5, 3).
+f(2, 3).
+f(3, 5).
 ```
 
 Here we combine recursion and negation and recursively generate f, by negating
@@ -929,21 +931,21 @@ This problem can be modeled via the following set of recursive Vadalog rules.
 ```prolog showLineNumbers
 % input company graph, described as ownerships edges
 % the company 1 own 0.9% of shares of 2
-own(1,2,0.9).
+own(1, 2, 0.9).
 % the company 2 own 1.0% of shares of 3
-own(2,3,1.0).
-own(3,2,0.1).
-own(3,4,0.9).
-own(4,5,1.0).
-own(5,1,0.1).
-own(1,6,0.9).
-own(6,5,1.0).
-own(5,10,0.9).
-own(10,20,1.0).
-own(20,1,0.5).
-own(1,10,0.9).
-own(19,5,1.0).
-own(10,19,0.5).
+own(2, 3, 1.0).
+own(3, 2, 0.1).
+own(3, 4, 0.9).
+own(4, 5, 1.0).
+own(5, 1, 0.1).
+own(1, 6, 0.9).
+own(6, 5, 1.0).
+own(5, 10, 0.9).
+own(10, 20, 1.0).
+own(20, 1, 0.5).
+own(1, 10, 0.9).
+own(19, 5, 1.0).
+own(10, 19, 0.5).
 
 % base case: if a company X owns Y with shares Q then there is direct a
 % controlled_share relationship from X to Y with share Q
@@ -1045,13 +1047,13 @@ This problem can be modeled via the following set of recursive Vadalog rules
 ```prolog showLineNumbers
 % input company graph, described as ownerships edges
 % the company A own 0.2% of shares of the comapany B
-own("A","B",0.2).
+own("A", "B", 0.2).
 % the company B own 0.8% of shares of the comapany A
-own("B","A",0.8).
-own("B","C",0.2).
-own("C","D",0.6).
-own("D","A",0.9).
-own("A","C",0.2).
+own("B", "A", 0.8).
+own("B", "C", 0.2).
+own("C", "D", 0.6).
+own("D", "A", 0.9).
+own("A", "C", 0.2).
 
 % if there the company X owns a percentage W of shares of Y and we add in a set
 % the visited node X and the visited node Y, then there is a closeLinkPaths of X

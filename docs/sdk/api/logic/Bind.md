@@ -1,13 +1,19 @@
 # Bind
 
 ---
+
 **Module**: `prometheux_chain.logic.Bind`
 
-Classes
--------
+## Classes
 
-`Bind(id, predicate_name, bind_annotation, datasource: prometheux_chain.model.Datasource.Datasource)`
-:   
+```python
+Bind(id,
+     predicate_name,
+     bind_annotation,
+     datasource: prometheux_chain.model.Datasource.Datasource)
+```
+
+:
 
     ### Static methods
 

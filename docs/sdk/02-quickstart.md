@@ -20,7 +20,7 @@ databases:
     username: "***"
     password: "***"
     host: "/my_folder"
-    port: "***"
+    port: "8080"
   - alias: "sample postgresql"
     database_type: "postgres"
     database: "database"

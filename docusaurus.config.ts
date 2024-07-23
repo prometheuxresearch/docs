@@ -96,7 +96,7 @@ const config: Config = {
             },
             {
               label: 'SDK',
-              to: '/sdk/getting-started',
+              to: '/sdk',
             },
           ],
         },

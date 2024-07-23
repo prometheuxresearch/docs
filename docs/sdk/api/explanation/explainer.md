@@ -1,19 +1,16 @@
 # explainer
 
 ---
+
 **Module**: `prometheux_chain.explanation.explainer`
 
-Functions
----------
+## Functions
 
-`aggregate_data(records)`
-:   
+```python
+explain(structured_fact: prometheux_chain.logic.Fact.Fact = None,
+        fact = None,
+        csv_path = None,
+        json_glossary = None) -> String
+```
 
-`explain(structured_fact: prometheux_chain.logic.Fact.Fact = None, fact=None, csv_path=None, json_glossary=None)`
-:   
-
-`explain_from_file(root, csv_path)`
-:   
-
-`process_aggregate_by_start_node(aggregate_by_start_node)`
-:
+Explain a result fact after the reasoning process.

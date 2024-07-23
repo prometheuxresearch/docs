@@ -1,3 +1,7 @@
+---
+sidebar_position: 1
+---
+
 # Overview
 
 Prometheux_chain is a Python SDK designed to power your knowledge graphs by:

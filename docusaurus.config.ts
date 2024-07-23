@@ -70,6 +70,12 @@ const config: Config = {
           sidebarId: 'learn',
           position: 'left',
           label: 'Learn',
+        },   
+        {
+          type: 'docSidebar',
+          sidebarId: 'sdk',
+          position: 'left',
+          label: 'Python SDK',
         },    
         {
           href: 'https://www.prometheux.co.uk',
@@ -86,7 +92,11 @@ const config: Config = {
           items: [
             {
               label: 'Learn',
-              to: `/learn/getting-started`,
+              to: '/learn/getting-started',
+            },
+            {
+              label: 'SDK',
+              to: '/sdk/getting-started',
             },
           ],
         },

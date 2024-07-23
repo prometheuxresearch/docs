@@ -6,10 +6,21 @@
 
 ## Functions
 
-`connect_from_yaml(file_path)`
-: Connect to the databases defined in the yaml file.
+```python
+connect_from_yaml(file_path)
+```
 
-The yaml file should have the following schema:
+Connects to databases specified in the YAML configuration file.
+
+- Supports connections to multiple database types, including but not limited to PostgreSQL, Neo4j, CSV, and Parquet.
+- Connection is performed without any data migration.
+- If a database with the specified alias already exists, the new database is not connected.
+
+**Parameters:**
+
+- `file_path` (str): Path to the YAML file containing database connection details.
+
+**YAML Schema:**
 
 ```yml title="databases.yaml"
 databases:
@@ -27,4 +38,3 @@ databases:
     password: "password"
     host: "database.myhost.com"
     port: "5432"
-```

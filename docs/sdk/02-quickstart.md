@@ -50,7 +50,7 @@ potential_input_bindings.show()
 
 ## Selecting Input Bindings
 
-Select specific bindings from the list of compatible ones:
+Select specific input bindings from the list of compatible ones:
 
 ```python
 selected_input_bindings = pmtx.select_bindings(potential_input_bindings, {0})
@@ -67,7 +67,7 @@ potential_output_bindings.show()
 
 ## Selecting Output Bindings
 
-Choose specific output bindings from the compatible ones:
+Select specific output bindings from the list of compatible ones:
 
 ```python
 selected_output_bindings = pmtx.select_bindings(potential_output_bindings, {2})
@@ -92,7 +92,8 @@ paginated_results.show()
 
 ## Generating Textual Explanations
 
-Generate and display textual explanations for a selected result, using a predefined glossary:
+Generate and display the textual explanation for a selected result, optionally enhanced by a JSON glossary file
+containing natural language descriptions of the predicates:
 
 ```python
 pmtx.explain(paginated_results.get(0), json_glossary="glossary.json")

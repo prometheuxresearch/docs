@@ -295,10 +295,24 @@ collections, such as lists and sets..
 
 To use any of these, add the library prefix `collections:`. For example:
 
-```
+```prolog
 rule(X, Size) :- fact(X), Size = collections:size(X).
 ```
 
+### Temporal Functions
+The library `date` implements functions for manipulation of temporal operations 
+- `currentDate()`: returns the current date at the start of reasoning evaluation as a date.
+- `currentTimestamp()`: returns the current date at the start of query evaluation as a date.
+- `nextDay(Date)`: returns the date that is days days after Date
+- `add(Start,Days)`: returns the date that is days days after start
+
+To use any of these, add the library prefix `date:`. For example:
+
+```prolog
+a(D) :- b(X), D = date:currentDate().
+next_day(Next) :- a(D), Next = date:nextDay(D).
+add_ten_days(Next) :- a(D), Next = date:add(D,10).
+```
 ## Monotonic Aggregates
 
 Monotonic aggregations are functions for incremental and recursion-friendly

@@ -317,8 +317,15 @@ a(D) :- b(X), D = dataTypes:asDate("22-02-2022").
 The library `date` implements functions for manipulation of temporal operations 
 - `currentDate()`: returns the current date at the start of reasoning evaluation as a date.
 - `currentTimestamp()`: returns the current date at the start of query evaluation as a date.
-- `nextDay(Date)`: returns the date that is days days after Date
-- `add(Start,Days)`: returns the date that is days days after start
+- `nextDay(Date)`: returns the date that is one days after Date
+- `add(Start,Days)`: returns the date that is Days days after Start
+- `prevDay(Date)`: returns the date that is one days before Date
+- `sub(Start,Days)`: returns the date that is Days days before Start
+- `diff(End,Start)`: returns the number of days from Start to End.
+
+
+
+
 
 To use any of these, add the library prefix `date:`. For example:
 

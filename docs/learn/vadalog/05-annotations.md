@@ -40,7 +40,7 @@ In all the syntaxes above, `annotationName` indicates the specific annotation
 and each of them accepts a specific list of parameters. In the following
 sections we present the supported annotations.
 
-## Input
+## @input
 
 It specifies that the facts for an atom of the program are imported from an
 external data source, for example a relational database.
@@ -62,7 +62,7 @@ It is assumed that an atom annotated with `@input`:
 The full details of the external source must be specified with the `@bind`,
 `@mapping` and `@qbind` annotations.
 
-## Output
+## @output
 
 It specifies that the facts for an atom of the program will be exported to an
 external target, for example the standard output or a relational database.
@@ -85,13 +85,12 @@ If the `@output` annotation is used without any `@bind` annotation, it is
 assumed that the default target is the standard output. Annotations `@model`, `@bind` and
 `@mapping` can be used to customize the target system.
 
-### @model
+## @model
 
 The `@model` annotation is used to create and enforce a schema for a predicate, ensuring the data adheres to a specified structure. This is crucial for maintaining data consistency and integrity across operations.
 
-### Usage
+The annotation syntax is as follows:
 
-The annotation format is as follows:
 ```
 @model("predicate_name", "['field_name:type', 'field_name:type', '...']").
 ```
@@ -99,9 +98,9 @@ The annotation format is as follows:
 - predicate_name: The name of the predicate to which the schema is applied.
 - ['field_name:type', 'field_name:type', '...']: A list defining the schema, where each argument specifies a field name and its corresponding type.
 
-### Example
+Consider this simple example:
 
-```prolog show line numbers
+```prolog showLineNumbers {4}
 b(1, "2", 1.0, "Davide").
 a(A, B, C, D) :- b(A, B, C, D).
 
@@ -116,7 +115,8 @@ This imposes a 4-field schema for the predicate a with the following fields and 
 - third: double
 - fourth: string
 
-#### Example Workflow
+#### Workflow
+
 Assume to have a parquet dataset containing the following row:
 
 ```prolog
@@ -125,43 +125,43 @@ Assume to have a parquet dataset containing the following row:
 
 1. Define a schema for the input predicate:
 
-    ``` prolog
-    @model("b", "['first:int', 'second:string', 'third:double', 'fourth:string']").
-    @input("b").
-    ```
+   ```prolog
+   @model("b", "['first:int', 'second:string', 'third:double', 'fourth:string']").
+   @input("b").
+   ```
 
-    This ensures that predicate `b` adheres to the specified schema.
+   This ensures that predicate `b` adheres to the specified schema.
 
 2. Bind the predicate to a data source:
 
-    ``` prolog
-    @bind("b", "parquet", "src/test/resources/datasets", "dataset")
-    ```
-    This reads data from the specified Parquet file into predicate `b`.
+   ```prolog
+   @bind("b", "parquet", "src/test/resources/datasets", "dataset")
+   ```
+
+   This reads data from the specified Parquet file into predicate `b`.
 
 3. Define and enforce a schema for the output predicate:
 
-    ``` prolog
-    @output("a")
-    @model("a", "['first:int', 'second:int', 'third:double', 'fourth:string']").
-    @bind("a", "parquet", "src/test/resources/datasets/", "dataset").
-    ```
+   ```prolog
+   @output("a")
+   @model("a", "['first:int', 'second:int', 'third:double', 'fourth:string']").
+   @bind("a", "parquet", "src/test/resources/datasets/", "dataset").
+   ```
 
-    This writes the Parquet file and casts the input data type fields to the output data type fields int, int, double, and string.
+   This writes the Parquet file and casts the input data type fields to the output data type fields int, int, double, and string.
 
 4. Define the rules using the schema-defined predicates:
 
-    ```prolog
-    a(A, B, C, D) :- b(A, B, C, D).
-    @output("a").
-    ```
+   ```prolog
+   a(A, B, C, D) :- b(A, B, C, D).
+   @output("a").
+   ```
 
-    This writes the following row in the parquet file:
+   This writes the following row in the parquet file:
 
-    ```prolog
-    1, 2, 1.0, "Davide"
-    ```
-
+   ```prolog
+   1, 2, 1.0, "Davide"
+   ```
 
 ## Bind, Mappings and Qbind
 
@@ -295,7 +295,7 @@ You can also use multiple parameters within a parametric `@qbind`:
 
 where `${1}` and `${2}` are the first and second parameters of all `t` results.
 
-## Post-processing
+## Post-processing with @post
 
 This category of annotations include a set of post-processing operations that
 can be applied to facts of atoms annotated with @output before exporting the

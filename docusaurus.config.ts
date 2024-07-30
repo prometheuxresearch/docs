@@ -107,6 +107,12 @@ const config: Config = {
         },
         {
           type: "docSidebar",
+          sidebarId: "examples",
+          position: "left",
+          label: "Examples",
+        },
+        {
+          type: "docSidebar",
           sidebarId: "sdk",
           position: "left",
           label: "Python SDK",
@@ -127,6 +133,10 @@ const config: Config = {
             {
               label: "Learn",
               to: "/learn/getting-started",
+            },
+            {
+              label: "Examples",
+              to: "/examples",
             },
             {
               label: "SDK",

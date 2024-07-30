@@ -82,8 +82,86 @@ It is assumed that an atom annotated with `@output`:
 2. is never used within an `@input` annotation.
 
 If the `@output` annotation is used without any `@bind` annotation, it is
-assumed that the default target is the standard output. Annotations `@bind` and
+assumed that the default target is the standard output. Annotations `@model`, `@bind` and
 `@mapping` can be used to customize the target system.
+
+### @model
+
+The `@model` annotation is used to create and enforce a schema for a predicate, ensuring the data adheres to a specified structure. This is crucial for maintaining data consistency and integrity across operations.
+
+### Usage
+
+The annotation format is as follows:
+```
+@model("predicate_name", "['field_name:type', 'field_name:type', '...']").
+```
+
+- predicate_name: The name of the predicate to which the schema is applied.
+- ['field_name:type', 'field_name:type', '...']: A list defining the schema, where each argument specifies a field name and its corresponding type.
+
+### Example
+
+```prolog show line numbers
+b(1, "2", 1.0, "Davide").
+a(A, B, C, D) :- b(A, B, C, D).
+
+@model("a", "['first:string', 'second:string', 'third:double', 'fourth:string']").
+@output("a").
+```
+
+This imposes a 4-field schema for the predicate a with the following fields and types:
+
+- first: string
+- second: string
+- third: double
+- fourth: string
+
+#### Example Workflow
+Assume to have a parquet dataset containing the following row:
+
+```prolog
+1, "2", 1.0, "Davide"
+```
+
+1. Define a schema for the input predicate:
+
+    ``` prolog
+    @model("b", "['first:int', 'second:string', 'third:double', 'fourth:string']").
+    @input("b").
+    ```
+
+    This ensures that predicate `b` adheres to the specified schema.
+
+2. Bind the predicate to a data source:
+
+    ``` prolog
+    @bind("b", "parquet", "src/test/resources/datasets", "dataset")
+    ```
+    This reads data from the specified Parquet file into predicate `b`.
+
+3. Define and enforce a schema for the output predicate:
+
+    ``` prolog
+    @output("a")
+    @model("a", "['first:int', 'second:int', 'third:double', 'fourth:string']").
+    @bind("a", "parquet", "src/test/resources/datasets/", "dataset").
+    ```
+
+    This writes the Parquet file and casts the input data type fields to the output data type fields int, int, double, and string.
+
+4. Define the rules using the schema-defined predicates:
+
+    ```prolog
+    a(A, B, C, D) :- b(A, B, C, D).
+    @output("a").
+    ```
+
+    This writes the following row in the parquet file:
+
+    ```prolog
+    1, 2, 1.0, "Davide"
+    ```
+
 
 ## Bind, Mappings and Qbind
 

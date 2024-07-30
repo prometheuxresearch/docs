@@ -299,6 +299,20 @@ To use any of these, add the library prefix `collections:`. For example:
 rule(X, Size) :- fact(X), Size = collections:size(X).
 ```
 
+### Cast Datatypes Functions
+The library `dataTypes` implements functions for casting of data types 
+- `asString(X)`: casts X to string datatype.
+- `asInteger(X)`: casts X to int datatype.
+- `asDouble(X)`: casts X to double datatype.
+- `asLong(X)`: casts X to long datatype.
+- `asDate(X)`: casts X to date datatype.
+
+To use any of these, add the library prefix `dataTypes:`. For example:
+
+```prolog
+a(D) :- b(X), D = dataTypes:asDate("22-02-2022").
+```
+
 ### Temporal Functions
 The library `date` implements functions for manipulation of temporal operations 
 - `currentDate()`: returns the current date at the start of reasoning evaluation as a date.

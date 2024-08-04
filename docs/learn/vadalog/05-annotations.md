@@ -87,7 +87,7 @@ assumed that the default target is the standard output. Annotations `@model`, `@
 
 ## @model
 
-The `@model` annotation is used to create and enforce a schema for a predicate, ensuring the data adheres to a specified structure. This is crucial for maintaining data consistency and integrity across operations.
+The `@model` annotation is used to create and enforce a schema for a predicate, ensuring the data adheres to a specified structure. This annotation not only supports simple predicate schema definitions but also extends to handle complex concepts such as superclass relationships and triple-based entity relationships.
 
 The annotation syntax is as follows:
 
@@ -162,6 +162,42 @@ Assume to have a parquet dataset containing the following row:
    ```prolog
    1, 2, 1.0, "Davide"
    ```
+
+### Superclass Concept
+A superclass in the context of @model annotations allows for the inheritance of attribute schemas from a base predicate to a derived predicate. This feature simplifies the management of related predicates by allowing common attributes to be defined once in a superclass predicate.
+
+#### Example
+Consider a `person` as a superclass and `engineer` as a derived class from person:
+
+```prolog
+@model("person", "['id:int', 'name:string', 'age:int']").
+@model("engineer(person)", "['id:person[id]', 'engineer name:person[name]', 'specialty:string']").
+```
+
+In this example, `engineer` inherits `id` and `name` fields from person and adds a new field `specialty`.
+
+
+
+The super class can also be modeled recursively as follows:
+```prolog
+@model("superclass_level_1", ['super_field_level_1:type']).
+@model("superclass_level_2_1(superclass_level_1)", ['a_field_level_2:superclass_level_1[super_field_level_1]', 'a_field:double']).
+@model("superclass_level_2_2(superclass_level_1)", ['a_field:int','a_field_level_2:superclass_level_1[super_field_level_1]']).
+@model("subclass(superclass_level_2_2)", ['a_field_0:superclass_level_2_2[a_field_level_2]', 'a_field_1:date','a_field_2:superclass_level_2_2[a_field]']).
+```
+
+### Triple Concept
+The triple concept is utilized for modeling relationships between entities, where each relationship can be expressed as a triple of `[subject, predicate, object]`. In the context of our schema definitions, this allows for specifying how entities interact or relate to each other within the data model.
+
+#### Example
+Using `person` and `engineer` entities, a triple relationship can be defined to capture ownership or control dynamics:
+
+```prolog
+@model("(person)manages(engineer)", "['manager:person[name]', 'engineer_managed:engineer[name]', 'responsibility_level:string']").
+```
+Here, each relationship is expressed through a subject `(person)`, a predicate `manages`, and an object `(engineer)`, with an additional field describing the level of responsibility.
+
+####
 
 ## Bind, Mappings and Qbind
 

@@ -3,7 +3,7 @@
 ---
 **Module**: `prometheux_chain.logic.vadalog_compiler`
 
-Functions
+## Functions
 ---------
 
 ```python

@@ -11,3 +11,4 @@ Sub-modules
 * prometheux_chain.logic
 * prometheux_chain.model
 * prometheux_chain.reasoning
+* prometheux_chain.config

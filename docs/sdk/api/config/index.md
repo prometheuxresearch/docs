@@ -5,17 +5,11 @@
 
 The `config` module provides a simple interface for reading and writing configuration values from a YAML file. It includes a `Config` class that can be used to load, retrieve, and update configuration values, as well as a singleton instance of this class (`config`) that can be imported and used throughout the chain.
 
-
-
-Class
-
-`Config`
-The Config class is responsible for managing configuration data. It loads the configuration from a YAML file and provides methods to retrieve and update configuration values.
-
 ## Functions
+---------
 
-
-```python get(key)
+```python
+get(key)
 ```
 Retrieves a value from the configuration using the specified key.
 **Parameters:**
@@ -39,14 +33,14 @@ The Prometheux Chain exploits LLMs to generate more human-readable explanations 
 ### Example: Setting Up OpenAI as the LLM
 To enable and configure an LLM, such as OpenAI's GPT, follow these steps:
 
-1. `Set the LLM Provider:`
+1. **Set the LLM Provider:**
     Configure the desired LLM by specifying the provider. In this example, we'll use OpenAI.
 
     ```python
     pmtx.config.set("LLM", "OpenAI")
     ```
 
-2. `Provide the API Key:`
+2. **Provide the API Key:**
     Set your OpenAI API key to allow Prometheux Chain to interact with the OpenAI service.
 
     ```python
@@ -58,6 +52,6 @@ To enable and configure an LLM, such as OpenAI's GPT, follow these steps:
 If you prefer to use basic, non-LLM explanations, you can disable the LLM feature entirely:
 
 ```python
-pmtx.config("LLM", "None")
+pmtx.config.set("LLM", "None")
 ```
-This command will revert to use standard explanations without LLM assistance.
+This command will revert to standard explanations without LLM assistance.

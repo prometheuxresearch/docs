@@ -187,7 +187,7 @@ The super class can also be modeled recursively as follows:
 ```
 
 ### Triple Concept
-The triple concept is utilized for modeling relationships between entities, where each relationship can be expressed as a triple of `[subject, predicate, object]`. In the context of our schema definitions, this allows for specifying how entities interact or relate to each other within the data model.
+The triple concept is used for modeling relationships between entities, where each relationship can be expressed as a triple of `[subject, predicate, object]`. In the context of our schema definitions, this allows for specifying how entities interact or relate to each other within the data model.
 
 #### Example
 Using `person` and `engineer` entities, a triple relationship can be defined to capture ownership or control dynamics:
@@ -197,7 +197,26 @@ Using `person` and `engineer` entities, a triple relationship can be defined to 
 ```
 Here, each relationship is expressed through a subject `(person)`, a predicate `manages`, and an object `(engineer)`, with an additional field describing the level of responsibility.
 
-####
+### Composition Concept
+
+The composition allows a predicate to include other predicates as complex data types, rather than only primitive data types. This facilitates the modeling of intricate relationships and nested data structures directly within your schema definitions, providing a robust mechanism for data integrity and hierarchical data management.
+
+When defining a predicate that uses composition, one of the fields can be specified as another predicate. This nested predicate must define a primary key that identifies its instances uniquely, which is used as the reference key in the composite predicate.
+
+#### Example
+
+Consider modeling events and states where each event transitions from one state to another:
+
+```prolog
+@model("state","['state_id(ID):string', 'Type:string', 'Balance:double']").
+```
+Defines a state with a unique state_id as the primary key.
+
+```prolog
+@model("event","['Id:int', 'Start State:state', 'End State:state', 'Prob:double']").
+```
+
+event uses state for both `Start State` and `End State`, with `state_id` serving as the data type for these fields, implied to be string type due to the primary key type of state.
 
 ## Bind, Mappings and Qbind
 

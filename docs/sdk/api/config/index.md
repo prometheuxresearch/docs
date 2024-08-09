@@ -30,28 +30,28 @@ Sets a configuration value for the specified key and saves the updated configura
 
 The Prometheux Chain exploits LLMs to generate more human-readable explanations and translations of Vadalog rules. By default, no LLM is configured.
 
-### Example: Setting Up OpenAI as the LLM
+### Setting up OpenAI as the LLM
 To enable and configure an LLM, such as OpenAI's GPT, follow these steps:
 
 1. **Set the LLM Provider:**
     Configure the desired LLM by specifying the provider. In this example, we'll use OpenAI.
 
     ```python
-    pmtx.config.set("LLM", "OpenAI")
+    prometheux_chain.config.set("LLM", "OpenAI")
     ```
 
 2. **Provide the API Key:**
     Set your OpenAI API key to allow Prometheux Chain to interact with the OpenAI service.
 
     ```python
-    pmtx.config.set("OPENAI_API_KEY", "your_openai_api_key")
+    prometheux_chain.config.set("OPENAI_API_KEY", "your_openai_api_key")
     ```
     This setup will enable the Prometheux Chain to use OpenAI's language model for generating explanations and translations.
 
 ### Disabling the LLM
-If you prefer to use basic, non-LLM explanations, you can disable the LLM feature entirely:
+If you prefer to use basic, non-LLM explanations, you can disable the LLM:
 
 ```python
-pmtx.config.set("LLM", "None")
+prometheux_chain.config.set("LLM", "None")
 ```
 This command will revert to standard explanations without LLM assistance.

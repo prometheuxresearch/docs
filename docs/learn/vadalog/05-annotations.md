@@ -218,6 +218,21 @@ Defines a state with a unique state_id as the primary key.
 
 event uses state for both `Start State` and `End State`, with `state_id` serving as the data type for these fields, implied to be string type due to the primary key type of state.
 
+#### Vadalog Examples
+
+```prolog
+@model("event","['Id:int', 'StartState:state', 'EndState:state', 'Prob:double']").
+@model("state","['state_id(ID):string', 'Type:string', 'Balance:double']"). % required, due to the composition in the event modeling
+@model("out_event","['Start State(ID):string', 'Type:string', 'Balance:double']"). % optional
+
+event(1, "start state A", "end state A", 0.1).
+state("start state A", "positive", 10.0). % optional
+state("end state A", "negative", -10.0). % optional
+
+out_event(StartState,EndState,Prob) :- event(ID, StartState,EndState,Prob).
+@output("out_event").
+```
+
 ## Bind, Mappings and Qbind
 
 These annotations (`@bind`, `@mapping`, `@qbind`) allow to customize the data

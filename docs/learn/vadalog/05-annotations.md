@@ -674,7 +674,7 @@ valid_path(Start, End, Distance) :-
     Distance <= ${max_distance}.
 
 @output("valid_path").
-
+@model("valid_path","['Start:string','End:string','Distance:int']").
 ```
 
 Given the input data and the parameters defined the output is:

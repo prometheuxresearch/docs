@@ -638,3 +638,80 @@ annotations `limit` and `prelimit` as shown below.
 ```
 @post("atomName", "limit(N)").
 ```
+
+
+### Param
+The `@param` annotation is used to introduce and define parameters that can be referenced throughout the rules within a program. Parameters allow for dynamic values that can be modified without changing the core logic of the program, making the rules more flexible and reusable.
+
+For parameterization via API refer to [`evaluateFromRepoWithParams`](https://www.prometheux.co.uk/docs/learn/on-prem/rest-api#evaluatefromrepowithparams).
+
+#### Syntax
+```prolog
+@param("parameter_name", value).
+```
+
+- parameter_name: A string representing the name of the parameter. It should be unique within the context of the program.
+- value: The value associated with the parameter. This can be any valid value type in Vadalog (e.g., integer, string, double, list, etc..).
+
+
+#### Vadalog examples
+
+#### Filtering Paths Within a Specified Distance Range
+
+```prolog
+@param("max_distance", 15).
+@param("min_distance", 5).
+
+connection("A", "B", 10).
+connection("A", "C", 20).
+connection("B", "D", 7).
+connection("C", "D", 12).
+connection("D", "E", 5).
+
+valid_path(Start, End, Distance) :- 
+    connection(Start, End, Distance), 
+    Distance >= ${min_distance}, 
+    Distance <= ${max_distance}.
+
+@output("valid_path").
+
+```
+
+Given the input data and the parameters defined the output is:
+
+```prolog
+valid_path("A", "B", 10).
+valid_path("B", "D", 7).
+valid_path("C", "D", 12).
+valid_path("D", "E", 5).
+```
+These results reflect only those paths where the distance falls within the specified range (**5 <= Distance <= 15**).
+
+### Filtering Connections Based on Priority Levels
+
+```prolog
+@param("priority_levels", [1, 2, 3]).
+
+task("TaskA", "TaskB", 4).
+task("TaskA", "TaskC", 2).
+task("TaskB", "TaskD", 1).
+task("TaskC", "TaskD", 5).
+
+high_priority_task(Start, End, Priority) :- 
+    task(Start, End, Priority), 
+    AllowedPriorities = ${priority_levels}, 
+    IsHighPriority = collections:contains(AllowedPriorities, Priority), 
+    IsHighPriority = #T.
+
+@output("high_priority_task").
+@model("high_priority_task","['Start:string','End:string','Priority:int']").
+```
+
+Given the input data and the parameters defined the output is:
+
+```prolog
+high_priority_task("TaskA", "TaskC", 2).
+high_priority_task("TaskB", "TaskD", 1).
+```
+
+These results reflect only those task connections where the **priority level** is within the defined priority_levels list **[1, 2, 3]**.

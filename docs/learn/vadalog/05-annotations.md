@@ -685,7 +685,7 @@ valid_path("B", "D", 7).
 valid_path("C", "D", 12).
 valid_path("D", "E", 5).
 ```
-These results reflect only those paths where the distance falls within the specified range (**5 <= Distance <= 15**).
+These results reflect only those paths where the distance falls within the specified range between 5 and 15.
 
 ### Filtering Connections Based on Priority Levels
 

@@ -687,7 +687,7 @@ valid_path("D", "E", 5).
 ```
 These results reflect only those paths where the distance falls within the specified range between 5 and 15.
 
-### Filtering Connections Based on Priority Levels
+#### Filtering Connections Based on Priority Levels
 
 ```prolog
 @param("priority_levels", [1, 2, 3]).

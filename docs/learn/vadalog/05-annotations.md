@@ -640,7 +640,7 @@ annotations `limit` and `prelimit` as shown below.
 ```
 
 
-### Param
+##  @Param
 The `@param` annotation is used to introduce and define parameters that can be referenced throughout the rules within a program. Parameters allow for dynamic values that can be modified without changing the core logic of the program, making the rules more flexible and reusable.
 
 For parameterization via API refer to [`evaluateFromRepoWithParams`](https://www.prometheux.co.uk/docs/learn/on-prem/rest-api#evaluatefromrepowithparams).

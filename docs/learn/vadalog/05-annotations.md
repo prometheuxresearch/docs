@@ -239,8 +239,8 @@ The composition also allows you to include a predicate as a data type within a C
 Specifically, the type of elements within the Collection is determined by the type of the primary key of the predicate defined within the brackets.
 
 ```prolog
-@model("event","['Event Id(ID):string', 'FromState:string', 'ToState:string', 'Prob:double']
-@model("risk","['Risk Id:string', 'Events:[event]']
+@model("event","['Event Id(ID):string', 'FromState:string', 'ToState:string', 'Prob:double']").
+@model("risk","['Risk Id:string', 'Events:[event]']").
 
 event("E1", "pbalance", "nbalance", 0.1).
 event("~E1", "pbalance", "pbalance", 0.9).

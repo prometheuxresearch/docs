@@ -233,6 +233,28 @@ out_event(StartState,EndState,Prob) :- event(ID, StartState,EndState,Prob).
 @output("out_event").
 ```
 
+#### Composition in Collections
+
+The composition also allows you to include a predicate as a data type within a Collection.
+Specifically, the type of elements within the Collection is determined by the type of the primary key of the predicate defined within the brackets.
+
+```prolog
+@model("event","['Event Id(ID):string', 'FromState:string', 'ToState:string', 'Prob:double']
+@model("risk","['Risk Id:string', 'Events:[event]']
+
+event("E1", "pbalance", "nbalance", 0.1).
+event("~E1", "pbalance", "pbalance", 0.9).
+event("E2", "nbalance", "pbalance", 0.2).
+event("E3", "nbalance", "lost", 0.8).
+event("E4", "lost", "lost", 1.0).
+risk("NBRisk", ["E1", "~E1", "E2", "E3", "E4"]).
+
+risk_path_prob(RiskId, StartStateId, StartStateId, NumSteps, Events, Prob) :- risk(RiskId, Events), NumSteps = 1, StartStateId = "pbalance", Prob=1.0.
+risk_path_prob(RiskId, StartStateId, EndStateId, NumStepsNew, Events, ProbNew) :- risk_path_prob(RiskId, StartStateId, MidStateId, NumStepsOld, Events, ProbOld), event(EventId, MidStateId, EndStateId, ProbEvent), NumStepsNew = NumStepsOld + 1, ProbNew = ProbOld * ProbEvent, IsEventOfRiskInstance = collections:contains(Events, EventId), IsEventOfRiskInstance=#T, NumStepsNew <= 5.
+@output("risk_path_prob").
+```
+
+
 ## Bind, Mappings and Qbind
 
 These annotations (`@bind`, `@mapping`, `@qbind`) allow to customize the data

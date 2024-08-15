@@ -1,13 +1,13 @@
 # BindTable
 
 ---
+
 **Module**: `prometheux_chain.logic.BindTable`
 
-Classes
--------
+## Classes
 
 ```python
-BindTable(bindings: List[prometheux_chain.logic.Bind.Bind])
+class BindTable(bindings: List[Bind])
 ```
 
 Represents a collection of Bind instances
@@ -16,19 +16,19 @@ Represents a collection of Bind instances
 
 - **bindings**: the list of Bind instances in the BindTable.
 
-    ### Methods
+  ### Methods
 
-    `get(self, index)`
-    : Retrieves a Bind instance at the specified index.
+  `get(self, index)`
+  : Retrieves a Bind instance at the specified index.
 
-    `get_bindings(self)`
-    : Returns the list of Bind instances.
+  `get_bindings(self)`
+  : Returns the list of Bind instances.
 
-    `show(self, max_rows=None, max_colwidth=None)`
-    : Displays the bindings in a tabular format using a pandas DataFrame.
+  `show(self, max_rows=None, max_colwidth=None)`
+  : Displays the bindings in a tabular format using a pandas DataFrame.
 
-    `from_dict(data)`
-    : Creates a BindTable instance from a dictionary.
+  `from_dict(data)`
+  : Creates a BindTable instance from a dictionary.
 
-    `to_dict(self)`
-    : Converts the object to a dictionary suitable for JSON serialization.
+  `to_dict(self)`
+  : Converts the object to a dictionary suitable for JSON serialization.

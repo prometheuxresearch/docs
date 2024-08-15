@@ -7,10 +7,10 @@
 ## Functions
 
 ```python
-explain(structured_fact: prometheux_chain.logic.Fact.Fact = None,
-        fact = None,
-        csv_path = None,
-        json_glossary = None) -> String
+def explain(structured_fact: logic.Fact = None,
+            fact = None,
+            csv_path = None,
+            json_glossary = None) -> String
 ```
 
 Generates a textual explanation for a given fact after the reasoning process.

@@ -7,10 +7,10 @@
 ## Classes
 
 ```python
-Bind(id,
-     predicate_name,
-     bind_annotation,
-     datasource: prometheux_chain.model.Datasource.Datasource)
+class Bind(id: String,
+           predicate_name,
+           bind_annotation,
+           datasource: Datasource)
 ```
 
 Represents a binding between a predicate and a data source.
@@ -21,7 +21,6 @@ Represents a binding between a predicate and a data source.
 - **predicate_name**: The name of the predicate involved in the Bind.
 - **bind_annotation**: The string with the binding annotation representing the Bind.
 - **datasource**: The datasource involved in the Bind.
-
 
 ### Methods
 

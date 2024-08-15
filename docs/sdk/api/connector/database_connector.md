@@ -7,7 +7,7 @@
 ## Functions
 
 ```python
-connect_from_yaml(file_path)
+def connect_from_yaml(file_path)
 ```
 
 Connects to databases specified in the YAML configuration file.
@@ -38,3 +38,4 @@ databases:
     password: "password"
     host: "database.myhost.com"
     port: "5432"
+```

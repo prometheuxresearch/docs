@@ -1,13 +1,13 @@
 # Ontology
 
 ---
+
 **Module**: `prometheux_chain.logic.Ontology`
 
-Classes
--------
+## Classes
 
 ```python
-Ontology(id, name, short_description, long_description, domain_knowledge)
+class Ontology(id, name, short_description, long_description, domain_knowledge)
 ```
 
 Represents an ontology with its associated predicates and rules.
@@ -19,7 +19,6 @@ Represents an ontology with its associated predicates and rules.
 - **shortDescription**: A short description of the ontology.
 - **longDescription**: A long description of the ontology.
 - **domainKnowledge**: The domain knowledge representing the ontology.
-
 
 ### Methods
 

@@ -1,13 +1,16 @@
 # reasoner
 
 ---
+
 **Module**: `prometheux_chain.reasoning.reasoner`
 
-Functions
----------
+## Functions
 
 ```python
-reason(ontology: prometheux_chain.logic.Ontology.Ontology, bind_input_table: prometheux_chain.logic.BindTable.BindTable, bind_output_table: prometheux_chain.logic.BindTable.BindTable, for_explanation=False) ‑> prometheux_chain.reasoning.ReasoningResult.ReasoningResult
+def reason(ontology: prometheux_chain.logic.Ontology.Ontology,
+           bind_input_table: prometheux_chain.logic.BindTable.BindTable,
+           bind_output_table: prometheux_chain.logic.BindTable.BindTable,
+           for_explanation=False) ‑> ReasoningResult
 ```
 
 Performs reasoning on a given ontology using input and output binding tables, and returning a `ReasoningResult` instance.

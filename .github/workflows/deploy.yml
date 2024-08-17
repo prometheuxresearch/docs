@@ -50,6 +50,11 @@ jobs:
             --distribution-id E9X11W9SXSFDG \
             --paths "/docs/*"
 
+  index:
+    name: Reindex with algolia
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
       - name: Algolia crawler creation and crawl
         uses: algolia/algoliasearch-crawler-github-actions@v1.0.10
         id: algolia_crawler

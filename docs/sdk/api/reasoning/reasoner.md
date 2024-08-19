@@ -1,10 +1,10 @@
 # reasoner
 
 ---
+
 **Module**: `prometheux_chain.reasoning.reasoner`
 
-Functions
----------
+## Functions
 
 ```python
 reason(ontologies : list[Ontology], bind_input_table: BindTable = None, bind_output_table: BindTable = None, for_explanation=False, params : dict = {}):

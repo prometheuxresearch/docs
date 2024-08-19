@@ -1,13 +1,15 @@
 # vadalog_compiler
 
 ---
+
 **Module**: `prometheux_chain.logic.vadalog_compiler`
 
 ## Functions
----------
+
+---
 
 ```python
-compile_vadalog(file_path)
+def compile_vadalog(file_path) -> Ontology
 ```
 ```python
 compile_vadalog([file_path_1, file_path_2,...])

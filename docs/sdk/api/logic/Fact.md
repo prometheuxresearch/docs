@@ -1,16 +1,22 @@
 # Fact
 
 ---
+
 **Module**: `prometheux_chain.logic.Fact`
 
-Classes
--------
+## Classes
 
 ```python
-Fact(fact, textual_explanation, visual_explanation, chase_explanation, is_for_chase, reasoning_task_id, knowledge_graph_id)
+class Fact(fact,
+           textual_explanation,
+           visual_explanation,
+           chase_explanation,
+           is_for_chase,
+           reasoning_task_id,
+           knowledge_graph_id)
 ```
 
-Represents a Vadalog fact along with its textual and visual explanations and related metadata. 
+Represents a Vadalog fact along with its textual and visual explanations and related metadata.
 
 **Attributes:**
 
@@ -21,7 +27,6 @@ Represents a Vadalog fact along with its textual and visual explanations and rel
 - **is_for_chase**: A boolean indicating if the fact has been generated with the explanation or not.
 - **reasoning_task_id**: The identifier for the reasoning task associated with the fact.
 - **knowledge_graph_id**: The identifier for the knowledge graph associated with the fact.
-
 
 ### Methods
 

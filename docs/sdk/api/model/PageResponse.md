@@ -1,18 +1,29 @@
 # PageResponse
 
 ---
+
 **Module**: `prometheux_chain.model.PageResponse`
 
-Classes
--------
+## Classes
 
 ```python
-PageResponse(content, pagination, total_pages, total_elements, last, size, number, sort, number_of_elements, first, empty)
+class PageResponse(content,
+                   pagination,
+                   total_pages,
+                   total_elements,
+                   last,
+                   size,
+                   number,
+                   sort,
+                   number_of_elements,
+                   first,
+                   empty)
 ```
 
 Represents a paginated response containing a list of `Fact` instances and pagination information.
 
 ### Attributes
+
 - **content**: A list of `Fact` instances.
 - **pagination**: An instance of the `Pagination` class representing pagination information.
 - **total_pages**: The total number of pages in the response.
@@ -23,8 +34,7 @@ Represents a paginated response containing a list of `Fact` instances and pagina
 - **sort**: The sorting information.
 - **number_of_elements**: The number of elements in the current page.
 - **first**: A boolean indicating if this is the first page.
-- **empty**: A boolean indicating if the content is empty. 
-
+- **empty**: A boolean indicating if the content is empty.
 
 ### Methods
 

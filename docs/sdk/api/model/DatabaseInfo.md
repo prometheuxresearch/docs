@@ -1,16 +1,24 @@
 # DatabaseInfo
 
 ---
+
 **Module**: `prometheux_chain.model.DatabaseInfo`
 
-Classes
--------
+## Classes
 
 ```python
-DatabaseInfo(id, alias, database, username, password, host, port, database_type, connection_status=None)
+class DatabaseInfo(id,
+                   alias,
+                   database,
+                   username,
+                   password,
+                   host,
+                   port,
+                   database_type,
+                   connection_status=None)
 ```
 
-Represents information about a database, including its connection details and status. 
+Represents information about a database, including its connection details and status.
 
 ### Attributes
 
@@ -23,12 +31,11 @@ Represents information about a database, including its connection details and st
 - **port**: The port number for connecting to the database.
 - **databaseType**: The type of the database.
 - **connectionStatus**: The connection status of the database (optional).
- 
 
 ### Methods
 
     `from_dict(data)`
     : Creates a DatabaseInfo instance from a dictionary.
-    
+
     `to_dict(self)`
     : Converts the object to a dictionary suitable for JSON serialization.

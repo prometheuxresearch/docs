@@ -1,13 +1,17 @@
 # Datasource
 
 ---
+
 **Module**: `prometheux_chain.model.Datasource`
 
-Classes
--------
+## Classes
 
 ```python
-Datasource(id=None, name='', column_names=None, json_schema='', database_info_id=None)
+class Datasource(id=None,
+                 name='',
+                 column_names=None,
+                 json_schema='',
+                 database_info_id=None)
 ```
 
 Represents a data source, including its name, column names, JSON schema, and associated database id.
@@ -20,7 +24,6 @@ Represents a data source, including its name, column names, JSON schema, and ass
 - **json_schema**: The JSON schema of the data source.
 - **database_info_id**: The ID of the associated `DatabaseInfo` instance (optional).
 
-    
 ### Methods
 
     `get_database_info_id(self)`

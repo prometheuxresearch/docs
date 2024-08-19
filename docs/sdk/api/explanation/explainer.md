@@ -13,7 +13,7 @@ explain(structured_fact: prometheux_chain.logic.Fact.Fact = None,
         json_glossary = None) -> String
 ```
 
-Generates a textual explanation for a given fact after the reasoning process.
+Generates a textual and a visual explanation for a given fact after the reasoning process.
 
 **Parameters:**
 

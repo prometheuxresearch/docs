@@ -32,7 +32,7 @@ databases:
 
 ## Compiling Ontology from Vadalog
 
-Compile an ontology from a [Vadalog](../learn/vadalog/) file and display its rules:
+Compile ontologies from [Vadalog](../learn/vadalog/) files and display its rules:
 
 ```python
 ontology = pmtx.compile_vadalog("file.vada")

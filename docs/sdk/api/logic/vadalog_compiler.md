@@ -9,8 +9,11 @@
 ```python
 compile_vadalog(file_path)
 ```
+```python
+compile_vadalog([file_path_1, file_path_2,...])
+```
 
-Reads a Vadalog file and returns the compiled ontology or an error if it was not compiled successfully.
+Reads a Vadalog file or a list of Vadalog files and returns the compiled ontologies or an error if the compilation is failed.
 
 **Parameters:**
 
@@ -20,4 +23,9 @@ Reads a Vadalog file and returns the compiled ontology or an error if it was not
 
 - **Ontology**: An instance of the `Ontology` class representing the compiled ontology.
 
+### Compiling multiple .vada files syntax
+
+```python
+ontologies = prometheux_chain.compile(["file_1.vada","file_2.vada",...])
+```
 

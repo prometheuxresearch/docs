@@ -26,7 +26,8 @@ Generates a textual and a visual explanation for a given fact after the reasonin
 
 - `String`: A textual explanation of the fact of interest.
 
-**Visual explanation on JupyterLab**
+### Visual explanation on JupyterLab
+
 The step-by-step explanation of the result produced by the reasoning process can be visualized in JupyterLab
 
 ![VisualExplanationJupyterLab](./visual_explanation_jupyterlab.png)

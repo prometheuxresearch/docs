@@ -175,9 +175,10 @@ Assume to have a parquet dataset containing the following row:
 
 You can include a natural language description within the `@model` annotation to
 describe what the predicate represents. This description provides human-readable
-context for predicates in addition to their schema definition. If both a model
-annotation and a glossary file provide descriptions for a certain predicate, the
-description in the glossary file takes precedence.
+context for predicates in addition to their schema definition. 
+
+If both a model annotation and a glossary file provide descriptions for a
+certain predicate, the description in the glossary file takes precedence.
 
 :::info
 You may refer to terms of the predicate, which will be substituted with
@@ -189,8 +190,8 @@ enclosed in square brackets `[]` in the description.
 
 ```prolog {3}
 @model("state_path_probability", 
-       "['Id:string','StartState:string','EndState:string','Prob:double']", 
-       "The probability of a series of states with ID [Id] from [StartState] to [EndState] is [Prob].").
+       "['id:string','startState:string','endState:string','prob:double']", 
+       "The probability of a series of states with ID [id] from [startState] to [endState] is [prob].").
 ```
 
 #### Automatic Generation of natural language description
@@ -212,6 +213,14 @@ of attribute schemas from a base predicate. This feature simplifies the
 management of related predicates by allowing common attributes to be defined
 once in a superclass predicate.
 
+In order to extend a schema in this way, you must wrap the superclass model in 
+parentheses `()`. You can then refer to attributes of the superclass using square
+brackets `[]` in the fields definition. 
+
+The syntax is as follows:
+`@model("subclass(superclass)", "['id:superclass[id]']")`.
+
+
 **Example**
 
 Consider a `person` as a superclass and `engineer` as a derived class from
@@ -219,13 +228,13 @@ person:
 
 ```
 @model("person", "['id:int', 'name:string', 'age:int']").
-@model("engineer(person)", "['id:person[id]', 'engineer name:person[name]', 'specialty:string']").
+@model("engineer(person)", "['id:person[id]', 'engineerName:person[name]', 'specialty:string']").
 ```
 
 In this example, `engineer` inherits `id` and `name` fields from person and adds
 a new field `specialty`.
 
-The super class can also be modeled recursively as follows:
+Superclasses can also be modelled deeply as follows:
 
 ```
 @model("superclass_level_1", "['super_field_level_1:type']").
@@ -237,7 +246,7 @@ The super class can also be modeled recursively as follows:
       "['a_field:int','a_field_level_2:superclass_level_1[super_field_level_1]']").
 
 @model("subclass(superclass_level_2_2)", 
-      "['a_field_0:superclass_level_2_2[a_field_level_2]',  'a_field_1:date', 'a_field_2:superclass_level_2_2[a_field]']").
+      "['a_field_0:superclass_level_2_2[a_field_level_2]', 'a_field_1:date', 'a_field_2:superclass_level_2_2[a_field]']").
 ```
 
 ### Triples
@@ -259,7 +268,7 @@ Here, each relationship is expressed through a subject `(person)`, a predicate
 level of responsibility.
 
 :::info
-Notice how the actual triple is simply the `mangages` relationship, but we've 
+Notice how the actual triple is simply the `manages` relationship, but we've 
 added a schema for the level as well. In fact, all relationships between any
 number of entities, and having any number of properties, can be modelled in this way.
 :::

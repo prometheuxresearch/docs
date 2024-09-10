@@ -82,12 +82,15 @@ It is assumed that an atom annotated with `@output`:
 2. is never used within an `@input` annotation.
 
 If the `@output` annotation is used without any `@bind` annotation, it is
-assumed that the default target is the standard output. Annotations `@model`, `@bind` and
-`@mapping` can be used to customize the target system.
+assumed that the default target is the standard output. Annotations `@model`,
+`@bind` and `@mapping` can be used to customize the target system.
 
 ## @model
 
-The `@model` annotation is used to create and enforce a schema for a predicate, ensuring the data adheres to a specified structure. This annotation not only supports simple predicate schema definitions but also extends to handle complex concepts such as superclass relationships and triple-based entity relationships.
+The `@model` annotation is used to create and enforce a schema for a predicate,
+ensuring the data adheres to a specified structure. This annotation not only
+supports simple predicate schema definitions but also extends to handle complex
+concepts such as superclass relationships and triple-based entity relationships.
 
 The annotation syntax is as follows:
 
@@ -96,8 +99,10 @@ The annotation syntax is as follows:
 ```
 
 - predicate_name: The name of the predicate to which the schema is applied.
-- ['field_name:type', 'field_name:type', '...']: A list defining the schema, where each argument specifies a field name and its corresponding type.
-- `optional_description`: (Optional) A natural language description of the predicate, providing a readable explanation of what the predicate represents.
+- ['field_name:type', 'field_name:type', '...']: A list defining the schema,
+      where each argument specifies a field name and its corresponding type.
+- `optional_description`: (Optional) A natural language description of the
+  predicate, providing a readable explanation of what the predicate represents.
 
 Consider this simple example:
 
@@ -109,7 +114,8 @@ a(A, B, C, D) :- b(A, B, C, D).
 @output("a").
 ```
 
-This imposes a 4-field schema for the predicate a with the following fields and types:
+This imposes a 4-field schema for the predicate a with the following fields and
+types:
 
 - first: string
 - second: string
@@ -149,7 +155,8 @@ Assume to have a parquet dataset containing the following row:
    @bind("a", "parquet", "src/test/resources/datasets/", "dataset").
    ```
 
-   This writes the Parquet file and casts the input data type fields to the output data type fields int, int, double, and string.
+   This writes the Parquet file and casts the input data type fields to the
+   output data type fields int, int, double, and string.
 
 4. Define the rules using the schema-defined predicates:
 
@@ -166,113 +173,154 @@ Assume to have a parquet dataset containing the following row:
 
 ### Natural Language Descriptions
 
-You can include a natural language description within the `@model` annotation to describe what the predicate represents. 
-This description provides human-readable context for predicates in addition to their schema definition.
-If both a model annotation and a glossary file provide descriptions for a certain predicate, the description in the glossary file takes precedence.
+You can include a natural language description within the `@model` annotation to
+describe what the predicate represents. This description provides human-readable
+context for predicates in addition to their schema definition. If both a model
+annotation and a glossary file provide descriptions for a certain predicate, the
+description in the glossary file takes precedence.
 
-**Note:** The predicate fields must be enclosed in square brackets `[]` in the description
+:::info
+You may refer to terms of the predicate, which will be substituted with
+values in the chase graph. Predicate terms referred to in this way must be
+enclosed in square brackets `[]` in the description. 
+:::
 
-#### Example
-```prolog
-@model("risk_path_prob", "['Id:string','StartState:string','EndState:string','Prob:double']", "The probability of a risk path with ID [Id] from [StartState] to [EndState] is [Prob].").
+**Example**
+
+```prolog {3}
+@model("state_path_probability", 
+       "['Id:string','StartState:string','EndState:string','Prob:double']", 
+       "The probability of a series of states with ID [Id] from [StartState] to [EndState] is [Prob].").
 ```
 
-#### Automatic Generation of Natural Language Description
+#### Automatic Generation of natural language description
 
-If a model annotation does not include a natural language description for the predicate and if an LLM is available, the description will be **automatically generated** during the compilation phase.
+If a model annotation does not include a natural language description for the
+predicate and if an [LLM is available](../../sdk/api/config#configuring-llms),
+the description will be **automatically generated** during the compilation
+phase.
 
-- This autogenerated description is based on the schema and fields defined in the model annotation.
-- Each time the `.vada` file is compiled, the autogenerated description is refreshed, ensuring that it remains up-to-date with any schema changes.
+- This autogenerated description is based on the schema and fields defined in
+  the model annotation.
+- Each time the `.vada` file is compiled, the autogenerated description is
+  refreshed, ensuring that it remains up-to-date with any schema changes.
 
 
-```prolog
-@model("risk_path_prob", "['Id:string','StartState:string','EndState:string','Prob:double']"). 
+### Superclasses
+A superclass in the context of a `@model` annotation allows for the inheritance
+of attribute schemas from a base predicate. This feature simplifies the
+management of related predicates by allowing common attributes to be defined
+once in a superclass predicate.
+
+**Example**
+
+Consider a `person` as a superclass and `engineer` as a derived class from
+person:
+
 ```
-
-If no natural language description is provided, an autogenerated description like the following will be generated during compilation:
-
-```prolog
-"The risk path with ID [Id] goes from [StartState] to [EndState] with a probability of [Prob]."
-```
-
-### Superclass Concept
-A superclass in the context of @model annotations allows for the inheritance of attribute schemas from a base predicate to a derived predicate. This feature simplifies the management of related predicates by allowing common attributes to be defined once in a superclass predicate.
-
-#### Example
-Consider a `person` as a superclass and `engineer` as a derived class from person:
-
-```prolog
 @model("person", "['id:int', 'name:string', 'age:int']").
 @model("engineer(person)", "['id:person[id]', 'engineer name:person[name]', 'specialty:string']").
 ```
 
-In this example, `engineer` inherits `id` and `name` fields from person and adds a new field `specialty`.
-
-
+In this example, `engineer` inherits `id` and `name` fields from person and adds
+a new field `specialty`.
 
 The super class can also be modeled recursively as follows:
-```prolog
-@model("superclass_level_1", ['super_field_level_1:type']).
-@model("superclass_level_2_1(superclass_level_1)", ['a_field_level_2:superclass_level_1[super_field_level_1]', 'a_field:double']).
-@model("superclass_level_2_2(superclass_level_1)", ['a_field:int','a_field_level_2:superclass_level_1[super_field_level_1]']).
-@model("subclass(superclass_level_2_2)", ['a_field_0:superclass_level_2_2[a_field_level_2]', 'a_field_1:date','a_field_2:superclass_level_2_2[a_field]']).
+
+```
+@model("superclass_level_1", "['super_field_level_1:type']").
+
+@model("superclass_level_2_1(superclass_level_1)", 
+       "['a_field_level_2:superclass_level_1[super_field_level_1]', 'a_field:double']").
+
+@model("superclass_level_2_2(superclass_level_1)", 
+      "['a_field:int','a_field_level_2:superclass_level_1[super_field_level_1]']").
+
+@model("subclass(superclass_level_2_2)", 
+      "['a_field_0:superclass_level_2_2[a_field_level_2]',  'a_field_1:date', 'a_field_2:superclass_level_2_2[a_field]']").
 ```
 
-### Triple Concept
-The triple concept is used for modeling relationships between entities, where each relationship can be expressed as a triple of `[subject, predicate, object]`. In the context of our schema definitions, this allows for specifying how entities interact or relate to each other within the data model.
+### Triples
+Traditional knowledge graphs are modelled using triples, where relationships
+ between entities are expressed as a *triple* of `[subject, predicate, object]`.
 
-#### Example
-Using `person` and `engineer` entities, a triple relationship can be defined to capture ownership or control dynamics:
+**Example**
 
-```prolog
-@model("(person)manages(engineer)", "['manager:person[name]', 'engineer_managed:engineer[name]', 'responsibility_level:string']").
+Using `person` and `engineer` entities, a triple relationship can be defined to
+capture ownership or control dynamics:
+
 ```
-Here, each relationship is expressed through a subject `(person)`, a predicate `manages`, and an object `(engineer)`, with an additional field describing the level of responsibility.
+@model("(person)manages(engineer)", 
+       "['manager:person[name]', 'engineer_managed:engineer[name]', 'responsibility_level:string']").
+```
 
-### Composition Concept
+Here, each relationship is expressed through a subject `(person)`, a predicate
+`manages`, and an object `(engineer)`, with an additional field describing the
+level of responsibility.
 
-The composition allows a predicate to include other predicates as complex data types, rather than only primitive data types. This facilitates the modeling of intricate relationships and nested data structures directly within your schema definitions, providing a robust mechanism for data integrity and hierarchical data management.
+:::info
+Notice how the actual triple is simply the `mangages` relationship, but we've 
+added a schema for the level as well. In fact, all relationships between any
+number of entities, and having any number of properties, can be modelled in this way.
+:::
 
-When defining a predicate that uses composition, one of the fields can be specified as another predicate. This nested predicate must define a primary key that identifies its instances uniquely, which is used as the reference key in the composite predicate.
+### Composition
+
+In addition to primitive data types, the `@model` annotation allows a predicate 
+to include other predicates as complex data types. This facilitates the modeling of
+intricate relationships and nested data structures directly within your schema
+definitions, providing a robust mechanism for data integrity and hierarchical
+data management.
+
+When defining a predicate that uses composition, one of the fields can be
+specified as another predicate. This nested predicate must define a primary key
+that identifies its instances uniquely, which is used as the reference key in
+the composite predicate.
 
 #### Example
 
-Consider modeling events and states where each event transitions from one state to another:
+Consider modeling events and states where each event transitions from one state
+to another:
 
 ```prolog
-@model("state","['state_id(ID):string', 'Type:string', 'Balance:double']").
+@model("state", "['state_id(ID):string', 'Type:string', 'Balance:double']").
 ```
 Defines a state with a unique state_id as the primary key.
 
 ```prolog
-@model("event","['Id:int', 'Start State:state', 'End State:state', 'Prob:double']").
+@model("event", "['Id:int', 'Start State:state', 'End State:state', 'Prob:double']").
 ```
 
-event uses state for both `Start State` and `End State`, with `state_id` serving as the data type for these fields, implied to be string type due to the primary key type of state.
+event uses state for both `Start State` and `End State`, with `state_id` serving
+as the data type for these fields, implied to be string type due to the primary
+key type of state.
 
 #### Vadalog Examples
 
-```prolog
+```prolog {2}
+@model("state","['state_id(ID):string', 'Type:string', 'Balance:double']").
 @model("event","['Id:int', 'StartState:state', 'EndState:state', 'Prob:double']").
-@model("state","['state_id(ID):string', 'Type:string', 'Balance:double']"). % required, due to the composition in the event modeling
-@model("out_event","['Start State(ID):string', 'Type:string', 'Balance:double']"). % optional
+% The next line is optional, since we're not using it an any computation.
+@model("out_event","['Start State(ID):string', 'Type:string', 'Balance:double']"). 
 
 event(1, "start state A", "end state A", 0.1).
-state("start state A", "positive", 10.0). % optional
-state("end state A", "negative", -10.0). % optional
+state("start state A", "positive", 10.0).
+state("end state A", "negative", -10.0).
 
-out_event(StartState,EndState,Prob) :- event(ID, StartState,EndState,Prob).
+out_event(StartState, EndState, Prob) :- event(Id, StartState, EndState, Prob).
 @output("out_event").
 ```
 
-#### Composition in Collections
+#### Typed Collections
 
-The composition also allows you to include a predicate as a data type within a Collection.
-Specifically, the type of elements within the Collection is determined by the type of the primary key of the predicate defined within the brackets.
+Composition also allows you to include a predicate as a data type within a
+Collection. Specifically, the type of elements within the Collection is
+determined by the type of the primary key of the predicate defined within the
+brackets.
 
-```prolog
+```prolog {2}
 @model("event","['Event Id(ID):string', 'FromState:string', 'ToState:string', 'Prob:double']").
-@model("risk","['Risk Id:string', 'Events:[event]']").
+@model("risk","['RiskId:string', 'Events:[event]']").
 
 event("E1", "pbalance", "nbalance", 0.1).
 event("~E1", "pbalance", "pbalance", 0.9).
@@ -281,8 +329,21 @@ event("E3", "nbalance", "lost", 0.8).
 event("E4", "lost", "lost", 1.0).
 risk("NBRisk", ["E1", "~E1", "E2", "E3", "E4"]).
 
-risk_path_prob(RiskId, StartStateId, StartStateId, NumSteps, Events, Prob) :- risk(RiskId, Events), NumSteps = 1, StartStateId = "pbalance", Prob=1.0.
-risk_path_prob(RiskId, StartStateId, EndStateId, NumStepsNew, Events, ProbNew) :- risk_path_prob(RiskId, StartStateId, MidStateId, NumStepsOld, Events, ProbOld), event(EventId, MidStateId, EndStateId, ProbEvent), NumStepsNew = NumStepsOld + 1, ProbNew = ProbOld * ProbEvent, IsEventOfRiskInstance = collections:contains(Events, EventId), IsEventOfRiskInstance=#T, NumStepsNew <= 5.
+risk_path_prob(RiskId, StartStateId, StartStateId, NumSteps, Events, Prob) :- 
+   risk(RiskId, Events), 
+   NumSteps = 1,
+   StartStateId = "pbalance", 
+   Prob=1.0.
+
+risk_path_prob(RiskId, StartStateId, EndStateId, NumStepsNew, Events, ProbNew) :- 
+   risk_path_prob(RiskId, StartStateId, MidStateId, NumStepsOld, Events, ProbOld), 
+   event(EventId, MidStateId, EndStateId, ProbEvent), 
+   NumStepsNew = NumStepsOld + 1, 
+   ProbNew = ProbOld * ProbEvent, 
+   IsEventOfRiskInstance = collections:contains(Events, EventId), 
+   IsEventOfRiskInstance = #T, 
+   NumStepsNew <= 5.
+
 @output("risk_path_prob").
 ```
 
@@ -294,7 +355,7 @@ sources for the `@input` annotation or the targets for the `@output` annotation.
 
 ### @bind
 
-`@bind` binds an input or output atom to a source. The syntax for `@bind` is the
+`@bind` binds an input or output atom to a [source](./data-sources). The syntax for `@bind` is the
 follows:
 
 ```
@@ -671,9 +732,12 @@ where `atomName` is the name of the atom at hand.
 
 ### Certain
 
-As Vadalog Parallel handles marked nulls, it is possible that the facts of some output atoms contain such values. Sometimes this may be not desired, for example when the result needs to be stored into a relational database.
+As Vadalog Parallel handles marked nulls, it is possible that the facts of some
+output atoms contain such values. Sometimes this may be not desired, for example
+when the result needs to be stored into a relational database.
 
-The `certain` post-processing annotation filters out, for a given atom, all the facts containing any marked nulls.
+The `certain` post-processing annotation filters out, for a given atom, all the
+facts containing any marked nulls.
 
 The syntax is as follows:
 
@@ -695,17 +759,23 @@ annotations `limit` and `prelimit` as shown below.
 
 
 ##  @Param
-The `@param` annotation is used to introduce and define parameters that can be referenced throughout the rules within a program. Parameters allow for dynamic values that can be modified without changing the core logic of the program, making the rules more flexible and reusable.
+The `@param` annotation is used to introduce and define parameters that can be
+referenced throughout the rules within a program. Parameters allow for dynamic
+values that can be modified without changing the core logic of the program,
+making the rules more flexible and reusable.
 
-For parameterization via API refer to [`evaluateFromRepoWithParams`](https://www.prometheux.co.uk/docs/learn/on-prem/rest-api#evaluatefromrepowithparams).
+For parameterization via API refer to
+[`evaluateFromRepoWithParams`](https://www.prometheux.co.uk/docs/learn/on-prem/rest-api#evaluatefromrepowithparams).
 
 #### Syntax
 ```prolog
 @param("parameter_name", value).
 ```
 
-- parameter_name: A string representing the name of the parameter. It should be unique within the context of the program.
-- value: The value associated with the parameter. This can be any valid value type in Vadalog (e.g., integer, string, double, list, etc..).
+- parameter_name: A string representing the name of the parameter. It should be
+  unique within the context of the program.
+- value: The value associated with the parameter. This can be any valid value
+  type in Vadalog (e.g., integer, string, double, list, etc..).
 
 
 #### Vadalog examples
@@ -739,7 +809,8 @@ valid_path("B", "D", 7).
 valid_path("C", "D", 12).
 valid_path("D", "E", 5).
 ```
-These results reflect only those paths where the distance falls within the specified range between 5 and 15.
+These results reflect only those paths where the distance falls within the
+specified range between 5 and 15.
 
 #### Filtering Connections Based on Priority Levels
 
@@ -768,4 +839,5 @@ high_priority_task("TaskA", "TaskC", 2).
 high_priority_task("TaskB", "TaskD", 1).
 ```
 
-These results reflect only those task connections where the **priority level** is within the defined priority_levels list **[1, 2, 3]**.
+These results reflect only those task connections where the **priority level**
+is within the defined priority_levels list **[1, 2, 3]**.

@@ -30,6 +30,18 @@ databases:
     port: "5432"
 ```
 
+## Configuring your LLM (Optional)
+
+Using an LLM allows you to get more human-readable explanations and translations
+of Vadalog rules. This step is optional if you don't have an LLM.
+
+```python
+prometheux_chain.config.set("LLM", "OpenAI")
+prometheux_chain.config.set("OPENAI_API_KEY", "your_openai_api_key")
+```
+
+For more options, consult the [config](./api/config#configuring-llms)
+
 ## Compiling Ontology from Vadalog
 
 Compile ontologies from [Vadalog](../learn/vadalog/) files and display its rules:

@@ -223,8 +223,8 @@ controls("Yum", SomeBrand) :- has_shares("Yum", SomeBrand, Shares),
 
 Since we've created this intermediate calculation `has_shares`, we should
 rephrase our 2 existing rules by dropping the condition (since that now happens
-later on line 19), and moving the `Shares` variable into the head of the
-predicate so that we can keep track of its value.
+later on line 19), and moving the `Shares` variable into the head predicate so 
+that we can keep track of its value.
 
 ```prolog showLineNumbers {8,12-14}
 owns("Yum", "KFC", 0.6).
@@ -251,6 +251,12 @@ controls("Yum", SomeBrand) :- has_shares("Yum", SomeBrand, Shares),
 Finally we sum through all the intermediaries by adding a summation rule, and
 replacing the body of our last rule to determine control based on the summed
 shares.
+
+::: Note
+When performing arithmetic across recursion, we need to use the recursion-specific 
+[monotoic aggregators](../vadalog/04-expressions-operators.md#motonic-aggregates),
+which keep track of the aggregation (in this case "sum") across each recursive call.
+:::
 
 ```prolog showLineNumbers {16-20,24}
 owns("Yum", "KFC", 0.6).

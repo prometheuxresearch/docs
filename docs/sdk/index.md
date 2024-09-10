@@ -15,6 +15,10 @@ Prometheux_chain is a Python SDK designed to power your knowledge graphs by:
 - Python 3.7 or higher
 - Ensure that the Constellation and Jarvis services are active
 
+### Opitional
+
+- An LLM of your choosing. Currently we support `OpenAI`'s chat models.
+
 ## Installation
 
 ### With pip

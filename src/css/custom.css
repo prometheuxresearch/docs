@@ -36,3 +36,7 @@
   height: 1rem;
   display: flex;
 }
+
+[class*="codeBlockContainer"] {
+  --ifm-code-font-size: 85%;
+}

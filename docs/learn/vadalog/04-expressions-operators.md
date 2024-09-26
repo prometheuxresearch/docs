@@ -334,13 +334,12 @@ a(D) :- b(X), D = date:currentDate().
 next_day(Next) :- a(D), Next = date:nextDay(D).
 add_ten_days(Next) :- a(D), Next = date:add(D,10).
 ```
-## Monotonic Aggregates
+## Aggregations
 
-Monotonic aggregations are functions for incremental and recursion-friendly
-computation of aggregate values.
+Aggregations are functions for incremental and recursion-friendly
+computation of aggregate values. They mainstain state outside of the program, allowing you to perform calculations across recursive steps.
 
-These functions are allowed in recursive rules. The currently supported
-functions include:
+The functions are:
 
 - `msum(X, [K1, …, Kn], [C1, …, Cm])` for the incremental computation of sums
 - `mprod(X, [K1, …, Kn], [C1, …, Cm])` for the incremental computation of
@@ -406,7 +405,7 @@ where:
 
 - `K1, …, Kn` are zero or more group by arguments
 - `body` is the rule body,
-- `maggr` is a placeholder for an aggregation function (`mmin`, `mmax`, `msum`,
+- `maggr` is the aggregation function desired (`mmin`, `mmax`, `msum`,
   `mprod`),
 - `C1, …, Cm` are zero or more variables of the body (with `Ci ≠ Kj, 1 ≤ i ≤ m,
 1 ≤ j ≤ n`), which we call contributor arguments

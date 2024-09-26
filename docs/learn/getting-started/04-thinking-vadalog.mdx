@@ -289,7 +289,7 @@ controls("Yum", SomeBrand) :- has_total_shares("Yum", SomeBrand, Shares),
 You'll notice that in our new `has_total_shares` rule, we've dropped `Intermediary` from the head
 of the rule and replaced it with `TotalShares`. Since we only care about the
 total sum of the shares, and we've already used the [`msum`
-aggregation](../vadalog/expressions-operators#monotonic-aggregates) to the joint shares for any given intermediary to
+aggregation](../vadalog/expressions-operators#aggregations) to the joint shares for any given intermediary to
 our running total, we no longer need the identity of
 the intermediary.
 

@@ -29,7 +29,7 @@ controlled_shares(X,Y,Y,Q) :- own(X,Y,Q), X<>Y.
 controlled_shares(X,Z,Y,Q) :- control(X,Y), own(Y,Z,Q), X<>Z, Z<>Y, X<>Y.
 
 % if X has controlled_shares of Y, via any company Z with shares Q, then the total
-% controlled share are computed with a monotonic aggregation msum, that groups
+% controlled share are computed with an aggregation msum, that groups
 % by X and Z and aggregates the sum of Q
 total_controlled_shares(X,Y,S) :- controlled_shares(X,Y,Z,Q), S=msum(Q).
 

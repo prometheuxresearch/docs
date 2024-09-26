@@ -1,13 +1,14 @@
-# Company control
+# Banking Supervision
 
-Company control is a staple of the analysis of ownership structure; it concerns
-decision power, i.e., when a subject can direct the decisions of another company
-via the control of the majority of the shares.
+Regulators and central banks often need large amounts of networked data to
+understand the intricate links between entities that on surface may seem
+independent of each other.
 
-### Indirect Ownership
+## Company Control
 
-This scenario requires determining who takes decisions in a company network,
-that is, who controls the majority of votes for each company.
+Company control is a staple in the analysis of ownership structures, and is
+concerned with decision power, i.e., whether a company can direct the decisions
+of another company by controling the majority of its shares.
 
 To determine whether a company X controls a company Y, we consider two rules:
 
@@ -18,24 +19,6 @@ To determine whether a company X controls a company Y, we consider two rules:
 This problem can be modeled via the following set of recursive Vadalog rules.
 
 ```prolog showLineNumbers
-% input company graph, described as ownerships edges
-% the company 1 own 0.9% of shares of 2
-own(1, 2, 0.9).
-% the company 2 own 1.0% of shares of 3
-own(2, 3, 1.0).
-own(3, 2, 0.1).
-own(3, 4, 0.9).
-own(4, 5, 1.0).
-own(5, 1, 0.1).
-own(1, 6, 0.9).
-own(6, 5, 1.0).
-own(5, 10, 0.9).
-own(10, 20, 1.0).
-own(20, 1, 0.5).
-own(1, 10, 0.9).
-own(19, 5, 1.0).
-own(10, 19, 0.5).
-
 % base case: if a company X owns Y with shares Q then there is direct a
 % controlled_share relationship from X to Y with share Q
 controlled_shares(X,Y,Y,Q) :- own(X,Y,Q), X<>Y.
@@ -43,7 +26,7 @@ controlled_shares(X,Y,Y,Q) :- own(X,Y,Q), X<>Y.
 % recursive case: if a company X controls Y with shares K
 % and the company Y owns Z with share Q, then there there is a indirect
 % controlled_share relationship from X to Y via Z with share Q
-controlled_shares(X,Z,Y,Q) :- control(X,Z,K), own(Y,Z,Q), X<>Z, Z<>Y, X<>Y.
+controlled_shares(X,Z,Y,Q) :- control(X,Y), own(Y,Z,Q), X<>Z, Z<>Y, X<>Y.
 
 % if X has controlled_shares of Y, via any company Z with shares Q, then the total
 % controlled share are computed with a monotonic aggregation msum, that groups
@@ -52,75 +35,46 @@ total_controlled_shares(X,Y,S) :- controlled_shares(X,Y,Z,Q), S=msum(Q).
 
 % if the total controlled shares Q of Y by X is greater than 0.5, then X
 % control Y with shares Q.
-control(X,Y,Q) :- total_controlled_shares(X,Y,Q), Q>0.5.
+control(X,Y) :- total_controlled_shares(X,Y,Q), Q>0.5.
 
-% if group by the company X and Y over the max value of Q then the maximum
-% control is M
-controlMax(X,Y,M) :- control(X,Y,Q), M=mmax(Q).
-
-@output("controlMax").
+@output("control").
 ```
 
-After execution, the relation `controlMax` contains the following tuples:
+Let's now consider this set of organisations:
+
+![A small graph showing financial institutions and how much shares are owned between them](company-control.png?raw=true)
+
+We can model the above graph using the following set of input facts:
 
 ```
-% Output of controlMax(X,Y,M)
-controlMax(1, 2, 1).
-controlMax(1, 3, 1).
-controlMax(1, 4, 0.9).
-controlMax(1, 5, 2).
-controlMax(1, 6, 0.9).
-controlMax(1, 10, 1.8).
-controlMax(1, 20, 1).
-controlMax(2, 1, 0.6).
-controlMax(2, 3, 1).
-controlMax(2, 4, 0.9).
-controlMax(2, 5, 2).
-controlMax(2, 6, 0.9).
-controlMax(2, 10, 1.8).
-controlMax(2, 20, 1).
-controlMax(3, 1, 0.6).
-controlMax(3, 2, 1).
-controlMax(3, 4, 0.9).
-controlMax(3, 5, 2).
-controlMax(3, 6, 0.9).
-controlMax(3, 10, 1.8).
-controlMax(3, 20, 1).
-controlMax(4, 1, 0.6).
-controlMax(4, 2, 1).
-controlMax(4, 3, 1).
-controlMax(4, 5, 2).
-controlMax(4, 6, 0.9).
-controlMax(4, 10, 1.8).
-controlMax(4, 20, 1).
-controlMax(5, 1, 0.6).
-controlMax(5, 2, 1).
-controlMax(5, 3, 1).
-controlMax(5, 4, 0.9).
-controlMax(5, 6, 0.9).
-controlMax(5, 10, 1.8).
-controlMax(5, 20, 1).
-controlMax(6, 1, 0.6).
-controlMax(6, 2, 1).
-controlMax(6, 3, 1).
-controlMax(6, 4, 0.9).
-controlMax(6, 5, 2).
-controlMax(6, 10, 1.8).
-controlMax(6, 20, 1).
-controlMax(10, 20, 1).
-controlMax(19, 1, 0.6).
-controlMax(19, 2, 1).
-controlMax(19, 3, 1).
-controlMax(19, 4, 0.9).
-controlMax(19, 5, 3).
-controlMax(19, 6, 0.9).
-controlMax(19, 10, 1.8).
-controlMax(19, 20, 1).
+own("Alpha Treasury","Phoenix Vault",0.7).
+own("Alpha Treasury","Initech",0.4).
+own("Phoenix Vault","Initech",0.1).
+own("Phoenix Vault","Royal Crown Bank",0.6).
+own("Royal Crown Bank","Initech",0.1).
+own("Royal Crown Bank","Goldward Bank",0.3).
+own("Goldleaf Bank","Acme Corp",0.4).
+own("Initech","Acme Corp",0.4).
+own("Initech","Soylent Corp",0.99).
+own("Soylent Corp","Goldward Bank",0.3).
+````
+
+After reasoning, we can see the "Alpha Treasury" indirectly controls many of the other institutions, including "Godward Bank", via a long chain of control.
+
+```
+control("Alpha Treasury","Phoenix Vault").
+control("Alpha Treasury","Royal Crown Bank").
+control("Alpha Treasury","Initech").
+control("Alpha Treasury","Soylent Corp").
+control("Alpha Treasury","Godward Bank").
+control("Phoenix Vault","Royal Crown Bank").
+control("Initech","Soylent Corp").
+control("Initech","Acme Corp").
 ```
 
 ---
 
-### Close Link Detection
+## Close Link Detection
 
 This scenario consists in determining whether there exists a (direct or
 indirect) link between two companies, based on a high overlap of shares.
@@ -132,8 +86,6 @@ Y (resp. X).
 Determining whether two companies are closely-linked is extremely important for
 banking supervision since a company cannot act as a guarantor for loans to
 another company if they share such a relationship.
-
-This problem can be modeled via the following set of recursive Vadalog rules
 
 ```prolog showLineNumbers
 % input company graph, described as ownerships edges

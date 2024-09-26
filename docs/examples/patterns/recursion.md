@@ -21,25 +21,22 @@ See how `path` can be a simple hop from one node to another, or requires
 
 ### Transitive Closure
 
-To find all the pairwise connections between all others nodes in a graph:
+The task of finding out all pairs of nodes in a graph that are connected to each other either directly or indirectly is known as [transitive closure](https://en.wikipedia.org/wiki/Transitive_closure). You might think of this asking if it's possible to fly from some airport to another in one or more direct flights.
 
-// add aimage here
+Consider the following small graph:
+
+![Recursion](./recursion.png)
 
 ```prolog showLineNumbers
-% input company graph, described with edges
-% there is an edge from the node 1 to the node 2
-edge(1,2).
-% there is an edge from the node 2 to the node 3
-edge(2,3).
-edge(1,4).
-edge(4,3).
-edge(1,6).
-edge(6,3).
-edge(3,7).
-edge(6,7).
-edge(4,5).
-edge(5,7).
-edge(7,1).
+edge("a","b").
+edge("a","e").
+edge("a","f").
+edge("b","d").
+edge("c","b").
+edge("c","e").
+edge("d","c").
+edge("d","h").
+edge("f","g").
 
 % base case: if there is and edge from the node X to the node Y then there is a path from X to Y %
 path(X,Y) :- edge(X,Y).
@@ -54,53 +51,28 @@ After execution, the relation `path` contains the following tuples:
 
 ```
 % Output of path(X,Z)
-path(4,5).
-path(1,2).
-path(1,4).
-path(1,6).
-path(2,3).
-path(4,3).
-path(6,3).
-path(7,1).
-path(3,7).
-path(6,7).
-path(5,7).
-path(1,5).
-path(2,7).
-path(7,4).
-path(1,3).
-path(1,7).
-path(7,6).
-path(6,1).
-path(4,7).
-path(3,1).
-path(7,2).
-path(5,1).
-path(2,1).
-path(3,6).
-path(3,4).
-path(4,1).
-path(7,7).
-path(6,4).
-path(5,6).
-path(5,4).
-path(1,1).
-path(7,5).
-path(7,3).
-path(6,6).
-path(6,2).
-path(3,2).
-path(5,2).
-path(3,3).
-path(4,4).
-path(6,5).
-path(5,3).
-path(2,4).
-path(2,2).
-path(3,5).
-path(4,6).
-path(4,2).
-path(2,6).
-path(5,5).
-path(2,5).
+path("a","e").
+path("b","d").
+path("f","g").
+path("c","b").
+path("d","h").
+path("a","b").
+path("a","f").
+path("c","e").
+path("d","c").
+path("c","d").
+path("a","g").
+path("d","b").
+path("b","h").
+path("b","c").
+path("a","d").
+path("d","e").
+path("b","b").
+path("c","c").
+path("d","d").
+path("a","c").
+path("b","e").
+path("c","h").
+path("a","h").
 ```
+From `a`, you can arrive at any other node. However, from `b`, you may only visit `c`,`d`,`e` and `h`.

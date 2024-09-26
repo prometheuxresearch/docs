@@ -1,0 +1,12 @@
+{
+  "position": 2,
+  "label": "Patterns",
+  "collapsible": true,
+  "collapsed": false,
+  "link": {
+    "type": "generated-index",
+    "slug": "/examples/patterns",
+    "title": "Patterns",
+    "description": "These industry-agnostic examples identify lower-level patterns that serve as templates for your own programs."
+  }
+}

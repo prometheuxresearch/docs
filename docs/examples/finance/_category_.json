@@ -1,0 +1,12 @@
+{
+  "position": 3,
+  "label": "Finance",
+  "collapsible": true,
+  "collapsed": false,
+  "link": {
+    "type": "generated-index",
+    "slug": "/examples/finance",
+    "title": "Finance",
+    "description": "These examples solve common problems in the Finance industry."
+  }
+}

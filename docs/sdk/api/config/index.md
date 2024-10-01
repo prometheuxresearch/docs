@@ -53,6 +53,7 @@ To enable and configure an LLM, such as OpenAI's GPT, follow these steps:
    prometheux_chain.config.set("OPENAI_API_KEY", "your_openai_api_key")
    prometheux_chain.config.set("OPENAI_MODEL", "openai_model") # default is gpt-3.5-turbo
    prometheux_chain.config.set("OPENAI_MAX_TOKENS", max_tokens)
+   prometheux_chain.config.set("OPENAI_TEMPERATURE", temperature)
    ```
 
    This setup will enable the Prometheux Chain to use OpenAI's language model for generating explanations and translations.

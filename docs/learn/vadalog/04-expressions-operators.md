@@ -284,6 +284,7 @@ collections, such as lists and sets..
   of collection Y, `false` otherwise.
 - `sort(X)`: returns a copy of the list `X` with elements sorted in ascending
   order.
+- `get(X, Y)`: returns the item at position `Y` in collection `X`.
 - `add(X, Y)`: returns a copy of the collection `X` with the element `Y` added
   to the collection. In case 'X' is a list, 'Y' is added to the end of 'X'.
 - `union(X, Y)`: returns the union of collections `X` and `Y`. In case both `X`
@@ -347,6 +348,7 @@ The functions are:
 - `mcount(K1, K2, …)` for the incremental computation of counts
 - `mmin(X, K1, K2, …)` for the incremental computation of minimal
 - `mmax(X, K1, K2, …)` for the incremental computation of maximal
+- `munion(X, K1, K2, …)` for the incremental union of sets
 
 Upon invocation, all functions return the currently accumulated value for the
 respective aggregate. All functions, except `mcount`, take as first argument the

@@ -1,13 +1,38 @@
 # Data sources
 
-## Relational database source
+## Database sources
 
-Vadalog Parallel can read and write to the following relational databases:
-PostgreSQL and SQLite. Please refer to the
+Vadalog Parallel can read and write to the following databases:
+PostgreSQL, SQLite, MongoDb, Neo4j, MariaDB. Please refer to the
 [configuration](../on-prem/03-configuring-prometheux.md) section for connecting
-to your database. Then, refer to the [Bind and
-Mappings](./annotations#bind-mappings-and-qbind) section for instructions on how
-to read, update and delete data from these data sources.
+to your database. 
+
+### @bind options
+
+The bind command allows for the configuration of reading from and writing to sql databases.
+The syntax is as follows:
+
+```
+@bind("concept_name",
+      "database_type option_1 = 'value_1', option_2 = 'value_2', …, option_n = 'value_n'",
+      "database_name",
+      "table_name").
+```
+
+where `database_type` should be one of:
+- `postgresql`
+- `sqlite`
+- `mariadb`
+- `mongodb`
+- `neo4j`
+
+And the available configuration options are
+
+- `host`: Database host (e.g. localhost)
+- `port`: Database port (e.g., `5432` for postgres, `7678` for neo4j)
+- `username`: Username to login with.
+- `password`: Password to login with.
+
 
 ## CSV data source
 
@@ -19,7 +44,7 @@ It does not make a guess about the input schema. Therefore, if no schema
 strings. Values `\N` are treated as `null` values and interpreted as [Marked
 Nulls](./language-primitives#marked-nulls) while reading the CSV file.
 
-### Configuration (Bind Command)
+### @bind options
 
 The bind command allows for the configuration of reading and writing cvs files.
 The syntax is as follows:

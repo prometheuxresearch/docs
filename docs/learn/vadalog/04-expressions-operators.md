@@ -627,6 +627,16 @@ h(1, 2).
 h(2, 3).
 ```
 
+To combine some properties into a set, you can simply do the following:
+
+```prolog {5}
+c(15552,"Name").
+c(15552,"Synonym").
+c(15552,"Alternative").
+
+synonyms(Id, NewSynonyms) :- c(Id,Synonym), NewSynonyms = munion({}|Synonym).
+```
+
 ## Conditions
 
 Rules can be enriched with conditions in order to constrain specific values for

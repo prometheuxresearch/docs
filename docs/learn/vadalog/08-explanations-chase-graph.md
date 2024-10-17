@@ -93,7 +93,7 @@ arc(1,2).
 arc(1,3).
 
 path(X,Y) :- arc(X,Y).
-@chase("path", "csv forNeo4jBulkImport=true, compress=gzip", "neo4j-import", "chase").
+@chase("path", "csv forNeo4jBulkImport=true, compression=gzip", "neo4j-import", "chase").
 @output("path").
 ```
 

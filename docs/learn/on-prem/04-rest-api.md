@@ -158,3 +158,19 @@ including Vadalog Distributed Evaluation, disk space, and a simple ping check.
   ```bash
     curl http://localhost:8080/actuator/health
   ```
+
+### `/config-info/set`
+This endpoint allows you to set a single key-value pair for configuration. It is useful for dynamically setting credentials such as database connection details or AWS access keys for S3 buckets.
+
+- URL: /config-info/set
+
+- Method: GET
+
+- Data Params: `key`: The configuration key you wish to set (e.g., database.password, aws.accessKey).
+`value`: The value to be assigned to the given key (e.g., myDBPassword, myAWSAccessKey).
+- Response: `{ "status": "SUCCESS/FAILURE", "message": "Operation details" }`
+
+Sample Call:
+```
+curl -X GET "http://localhost:8080/config-info/set?key=aws.accessKey&value=myAWSAccessKey"
+```

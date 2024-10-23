@@ -65,7 +65,7 @@ Nulls](./language-primitives#marked-nulls) while reading the CSV file.
 
 ### @bind options
 
-The bind command allows for the configuration of reading and writing cvs files.
+The bind command allows for the configuration of reading and writing csv files.
 The syntax is as follows:
 
 ``` prolog
@@ -82,12 +82,12 @@ The options that are available are
 - `delimiter`: Specifies the character that is used to separate single entries
 - `recordSeparator`: Specifies how the record are seperated
 - `quoteMode`: Defines quoting behavior. Possible values are:
-  - `ALL`: Quotes all fields.
-  - `MINIMAL`: Quotes fields which contain special characters such as a the
+  - `all`: Quotes all fields.
+  - `minimal`: Quotes fields which contain special characters such as a the
     field delimiter, quote character or any of the characters in the line
     separator string.
-  - `NON_NUMERIC`: Quotes all non-numeric fields.
-  - `NONE`: Never quotes fields.
+  - `non_numeric`: Quotes all non-numeric fields.
+  - `none`: Never quotes fields.
 - `nullString`: Value can be any string, which replaces null values in the csv
   file.
 - `selectedColumns`: Value is a list of the form `[c1;…;cn]` to select only the
@@ -97,11 +97,14 @@ The options that are available are
     starting from 0 denoting the column index.
   - It is also possible to specify ranges; e.g. `selectedColumns=[0:4]` reads
     only the five columns `0,1,2,3,4`.
-  - It is allowed to mix the values in the list, e.g. `selectedColumns=[0:3;
-'Column_5']` would select columns `0,1,2,3` and the column with the name
+  - It is allowed to mix the values in the list, e.g. `selectedColumns=[0:3;Column_5]` would select columns `0,1,2,3` and the column with the name
     `Column_5`.
   - Note that in order to select columns by name, a header line in the csv must
     be present.
+- `multiline`: Handles multi-line fields. When multiline is set to true it handles fields that span multiple lines correctly
+- `query`: perform a `SELECT` query over a CSV file. If you are familiar with SQL syntax, you can leverage that to query the CSV file. The fields of the select are the one of the first line of the CSV file.
+- `coalesce`: Unifies the output in one partition. The output will be a single CSV file instead of partitioned CSV files. Supported only in standalone environments. 
+ 
 
 When specifying a configuaration, any subset of these options can be set at the
 same time. Each value has be surrounded by single quotation marks `'value'`. An
@@ -109,7 +112,8 @@ example for a csv bind command with configuration would be the following:
 
 ```prolog
 @bind("relation",
-      "csv useHeaders=false, delimiter='\t', recordSeparator='\n'",
+      "csv useHeaders=false, delimiter='\t', recordSeparator='\n',
+      query='select Name from users'",
       "filepath",
       "filename").
 ```
@@ -159,16 +163,27 @@ withoutThree(W, X,Y,Z) :- myCsv(W, X,Y,Z).
 ```
 
 To store results into another CSV file, you must bind the entry
-point. In this example, we read a CSV file without mapping annotations and write
+point. In this example, we read a CSV file, perform a SQL query to select Name, Surname and Age of users without mapping annotations and write
 the output into another CSV file:
 
-```prolog showLineNumbers
-outFile(X,Y,Z) :- inFile(X,Y,Z).
-@input("inFile").
-@bind("inFile", "csv", "/path_to_csv/folder", "csv_name.csv").
+```prolog
+% Define the input source as a CSV file named "users.csv" located in "/path_to_csv/folder"
+% The file contains columns "Name", "Surname", "Age" and potentially other fields. Perform a `select` query over the CSV file and filter and only records where "Age > 10", which are loaded into the "user" relation.
+@input("user").
+@bind("user", "csv query='select Name,Surname,Age from user where Age > 10'", "/path_to_csv/folder", "users.csv").
 
-@output("outFile").
-@bind("outFile","csv","/another_csv_path/folder","result.csv").
+% Define a new relation "user_name_surname" that selects users from the "user" relation
+% with an additional condition that their "Age" is less than 5. This relation returns the
+% "Name", "Surname", and "Age" of users.
+user_name_surname(X,Y,Z) :- user(Name,Surname,Age), Age < 5.
+
+% Declare that the results of "user_name_surname" will be written to an output.
+@output("user_name_surname").
+
+% Bind the "user_name_surname" relation to output partitioned CSV files in a folder named "new_users" 
+% in the folder "/another_csv_path/folder/output".
+@bind("user_name_surname", "csv", "/another_csv_path/folder/output", "new_users").
+
 ```
 
 ## Parquet Datasource

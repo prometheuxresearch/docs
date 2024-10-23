@@ -335,6 +335,237 @@ a(D) :- b(X), D = date:currentDate().
 next_day(Next) :- a(D), Next = date:nextDay(D).
 add_ten_days(Next) :- a(D), Next = date:add(D,10).
 ```
+
+## Negation
+
+Negation is a prefix modifier that negates the truth value for an atom. In logic
+terms, we say that a negated formula holds whenever it is false, for example
+`not employee(X)` holds if `X` is not an employee. Negation has higher
+precedence than conjunction, so the single atoms are negated and not the entire
+body (or parts thereof).
+
+The following assumptions are made:
+
+1. Every variable that occurs in the head must have a binding in a non-negated
+   atom.
+2. Every binding of a variable that occurs only in a negation is not exported
+   outside of the negation.
+
+It is clear that assumption 2 implies assumption 1: as the bindings captured
+within the negation cannot be used outside the negation itself, they cannot be
+used to generate new facts in the head.
+
+However 2 is more specific, since it even forbids joins in the body based on
+negatively bound variables.
+
+Whereas assumption 1 is enforced in the Engine and its violation causes a
+runtime error, condition 2 is not enforced and negatively bound joins can be
+used (albeit discouraged), being aware of the theoretical and practical
+implications.
+
+```prolog showLineNumbers {10}
+employee("Mark").
+employee("Ruth").
+director("Jane").
+hired("Ruth").
+contractor("Mark").
+project(1,"Mark").
+project(2,"Ruth").
+project(3,"Jane").
+
+safeProjects(X,P) :- project(X,P), not contractor(P).
+
+@output("safeProjects").
+```
+
+The expected result is:
+
+```
+safeProjects(2, "Ruth").
+safeProjects(3, "Jane").
+```
+
+Here we select the safe projects, which are those run by a person who is not a
+contractor. Since a person can have various company attributes (`employee`,
+`hired`, etc.), even at the same time, here we simply check that he/she is not a
+contractor.
+
+Consider this next example:
+
+```prolog showLineNumbers {10,11}
+s(1, 2).
+s(2, 3).
+s(3, 5).
+s(4, 6).
+b(6, 2).
+b(4, 2).
+b(2, 2).
+c(2).
+
+f(X, Y) :- s(X, Y), not b(Y, Z).
+f(Y, X) :- f(X, Y), not b(X, Z).
+
+@output("f").
+```
+
+The expected result is:
+
+```
+f(5, 3).
+f(2, 3).
+f(3, 5).
+```
+
+Here we combine recursion and negation and recursively generate f, by negating
+b.
+
+## Conditions
+
+Rules can be enriched with conditions in order to constrain specific values for
+variables of the body. Syntactically, the conditions follow the body of the
+rule. A condition is the comparison (`>,<,=,>=,<=,<>`) of a variable (the LHS of
+the comparison) of the body and an **expression** (the RHS of the comparison).
+
+Notice that although the comparison symbols used in conditions are partially
+overlapped with the symbols for comparison operators (partially, since we have
+`=` for equality instead of `==`), they have different semantics. While
+comparison operators calculate Boolean results, comparison symbols in conditions
+only specify a filter.
+
+Each rule can have multiple comma-separated conditions.
+
+```prolog showLineNumbers {3}
+contract("Mark",14).
+contract("Jeff",22).
+rich(X) :- contract(X,Y),Y>=20.
+@output("rich").
+```
+
+In the example we individuate the contracts for `Y>=20` and classify the
+respective employee as rich. The expected result is:
+
+```
+rich("Jeff").
+```
+
+Consider this next example:
+
+```prolog showLineNumbers {3}
+balanceItem(1, 7, 2, 5).
+balanceItem(2, 2, 2, 7).
+error(E, I) :- balanceItem(I, X, Y, Z), X <> Y+Z.
+@output("error").
+```
+
+Here, we individuate the balance items for which X is different from the sum of
+Y and Z and report an error E for the identifier I of such an item. The expected
+result is:
+
+```
+error(_e, 2).
+```
+
+This next example selects the senior English players.
+
+```prolog showLineNumbers {13}
+player(1, "Chelsea").
+age(1, 24).
+player(2, "Bayern").
+team("Chelsea").
+age(2, 25).
+player(2, "Bayern").
+team("Chelsea").
+age(2, 25).
+player(3, "Chelsea").
+age(3, 18).
+team("Chelsea").
+team("Bayern").
+seniorEnglish(X) :- player(X, Y), team(Y), age(X, A), Y="Chelsea", A > 20.
+@output("seniorEnglish").
+```
+
+They are those who play with Chelsea with age greater than 20. The expected
+result is:
+
+```
+seniorEnglish(1).
+```
+
+## Assignment
+
+Rules can be enriched with assignments in order to generate specific values for
+existentially quantified variables of the head. Syntactically, the assignments
+follow the body of the rule. An assignment is the equation (`=`) of a variable
+(the LHS of the equation) of the body and an expression (the RHS of the
+equation).
+
+Observe that although assignments and equality conditions are denoted by the
+same symbol (`=`), assignments and conditions can be unambiguously
+distinguished, since the LHS of the equation appears only in the head.
+
+Each rule can have multiple comma-separated assignments.
+
+```prolog showLineNumbers {3,4}
+balanceItem("loans", 23.0).
+balanceItem("deposits", 20.0).
+operations(Q, Z, A) :- balanceItem(I1,X), balanceItem(I2,Y),
+                       I1="loans", I2="deposits", Z=X+Y, A=(X+Y)/2.
+@output("operations").
+```
+
+This example generates a fact for operations, summing two balance items, one for
+loans and one for deposits. Observe that `I1="loans"` and `I2="deposits"` are
+conditions to select the `balanceItems` (as I1 and I2 appear in the body),
+whereas `Z=X+Y` and `A=(X+Y)/2` are assignments (as Z and A do not appear in the
+body).
+
+The expected result is:
+
+```
+operations(_q, 43, 21.5).
+```
+
+## Recursion
+
+We say that a Vadalog program or ontology is **recursive** if the dependency
+graph implied by the rules is cyclical. The simplest form of recursion is that
+in which the head of a rule also appears in the body (_self-recursive rules_).
+
+Recursion is particularly powerful as it allows for inference based on
+previously inferred results.
+
+In self-recursive rules, in case of bodies with two atoms, we distinguish
+between:
+
+1. _left recursion_, where the recursive atom is the left-most;
+2. _right recursion_, where the recursive atom is the right-most.
+
+Some examples follow.
+
+```prolog showLineNumbers {6}
+edge(1, 2).
+edge(2, 3).
+edge(1, 4).
+edge(4, 5).
+path(X, Y) :- edge(X, Y).
+path(X, Z) :- path(Y, Z), edge(X, Y).
+@output("path").
+```
+
+The expected results are:
+
+```
+path(1, 3).
+path(1, 2).
+path(1, 5).
+path(2, 3).
+path(1, 4).
+path(4, 5).
+```
+
+The examples above show reachability in graphs with left recursion, in the
+extended version of the manual further examples.
+
 ## Aggregations
 
 Aggregations are functions for incremental and recursion-friendly
@@ -636,233 +867,3 @@ c(15552,"Alternative").
 
 synonyms(Id, NewSynonyms) :- c(Id,Synonym), NewSynonyms = munion({}|Synonym).
 ```
-
-## Conditions
-
-Rules can be enriched with conditions in order to constrain specific values for
-variables of the body. Syntactically, the conditions follow the body of the
-rule. A condition is the comparison (`>,<,=,>=,<=,<>`) of a variable (the LHS of
-the comparison) of the body and an **expression** (the RHS of the comparison).
-
-Notice that although the comparison symbols used in conditions are partially
-overlapped with the symbols for comparison operators (partially, since we have
-`=` for equality instead of `==`), they have different semantics. While
-comparison operators calculate Boolean results, comparison symbols in conditions
-only specify a filter.
-
-Each rule can have multiple comma-separated conditions.
-
-```prolog showLineNumbers {3}
-contract("Mark",14).
-contract("Jeff",22).
-rich(X) :- contract(X,Y),Y>=20.
-@output("rich").
-```
-
-In the example we individuate the contracts for `Y>=20` and classify the
-respective employee as rich. The expected result is:
-
-```
-rich("Jeff").
-```
-
-Consider this next example:
-
-```prolog showLineNumbers {3}
-balanceItem(1, 7, 2, 5).
-balanceItem(2, 2, 2, 7).
-error(E, I) :- balanceItem(I, X, Y, Z), X <> Y+Z.
-@output("error").
-```
-
-Here, we individuate the balance items for which X is different from the sum of
-Y and Z and report an error E for the identifier I of such an item. The expected
-result is:
-
-```
-error(_e, 2).
-```
-
-This next example selects the senior English players.
-
-```prolog showLineNumbers {13}
-player(1, "Chelsea").
-age(1, 24).
-player(2, "Bayern").
-team("Chelsea").
-age(2, 25).
-player(2, "Bayern").
-team("Chelsea").
-age(2, 25).
-player(3, "Chelsea").
-age(3, 18).
-team("Chelsea").
-team("Bayern").
-seniorEnglish(X) :- player(X, Y), team(Y), age(X, A), Y="Chelsea", A > 20.
-@output("seniorEnglish").
-```
-
-They are those who play with Chelsea with age greater than 20. The expected
-result is:
-
-```
-seniorEnglish(1).
-```
-
-## Assignment
-
-Rules can be enriched with assignments in order to generate specific values for
-existentially quantified variables of the head. Syntactically, the assignments
-follow the body of the rule. An assignment is the equation (`=`) of a variable
-(the LHS of the equation) of the body and an expression (the RHS of the
-equation).
-
-Observe that although assignments and equality conditions are denoted by the
-same symbol (`=`), assignments and conditions can be unambiguously
-distinguished, since the LHS of the equation appears only in the head.
-
-Each rule can have multiple comma-separated assignments.
-
-```prolog showLineNumbers {3,4}
-balanceItem("loans", 23.0).
-balanceItem("deposits", 20.0).
-operations(Q, Z, A) :- balanceItem(I1,X), balanceItem(I2,Y),
-                       I1="loans", I2="deposits", Z=X+Y, A=(X+Y)/2.
-@output("operations").
-```
-
-This example generates a fact for operations, summing two balance items, one for
-loans and one for deposits. Observe that `I1="loans"` and `I2="deposits"` are
-conditions to select the `balanceItems` (as I1 and I2 appear in the body),
-whereas `Z=X+Y` and `A=(X+Y)/2` are assignments (as Z and A do not appear in the
-body).
-
-The expected result is:
-
-```
-operations(_q, 43, 21.5).
-```
-
-## Recursion
-
-We say that a Vadalog program or ontology is **recursive** if the dependency
-graph implied by the rules is cyclical. The simplest form of recursion is that
-in which the head of a rule also appears in the body (_self-recursive rules_).
-
-Recursion is particularly powerful as it allows for inference based on
-previously inferred results.
-
-In self-recursive rules, in case of bodies with two atoms, we distinguish
-between:
-
-1. _left recursion_, where the recursive atom is the left-most;
-2. _right recursion_, where the recursive atom is the right-most.
-
-Some examples follow.
-
-```prolog showLineNumbers {6}
-edge(1, 2).
-edge(2, 3).
-edge(1, 4).
-edge(4, 5).
-path(X, Y) :- edge(X, Y).
-path(X, Z) :- path(Y, Z), edge(X, Y).
-@output("path").
-```
-
-The expected results are:
-
-```
-path(1, 3).
-path(1, 2).
-path(1, 5).
-path(2, 3).
-path(1, 4).
-path(4, 5).
-```
-
-The examples above show reachability in graphs with left recursion, in the
-extended version of the manual further examples.
-
-## Negation
-
-Negation is a prefix modifier that negates the truth value for an atom. In logic
-terms, we say that a negated formula holds whenever it is false, for example
-`not employee(X)` holds if `X` is not an employee. Negation has higher
-precedence than conjunction, so the single atoms are negated and not the entire
-body (or parts thereof).
-
-The following assumptions are made:
-
-1. Every variable that occurs in the head must have a binding in a non-negated
-   atom.
-2. Every binding of a variable that occurs only in a negation is not exported
-   outside of the negation.
-
-It is clear that assumption 2 implies assumption 1: as the bindings captured
-within the negation cannot be used outside the negation itself, they cannot be
-used to generate new facts in the head.
-
-However 2 is more specific, since it even forbids joins in the body based on
-negatively bound variables.
-
-Whereas assumption 1 is enforced in the Engine and its violation causes a
-runtime error, condition 2 is not enforced and negatively bound joins can be
-used (albeit discouraged), being aware of the theoretical and practical
-implications.
-
-```prolog showLineNumbers {10}
-employee("Mark").
-employee("Ruth").
-director("Jane").
-hired("Ruth").
-contractor("Mark").
-project(1,"Mark").
-project(2,"Ruth").
-project(3,"Jane").
-
-safeProjects(X,P) :- project(X,P), not contractor(P).
-
-@output("safeProjects").
-```
-
-The expected result is:
-
-```
-safeProjects(2, "Ruth").
-safeProjects(3, "Jane").
-```
-
-Here we select the safe projects, which are those run by a person who is not a
-contractor. Since a person can have various company attributes (`employee`,
-`hired`, etc.), even at the same time, here we simply check that he/she is not a
-contractor.
-
-Consider this next example:
-
-```prolog showLineNumbers {10,11}
-s(1, 2).
-s(2, 3).
-s(3, 5).
-s(4, 6).
-b(6, 2).
-b(4, 2).
-b(2, 2).
-c(2).
-
-f(X, Y) :- s(X, Y), not b(Y, Z).
-f(Y, X) :- f(X, Y), not b(X, Z).
-
-@output("f").
-```
-
-The expected result is:
-
-```
-f(5, 3).
-f(2, 3).
-f(3, 5).
-```
-
-Here we combine recursion and negation and recursively generate f, by negating
-b.

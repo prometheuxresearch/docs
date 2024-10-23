@@ -48,6 +48,9 @@ jobs:
         run: |-
           aws cloudfront create-invalidation \
             --distribution-id E9X11W9SXSFDG \
+            --paths "/docs/*" && \
+          aws cloudfront create-invalidation \
+            --distribution-id E1DZ8MLSP0XTSZ \
             --paths "/docs/*"
 
   index:

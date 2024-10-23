@@ -161,16 +161,59 @@ including Vadalog Distributed Evaluation, disk space, and a simple ping check.
 
 ### `/config-info/set`
 This endpoint allows you to set a single key-value pair for configuration. It is useful for dynamically setting credentials such as database connection details or AWS access keys for S3 buckets.
+Refer to the [Prometheux Configuration Guide](../on-prem/03-configuring-prometheux.md) to review the available configuration properties.
 
-- URL: /config-info/set
+- URL: `/config-info/set`
 
-- Method: GET
+- Method: `POST`
 
-- Data Params: `key`: The configuration key you wish to set (e.g., database.password, aws.accessKey).
-`value`: The value to be assigned to the given key (e.g., myDBPassword, myAWSAccessKey).
+- Request Body:
+  ```json
+  {
+    "key": "propertyName",
+    "value": "propertyValue"
+  }
+  ```
+  - `key`: The configuration key you wish to set (e.g., database.password, aws.accessKey).
+  - `value`: The value to be assigned to the given key (e.g., myDBPassword, myAWSAccessKey).
 - Response: `{ "status": "SUCCESS/FAILURE", "message": "Operation details" }`
 
 Sample Call:
+```bash
+curl -X POST "http://localhost:8080/config-info/set" \
+  -H "Content-Type: application/json" \
+  -d '{"key": "database.password", "value": "myDBPassword"}'
 ```
-curl -X GET "http://localhost:8080/config-info/set?key=aws.accessKey&value=myAWSAccessKey"
+
+## `/config-info/setAll`
+This endpoint allows you to set multiple key-value pairs for configuration at once. The key-value pairs should be provided in the request body as a JSON object.
+
+Refer to the [Prometheux Configuration Guide](../on-prem/03-configuring-prometheux.md) to review the available configuration properties.
+
+- URL: `/config-info/setAll`
+
+Method: `POST`
+
+Request Body:
+
+```json
+{
+  "propertyName1": "propertyValue1",
+  "propertyName2": "propertyValue2",
+  "propertyName3": "propertyValue3"
+}
+```
+Each key represents a configuration property (e.g., database.password, aws.accessKey), and each value represents the value assigned to that property.
+
+Response: `{ "status": "SUCCESS/FAILURE", "message": "All properties set successfully or error details"}`
+
+Sample Call:
+```bash
+curl -X POST "http://localhost:8080/config-info/setAll" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "database.password": "myDBPassword",
+    "aws.accessKey": "myAWSAccessKey",
+    "aws.secretKey": "myAWSSecretKey"
+  }'
 ```

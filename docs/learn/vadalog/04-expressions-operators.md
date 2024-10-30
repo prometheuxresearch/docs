@@ -21,14 +21,16 @@ _multi-facts operators_ (called **aggregation operators**).
 
 ## Single-fact operators
 
-| Data type     | Operators                                                                                                |
-| ------------- | -------------------------------------------------------------------------------------------------------- |
-| all           | `==`, `>`, `<`, `>=` , `<=`, `<>`, `!=`                                                                  |
-| string / list | `substring`, `contains`, `starts_with`, `ends_with`, `concat`, `index_of` (string only), `string_length` |
-| integer       | (monadic) `-`, `*`, `/`, `+`, `-`, `( )`                                                                 |
-| double        | (monadic) `-`, `*`, `/`, `+`, `-`, `( )`                                                                 |
-| Boolean       | `&&` (and), `\|\|` (or), `not`, `( )` for associativity                                                  |
-| set           | `\|` (union), `&` (intersection), `( )` for associativity                                                |
+| Data type     | Operators                                                                                               |
+| ------------- | ------------------------------------------------------------------------------------------------------- |
+| all           | `==`, `>`, `<`, `>=`, `<=`, `<>`, `!=`                                                                  |
+| string        | `substring`, `contains`, `starts_with`, `ends_with`, `concat`, `index_of`, `string_length`, `to_lower`, `to_upper`, `split` |
+| list          | `concat`, `contains`                                                                              |
+| integer       | (monadic) `-`, `*`, `/`, `+`, `-`, `( )`                                                                |
+| double        | (monadic) `-`, `*`, `/`, `+`, `-`, `( )`                                                                |
+| Boolean       | `&&` (and), `\|\|` (or), `not`, `( )` for associativity                                                    |
+| set           | `\|` (union), `&` (intersection), `( )` for associativity                                                  |
+
 
 ### Comparison operators
 
@@ -76,19 +78,16 @@ combine Boolean data types.
 
 ### String operators
 
-The String operators are `substring`, `contains`, `starts_with`, `ends_with`,
-`concat`, `+`, `index_of` and `string_length`. They can be used to combine
-values of types String.
+The String operators are `substring`, `contains`, `starts_with`, `ends_with`, `concat`, `+`, `index_of`, `string_length`, `to_lower`, `to_upper`, and `split`. These operators allow manipulation and comparison of `String` values.
 
-A rule with an assignment with a `substring` operator has the general form, and
-returns the substring, using a zero-based index. `start` and `end` represent
-integers, respectively the start and the end of substring returned:
+#### `substring`
+A rule using `substring` returns a substring from the specified `start` to `end` index, using zero-based indexing:
 
-```
+```prolog
 q(K1, K2, Kn, J) :- body, J = substring(x, start, end).
 ```
 
-Here is an example for `substring`:
+Example:
 
 ```prolog showLineNumbers {3}
 a("prometheux").
@@ -97,20 +96,20 @@ q(Y,J) :- a(X), b(Y), J = substring(X,4,10).
 @output("q").
 ```
 
-The expected output is:
+Expected output:
 
-```
+```prolog
 q("oxford", "metheux").
 ```
 
-A rule with an assignment using the `starts_with` operator has the general form,
-and returns true if the string starts with `start_string`:
+#### `starts_with`
+A rule with `starts_with` returns true if the `string` starts with `start_string`:
 
 ```prolog
 q(K1, K2, Kn, J) :- body, J = starts_with(string, start_string).
 ```
 
-An example for `starts_with`:
+Example:
 
 ```prolog showLineNumbers {3}
 a("prometheux").
@@ -119,20 +118,20 @@ q(X,Y,J) :- a(X), b(Y), J = starts_with(X,Y).
 @output("q").
 ```
 
-The expected output is:
+Expected output:
 
 ```prolog
-q("prometheux","prom",#T).
+q("prometheux", "prom", #T).
 ```
 
-A rule with an assignment using the `ends_with` operator has the general form,
-and returns true if the string ends with `end_string`:
+#### `ends_with`
+A rule with `ends_with` returns true if the `string` ends with `end_string`:
 
 ```prolog
 q(K1, K2, Kn, J) :- body, J = ends_with(string, end_string).
 ```
 
-An example for `ends_with`:
+Example:
 
 ```prolog showLineNumbers {3}
 a("prometheux").
@@ -141,20 +140,20 @@ q(X, Y, J) :- a(X), b(Y), J = ends_with(X,Y).
 @output("q").
 ```
 
-The expected output is:
+Expected output:
 
-```
+```prolog
 q("prometheux", "theux", #T).
 ```
 
-A rule with an assignment using the `concat` operator has the general form, and
-returns the concatenation `string`+`concat_string`:
+#### `concat`
+A rule with `concat` returns the concatenation of `string` and `concat_string`:
 
-```
+```prolog
 q(K1, K2, Kn, J) :- body, J = concat(string, concat_string).
 ```
 
-An example for `concat`:
+Example:
 
 ```prolog showLineNumbers {3}
 a("prometheux").
@@ -163,20 +162,20 @@ q(X,Y,J) :- a(X), b(Y), J = concat(X,Y).
 @output("q").
 ```
 
-The expected output is:
+Expected output:
 
 ```prolog
-q("prometheux","engine","prometheuxengine").
+q("prometheux", "engine", "prometheuxengine").
 ```
 
-A rule with an assignment using the `string_length` operator has the general
-form, and returns an integer representing the length of the string:
+#### `string_length`
+A rule with `string_length` returns an integer representing the length of the `string`:
 
 ```prolog
 q(K1, K2, Kn, J) :- body, J = string_length(string).
 ```
 
-An example for `string_length`:
+Example:
 
 ```prolog showLineNumbers {2}
 a("prometheux").
@@ -184,11 +183,97 @@ q(X, J) :- a(X), J = string_length(X).
 @output("q").
 ```
 
-The expected output is:
+Expected output:
 
 ```prolog
 q("prometheux", 10).
 ```
+
+#### `to_lower`
+A rule with `to_lower` converts `string` to lowercase:
+
+```prolog
+q(K1, K2, Kn, J) :- body, J = to_lower(string).
+```
+
+Example:
+
+```prolog showLineNumbers {2}
+a("Prometheux").
+q(X, J) :- a(X), J = to_lower(X).
+@output("q").
+```
+
+Expected output:
+
+```prolog
+q("Prometheux", "prometheux").
+```
+
+#### `to_upper`
+A rule with `to_upper` converts `string` to uppercase:
+
+```prolog
+q(K1, K2, Kn, J) :- body, J = to_upper(string).
+```
+
+Example:
+
+```prolog showLineNumbers {2}
+a("prometheux").
+q(X, J) :- a(X), J = to_upper(X).
+@output("q").
+```
+
+Expected output:
+
+```prolog
+q("prometheux", "PROMETHEUX").
+```
+
+#### `split`
+A rule with `split` divides `string` by a specified delimiter, producing a list of substrings:
+
+```prolog
+q(K1, K2, Kn, J) :- body, J = split(string, delimiter).
+```
+
+Example:
+
+```prolog showLineNumbers {2}
+a("prometheux engine").
+q(X, J) :- a(X), J = split(X, " ").
+@output("q").
+```
+
+Expected output:
+
+```prolog
+q("prometheux engine", ["prometheux", "engine"]).
+```
+
+#### `index_of`
+A rule with `index_of` finds the index of `substring` within `string`, returning -1 if not found:
+
+```prolog
+q(K1, K2, Kn, J) :- body, J = index_of(string, substring).
+```
+
+Example:
+
+```prolog showLineNumbers {3}
+a("prometheux").
+b("theux").
+q(X, Y, J) :- a(X), b(Y), J = index_of(X,Y).
+@output("q").
+```
+
+Expected output:
+
+```prolog
+q("prometheux", "theux", 4).
+```
+
 
 ### Math operators
 

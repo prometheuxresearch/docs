@@ -300,6 +300,18 @@ To use any of these, add the library prefix `collections:`. For example:
 rule(X, Size) :- fact(X), Size = collections:size(X).
 ```
 
+### Null Functions
+The library `nullManagement` implements functions for handling null values
+- `coalesce(A, B, C, …)`: returns the first value from the list of arguments that is not null.
+
+To use any of these, add the library prefix `nullManagement:`. For example:
+
+```prolog
+choice(Chosen) :- choose_from(OptionA, OptionB),
+                  or_from(OptionC),
+                  Chosen = nullManagment:coalesce(OptionB, OptionC, OptionA).
+```
+
 ### Cast Datatypes Functions
 The library `dataTypes` implements functions for casting of data types 
 - `asString(X)`: casts X to string datatype.
@@ -323,10 +335,6 @@ The library `date` implements functions for manipulation of temporal operations
 - `prevDay(Date)`: returns the date that is one days before Date
 - `sub(Start,Days)`: returns the date that is Days days before Start
 - `diff(End,Start)`: returns the number of days from Start to End.
-
-
-
-
 
 To use any of these, add the library prefix `date:`. For example:
 
@@ -423,13 +431,12 @@ b.
 
 Rules can be enriched with conditions in order to constrain specific values for
 variables of the body. Syntactically, the conditions follow the body of the
-rule. A condition is the comparison (`>,<,=,>=,<=,<>`) of a variable (the LHS of
+rule. A condition is the comparison (`>,<,==,>=,<=,<>`) of a variable (the LHS of
 the comparison) of the body and an **expression** (the RHS of the comparison).
 
 Notice that although the comparison symbols used in conditions are partially
-overlapped with the symbols for comparison operators (partially, since we have
-`=` for equality instead of `==`), they have different semantics. While
-comparison operators calculate Boolean results, comparison symbols in conditions
+overlapped with the symbols for comparison operators they have different semantics. 
+While comparison operators calculate Boolean results, comparison symbols in conditions
 only specify a filter.
 
 Each rule can have multiple comma-separated conditions.
@@ -480,7 +487,7 @@ player(3, "Chelsea").
 age(3, 18).
 team("Chelsea").
 team("Bayern").
-seniorEnglish(X) :- player(X, Y), team(Y), age(X, A), Y="Chelsea", A > 20.
+seniorEnglish(X) :- player(X, Y), team(Y), age(X, A), Y=="Chelsea", A > 20.
 @output("seniorEnglish").
 ```
 
@@ -499,22 +506,20 @@ follow the body of the rule. An assignment is the equation (`=`) of a variable
 (the LHS of the equation) of the body and an expression (the RHS of the
 equation).
 
-Observe that although assignments and equality conditions are denoted by the
-same symbol (`=`), assignments and conditions can be unambiguously
-distinguished, since the LHS of the equation appears only in the head.
-
 Each rule can have multiple comma-separated assignments.
 
 ```prolog showLineNumbers {3,4}
 balanceItem("loans", 23.0).
 balanceItem("deposits", 20.0).
 operations(Q, Z, A) :- balanceItem(I1,X), balanceItem(I2,Y),
-                       I1="loans", I2="deposits", Z=X+Y, A=(X+Y)/2.
+                       I1=="loans", I2=="deposits", 
+                       Z=X+Y, 
+                       A=(X+Y)/2.
 @output("operations").
 ```
 
 This example generates a fact for operations, summing two balance items, one for
-loans and one for deposits. Observe that `I1="loans"` and `I2="deposits"` are
+loans and one for deposits. Observe that `I1=="loans"` and `I2=="deposits"` are
 conditions to select the `balanceItems` (as I1 and I2 appear in the body),
 whereas `Z=X+Y` and `A=(X+Y)/2` are assignments (as Z and A do not appear in the
 body).

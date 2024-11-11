@@ -118,7 +118,7 @@ const config: Config = {
           label: "Python SDK",
         },
         {
-          href: "https://www.prometheux.co.uk",
+          href: "https://www.prometheux.ai",
           label: "Back to homepage",
           position: "right",
         },

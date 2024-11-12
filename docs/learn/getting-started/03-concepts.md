@@ -50,6 +50,6 @@ processing by repeatedly _chasing_ the rules in your ruleset until its logical
 conclusion.
 
 The steps it takes to get to your answer are known as a [Chase
-Graph](../vadalog/explanations-chase-graph), which is a graph of the rules and
+Graph](../vadalog/chase-provenance), which is a graph of the rules and
 data that contributed to the answer. This graph itself is a knowledge graph that
 can be explored and analysed.

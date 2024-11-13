@@ -1,4 +1,4 @@
-import type { Config } from 'tailwindcss'
+import type { Config } from "tailwindcss";
 
 export default {
   corePlugins: {
@@ -10,5 +10,9 @@ export default {
   theme: {
     extend: {},
   },
-  plugins: [],
+  plugins: [
+    require("tailwindcss-animate"),
+    require("@assistant-ui/react/tailwindcss"),
+    require("@assistant-ui/react-markdown/tailwindcss"),
+  ],
 } satisfies Config;

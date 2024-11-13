@@ -172,6 +172,9 @@ const config: Config = {
       defaultLanguage: "prolog",
     },
   } satisfies Preset.ThemeConfig,
+  customFields: {
+    docsChatUrl: "http://constellation-dev.prometheux.ai:3001/api/docsChat",
+  },
 };
 
 export default config;

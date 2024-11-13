@@ -21,7 +21,7 @@ export default function ContentWrapper(props: Props): JSX.Element {
           alt: "Prometheux",
         }}
         welcome={{
-          message: "Ask me about Promethuex and Vadalog?",
+          message: "How can I help with Prometheux?",
         }}
       />
     </LLMRuntimeProvider>

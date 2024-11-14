@@ -173,7 +173,7 @@ const config: Config = {
     },
   } satisfies Preset.ThemeConfig,
   customFields: {
-    docsChatUrl: "http://constellation-dev.prometheux.ai:3001/api/docsChat",
+    docsChatUrl: "https://ui.prometheux.ai/api/docsChat",
   },
 };
 

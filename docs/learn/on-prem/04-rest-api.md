@@ -213,7 +213,7 @@ curl -X POST "http://localhost:8080/config-info/setAll" \
   -H "Content-Type: application/json" \
   -d '{
     "database.password": "myDBPassword",
-    "aws.accessKey": "myAWSAccessKey",
-    "aws.secretKey": "myAWSSecretKey"
+    "s3AaccessKey": "myAWSAccessKey",
+    "s3ASecretKey": "myAWSSecretKey"
   }'
 ```

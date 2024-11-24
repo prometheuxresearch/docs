@@ -35,8 +35,8 @@ Below is a list of properties that need to be properly configured to ensure corr
 | `sparkConfFile`               | `spark-defaults.conf`                              | Full path to the Spark configuration file.                                                                                                                                                                                                                     |
 | `optimizationStrategy`        | `default`                                          | Optimization strategy for physical plan execution. Options include `default`, `snaJoin`, `sna`, and `noTermination`.                                                                                                                                           |
 | `computeAcceleratorPreference`| `cpu`                                              | Preferred compute accelerator for execution. Options include `cpu` or `gpu` (only available in GPU-enabled environments).                                                                                                                                      |
-| `s3a.accessKey`               | `myAccess`                                         | AWS S3 access key for connecting to S3-compatible storage.|
-| `s3a.secretKey`               | `mySecret`| S3 access key for connecting to S3-compatible storage.   
+| `s3aAaccessKey`               | `myAccess`                                         | AWS S3 access key for connecting to S3-compatible storage.|
+| `s3aSecretKey`               | `mySecret`| S3 access key for connecting to S3-compatible storage.   
 | `restService`                 | off                                    | Set this property to `livy` to enable submitting Prometheux jobs via the Livy REST service.                                                                                                             |
 
 

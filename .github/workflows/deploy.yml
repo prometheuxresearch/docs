@@ -48,7 +48,7 @@ jobs:
         run: |-
           aws cloudfront create-invalidation \
             --distribution-id E2HIWF1TR6OEBH \
-            --paths "*"
+            --paths "/*"
   index:
     name: Reindex with algolia
     needs: build

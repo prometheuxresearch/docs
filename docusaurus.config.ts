@@ -9,10 +9,10 @@ const config: Config = {
   favicon: "img/logo.svg",
 
   // Set the production url of your site here
-  url: "https://prometheux.co.uk/",
+  url: "https://docs.prometheux.ai/",
   // Set the /<baseUrl>/ pathname under which your site is served
   // For GitHub pages deployment, it is often '/<projectName>/'
-  baseUrl: "/docs",
+  baseUrl: "/",
 
   // GitHub pages deployment config.
   // If you aren't using GitHub pages, you don't need these.
@@ -49,7 +49,7 @@ const config: Config = {
           customCss: "./src/css/custom.css",
         },
         sitemap: {
-          ignorePatterns: ["https://prometheux.co.uk/"],
+          ignorePatterns: ["https://docs.prometheux.ai/"],
         },
       } satisfies Preset.Options,
     ],
@@ -150,11 +150,11 @@ const config: Config = {
           items: [
             {
               label: "Home",
-              to: "https://www.prometheux.co.uk",
+              to: "https://docs.prometheux.ai",
             },
             {
               label: "Research",
-              to: "https://www.prometheux.co.uk/#research-section",
+              to: "https://docs.prometheux.ai/#research-section",
             },
             {
               label: "LinkedIn",

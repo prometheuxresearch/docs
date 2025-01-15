@@ -4,7 +4,7 @@ slug: /sdk
 
 # Overview
 
-Prometheux Chain is a Python SDK designed to help you create, evolve, and deploy knowledge graphs with ease. The SDK offers the following capabilities:
+Prometheux Chain is a Python SDK designed to help you create, evolve, and deploy virtual knowledge graphs with ease. The SDK offers the following capabilities:
 
 - Data Ingestion: Seamlessly integrate data from various sources, including databases and files.
 - Reasoning & Knowledge Augmentation: Perform logical reasoning to derive new insights and augment your existing knowledge base.
@@ -19,7 +19,7 @@ Prometheux Chain is a Python SDK designed to help you create, evolve, and deploy
 ## Installation
 
 ### Requirements
-- Python 3.7 or higher
+- Python 3.9 or higher
 
 ### Install Using pip
 

@@ -1,41 +1,102 @@
 # config
 
----
-
-**Module**: `prometheux_chain.config`
-
-The `config` module provides a simple interface for reading and writing configuration values from a YAML file. It includes a `Config` class that can be used to load, retrieve, and update configuration values, as well as a singleton instance of this class (`config`) that can be imported and used throughout the chain.
+The `config` module provides an interface for reading and writing configuration values from a YAML file. It includes functions to load, retrieve, and update configuration values.
 
 ## Functions
-
 ---
 
 ```python
-def get(key)
+def get(key, default=None)
 ```
 
 Retrieves a value from the configuration using the specified key.
+
 **Parameters:**
 
-- `key` (str): The key for the configuration value to retrieve.
-  **Returns:**
-  The value associated with the specified key, or None if the key does not exist.
+- `key` _(str)_: The key for the configuration value to retrieve.
+- `default` _(optional)_: A default value to return if the key is not found.
+
+**Returns:**
+The value associated with the specified key, or None if the key does not exist.
+
+**Example:**
+```python
+token = pmtx.config.get("PMTX_TOKEN")
+print(token)
+```
+
+---
+
 
 ```python
 def set(key, value)
 ```
 
 Sets a configuration value for the specified key and saves the updated configuration to the file.
+
 **Parameters:**
 
-- `key` (str): The key for the configuration value to set.
+- `key` _(str)_: The key for the configuration value to set.
 - `value`: The value to associate with the key.
+
+**Example:**
+```python
+pmtx.config.set("PMTX_TOKEN", "new_token")
+```
+
+---
+
+```python
+def update_config(updates)
+```
+
+Update multiple configuration values at once from a dictionary.
+
+**Parameters:**
+
+- `updates` _(dict)_: A dictionary containing keys and values to update.
+
+**Example:**
+
+```python
+pmtx.config.update_config({
+    "PMTX_TOKEN": "updated_token",
+    "LLM_API_KEY": "new_api_key"
+})
+```
+
+**Configuring** `PMTX_TOKEN`
+
+The `PMTX_TOKEN` can be configured in two ways:
+
+**1. Using Environment Variables**
+
+You can set the token as an environment variable:
+
+```python
+import os
+
+os.environ['PMTX_TOKEN'] = 'pmtx_token'
+```
+
+
+**2. Using the SDK Configuration**
+
+You can use the SDK's configuration interface to set the token:
+
+```python
+import prometheux_chain as pmtx
+
+pmtx.config.set("PMTX_TOKEN", "pmtx_token")
+```
+
+
 
 ## Configuring LLMs
 
-The Prometheux Chain exploits LLMs to generate more human-readable explanations and translations of Vadalog rules. By default, no LLM is configured.
+The Prometheux Chain exploits LLMs to generate more human-readable `explanations`, `translations` of Vadalog rules, `graph rag` and LLM output `validation` tasks. By default, no LLM is configured.
 
-### Setting up OpenAI as the LLM
+### Setting up the LLM
 
 To enable and configure an LLM, such as OpenAI's GPT, follow these steps:
 
@@ -43,27 +104,33 @@ To enable and configure an LLM, such as OpenAI's GPT, follow these steps:
    Configure the desired LLM by specifying the provider. In this example, we'll use OpenAI.
 
    ```python
-   prometheux_chain.config.set("LLM", "OpenAI")
+   prometheux_chain.config.set("LLM_PROVIDER", "OpenAI")
    ```
 
 2. **Provide the API Key:**
    Set your OpenAI API key to allow Prometheux Chain to interact with the OpenAI service.
 
    ```python
-   prometheux_chain.config.set("OPENAI_API_KEY", "your_openai_api_key")
-   prometheux_chain.config.set("OPENAI_MODEL", "openai_model") # default is gpt-3.5-turbo
-   prometheux_chain.config.set("OPENAI_MAX_TOKENS", max_tokens)
-   prometheux_chain.config.set("OPENAI_TEMPERATURE", temperature)
+   prometheux_chain.config.set("LLM_API_KEY", "your_api_key")
    ```
 
-   This setup will enable the Prometheux Chain to use OpenAI's language model for generating explanations and translations.
+### Default Configurations
 
-### Disabling the LLM
 
-If you prefer to use basic, non-LLM explanations, you can disable the LLM:
+The SDK uses the following default configurations:
 
-```python
-prometheux_chain.config.set("LLM", "None")
+```plaintext
+# PMTX
+PMTX_TOKEN: None
+
+# =====================
+# Large Language Models
+# =====================
+LLM_API_KEY: None
+LLM_PROVIDER: OpenAI
+LLM_VERSION: gpt-4o
+LLM_TEMPERATURE: 0.50
+LLM_MAX_TOKENS: 2000
+EMBEDDING_MODEL_VERSION: text-embedding-3-large
+EMBEDDING_DIMENSIONS: 2048
 ```
-
-This command will revert to standard explanations without LLM assistance.

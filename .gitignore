@@ -3,6 +3,7 @@
 
 # Production
 /build
+build.sh
 
 # Generated files
 .docusaurus

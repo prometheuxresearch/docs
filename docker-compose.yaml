@@ -1,0 +1,6 @@
+version: '3'
+services:
+  prometheux-docs:
+    build: .
+    ports:
+      - "8080:80"

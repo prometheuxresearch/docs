@@ -864,7 +864,7 @@ In addition, Vadalog Parallel provides an annotation mechanism that allows to
 introduce special behaviors, pre-processing and post-processing features. A
 post-processing annotation can be used to filter only the maximum (or minimum)
 values for each group as follows (see the section on
-[Post-processing](./annotations#post-processing) for more details).
+[Post-processing](./annotations#post-processing-with-post) for more details).
 
 ```prolog showLineNumbers {9}
 s(1.0, "a").

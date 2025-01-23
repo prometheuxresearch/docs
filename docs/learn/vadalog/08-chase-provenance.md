@@ -1,6 +1,6 @@
-# Explanations with the Chase Graph
+# Chase and Provenance
 
-DP Vadalog natively supports full explanations of logical processes for output
+Prometheux natively supports full explanations of logical processes for output
 generation in reasoning tasks via the materialization of the chase graph during
 its parallel and distributed evaluation.
 
@@ -14,7 +14,7 @@ The `@chase` annotation configures how the chase graph is stored. Its syntax is
 as follows:
 
 ```
-@chase("relation", "datasource", "filepath", "filename").
+@chase("datasource", "filepath", "filename").
 ```
 
 The chase graph's storage format varies based on the selected datasource.
@@ -32,7 +32,7 @@ arc(1,2).
 arc(1,3).
 
 path(X,Y) :- arc(X,Y).
-@chase("path", "csv", "disk/data", "chase.csv").
+@chase("csv", "disk/data", "chase.csv").
 @output("path").
 ```
 
@@ -62,7 +62,7 @@ own(1,2,0.3).
 own(1,2,0.4).
 path_own(X,Y,Z) :- own(X,Y,Z), Z > 0.
 path_own_agg(X,Y,C) :- path_own(X,Y,Z), C = msum(Z).
-@chase("path_own_agg", "csv coalesce=true", "disk/data", "chase.csv").
+@chase("csv coalesce=true", "disk/data", "chase.csv").
 @output("path_own_agg").
 ```
 
@@ -93,7 +93,7 @@ arc(1,2).
 arc(1,3).
 
 path(X,Y) :- arc(X,Y).
-@chase("path", "csv forNeo4jBulkImport=true, compression=gzip", "neo4j-import", "chase").
+@chase("csv forNeo4jBulkImport=true, compression=gzip", "neo4j-import", "chase").
 @output("path").
 ```
 
@@ -149,7 +149,7 @@ arc(1,2).
 arc(1,3).
 
 path(X,Y) :- arc(X,Y).
-@chase("path", "neo4j", "", "").
+@chase("neo4j", "", "").
 @output("path").
 ```
 

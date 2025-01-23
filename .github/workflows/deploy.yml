@@ -42,17 +42,13 @@ jobs:
           aws-region: us-east-1
 
       - name: Upload to s3
-        run: aws s3 sync ./build s3://www.prometheux.co.uk/docs --delete
+        run: aws s3 sync ./build s3://docs.prometheux.ai --delete
 
       - name: Invalidate cloudfront
         run: |-
           aws cloudfront create-invalidation \
-            --distribution-id E9X11W9SXSFDG \
-            --paths "/docs/*" && \
-          aws cloudfront create-invalidation \
-            --distribution-id E1DZ8MLSP0XTSZ \
-            --paths "/docs/*"
-
+            --distribution-id E2HIWF1TR6OEBH \
+            --paths "/*"
   index:
     name: Reindex with algolia
     needs: build
@@ -67,4 +63,4 @@ jobs:
           crawler-api-key: ${{ secrets.CRAWLER_API_KEY }}
           algolia-app-id: ${{ secrets.ALGOLIA_APP_ID }}
           algolia-api-key: ${{ secrets.ALGOLIA_API_KEY }}
-          site-url: "https://prometheux.co.uk/docs"
+          site-url: "https://docs.prometheux.ai"

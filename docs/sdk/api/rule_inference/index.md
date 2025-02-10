@@ -43,7 +43,7 @@ def infer_from_schema(type, user, password, host, port, database, add_bind=False
 **Returns**
 
 - **dict** or **str**:  
-  Returns a dictionary containing the inferred schema if successful, or a string error message if an error occurs.
+  Returns inferred Vadalog rule from database or datasource schema.
 
 ---
 

@@ -97,12 +97,36 @@ inferred_rules = pmtx.infer_from_schema(
     options={        # Additional AWS S3 configurations
         "region": "eu-west-2", 
         "endpoint": "s3.amazonaws.com",
-        "credentials.provider": "org.apache.hadoop.fs.s3a.SimpleAWSCredentialsProvider"
+        "credentials.provider": "org.apache.hadoop.fs.s3a.SimpleAWSCredentialsProvider",
+        "delimiter": "\t"
     }
 )
 
 # Save the inferred rules to a file
 vada_file = "infer-from-csv_s3.vada"
+with open(vada_file, 'w') as file:
+    file.write(inferred_rules)
+```
+
+
+### **Example 3: Inferring Schema from a PostgreSQL Database**
+
+This example connects to a **PostgreSQL** database running locally on port **5432** and infers Vadalog rules.
+
+```python
+# Infer Vadalog rules from a PostgreSQL database
+inferred_rules = pmtx.infer_from_schema(
+    "postgresql",         # Database type
+    "prometheux",         # Username
+    "prometheux",        # Password
+    "localhost",     # Host
+    port=5432,       # PostgreSQL default port
+    database="prometheux",# Database name
+    add_bind=True    # Include bind statements in the output
+)
+
+# Save the inferred rules to a file
+vada_file = "infer-from-postgresql.vada"
 with open(vada_file, 'w') as file:
     file.write(inferred_rules)
 ```

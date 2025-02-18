@@ -16,37 +16,50 @@ The syntax is as follows:
 ```
 
 where `datasource_type` should be one of:
-- `csv`
-- `parquet`
-- `excel`
-- `json`
-- `postgresql`
-- `neo4j`
-- `db2`
-- `mariadb`
-- `oracle`
-- `sqlite`
-- `mysql`
-- `sqlserver`
-- `h2`
-- `sybase`
-- `teradata`
-- `redshift`
-- `bigquery`
-- `snowflake`
-- `hive`
-- `presto`
+- `csv` for CSV files
+- `parquet` for Parquet files
+- `excel` for Excel files
+- `json` for JSON files
+- `postgresql` for PostgreSQL databases
+- `neo4j` for Neo4j databases
+- `db2` for DB2 databases
+- `mariadb` for MariaDB databases               
+- `oracle` for Oracle databases
+- `sqlite` for SQLite databases
+- `mysql` for MySQL databases
+- `sqlserver` for SQL Server databases
+- `h2` for H2 databases
+- `sybase` for Sybase databases
+- `teradata` for Teradata databases
+- `redshift` for Redshift databases
+- `bigquery` for BigQuery
+- `hive` for Hive
+- `presto` for Presto
+- `snowflake` for Snowflake
+- `databricks` for Databricks
 
-And the available configuration options are
+And the available configuration options are:
 
-- `host`: Database host (e.g. localhost)
+- `url`: URL to use for the database connection (e.g. `jdbc:postgresql://localhost:5432/prometheux`)
+- `protocol`: Protocol to use for the database connection (e.g. `jdbc`, `odbc`, `jdbc-odbc`, `bolt`)
+- `host`: Database host (e.g. `localhost`)
 - `port`: Database port (e.g., `5432` for postgres, `7678` for neo4j)
+- `database`: Database name (e.g. `prometheux`)
 - `username`: Username to login with.
 - `password`: Password to login with.
 
 ## Configuring credential access
 
-Sensitive credentials such as database connection details (e.g., username, password) or AWS credentials (e.g., accessKey, secretKey) can be specified directly as options in the @bind annotations. This method allows for streamlined integration within the same code, ensuring that each datasource has its necessary credentials attached during the binding process.
+Sensitive credentials such as database connection details (e.g., username, password) or AWS credentials (e.g., accessKey, secretKey) can be specified directly as options in the @bind annotations.
+Example:
+
+```prolog
+@bind("concept_name",
+      "datasource_type option_1 = 'value_1', option_2 = 'value_2', …, option_n = 'value_n'",
+      "database_name",
+      "table_name").
+```
+This method allows for streamlined integration within the same code, ensuring that each datasource has its necessary credentials attached during the binding process.
 
 However, for better security and flexibility, these credentials can also be stored in external configurations:
 
@@ -360,13 +373,10 @@ person_neo4j(CustomerId, Name, Surname, Email) :-
 
 % Bind the 'person_neo4j' concept to a Neo4j node with label 'Person'
 @output("person_neo4j").
-@bind("person_neo4j", "neo4j username='neo4j', password='myPassw', host='neo4j-host', port=7680", ":Person", "node").
+@bind("person_neo4j", "neo4j username='neo4j', password='myPassw', host='neo4j-host', port=7680", "neo4j", "(:Person)").
 
 % Map the 'person_neo4j' concept's fields to the Neo4j 'Person' node properties
-@mapping("person_neo4j", 0, "customerId(ID)", "int").
-@mapping("person_neo4j", 1, "name", "string").
-@mapping("person_neo4j", 2, "surname", "string").
-@mapping("person_neo4j", 3, "email", "string").
+@model("person_neo4j", "['customerId(ID):int', 'name:string', 'surname:string', 'email:string']").
 
 % Define the 'order' concept by extracting order details from the CSV file
 order(OrderId, Cost) :- 
@@ -374,7 +384,7 @@ order(OrderId, Cost) :-
 
 % Bind the 'order' concept to a Neo4j node with label 'Order'
 @output("order").
-@bind("order", "neo4j username='neo4j', password='myPassw', host='neo4j-host', port=7680", ":Order", "node").
+@bind("order", "neo4j username='neo4j', password='myPassw', host='neo4j-host', port=7680", "neo4j", "(:Order)").
 
 % Map the 'order' concept's fields to the Neo4j 'Order' node properties
 @mapping("order", 0, "orderId(ID)", "int").
@@ -386,7 +396,7 @@ order_person_rel_neo4j(OrderId, CustomerId) :-
 
 % Bind the 'order_person_rel_neo4j' concept to create a relationship between the 'Order' and 'Person' nodes in Neo4j
 @output("order_person_rel_neo4j").
-@bind("order_person_rel_neo4j", "neo4j username='neo4j', password='myPassw', host='neo4j-host', port=7680", "(:Order)-[IS_RELATED_TO]->(:Person)", "relationship").
+@bind("order_person_rel_neo4j", "neo4j username='neo4j', password='myPassw', host='neo4j-host', port=7680", "neo4j", "(:Order)-[IS_RELATED_TO]->(:Person)").
 
 % Map the 'order_person_rel_neo4j' concept's fields to the relationship between Order and Person
 @mapping("order_person_rel_neo4j", 0, "orderId:orderId(sID)", "int").
@@ -561,4 +571,47 @@ transactions_snowflake_test(TransactionId, CustomerId, Amount) :-
 
 % Declare the output concept 'transactions_snowflake_test' for making the processed data available
 @output("transactions_snowflake_test").
+```
+
+## Databricks
+Databricks is a cloud-based platform for data engineering and data science.
+
+This example demonstrates writing data to a Databricks table.
+
+```prolog
+% Declare the input concept 'sales_postgres' to read data from the 'sales' table in Postgres
+@input("sales_postgres").
+
+% Bind the 'sales_postgres' concept to the Postgres database using the JDBC connection details
+@qbind("sales_postgres","postgresql host='postgres-host', port=5432, username='prometheux', password='myPassw'",
+      "postgres", "select sale_id, product_id, sale_amount from sales").
+
+% Define a rule to extract SaleId, ProductId, and SaleAmount from the 'sales' table in Postgres
+sales_databricks(SaleId, ProductId, SaleAmount) :- 
+        sales_postgres(SaleId, ProductId, SaleAmount).
+
+% Declare the output concept 'sales_databricks' to write data to the Databricks table   
+@output("sales_databricks").
+
+% Bind the 'sales_databricks' concept to the Databricks cluster using the JDBC connection details
+@bind("sales_databricks","databricks batchSize=5, password='dapixxxx', host='dbc-xxxx-02fe.cloud.databricks.com'",
+      "/sql/1.0/warehouses/3283097e44ba161d", "sales").
+```
+
+This example demonstrates reading data from a Databricks table.
+
+```prolog
+% Declare the input concept 'sales_databricks' to read data from the 'sales' table in Databricks
+@input("sales_databricks").
+
+% Bind the 'sales_databricks' concept to the Databricks cluster using the JDBC connection details
+@qbind("sales_databricks","databricks batchSize=5, password='dapixxxx', host='dbc-xxxx-02fe.cloud.databricks.com'",
+      "/sql/1.0/warehouses/3283097e44ba161d", "select sale_id, product_id, sale_amount from sales").
+
+% Define a rule to extract SaleId, ProductId, and SaleAmount from the 'sales' table in Databricks
+sales_databricks_test(SaleId, ProductId, SaleAmount) :- 
+        sales_databricks(SaleId, ProductId, SaleAmount).
+
+% Declare the output concept 'sales_databricks_test' to return the processed data
+@output("sales_databricks_test").
 ```

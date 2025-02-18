@@ -592,6 +592,7 @@ sales_databricks(SaleId, ProductId, SaleAmount) :-
 
 % Declare the output concept 'sales_databricks' to write data to the Databricks table   
 @output("sales_databricks").
+@model("sales_databricks", "['sale_id:int', 'productId:int', 'sale_amount:int']").
 
 % Bind the 'sales_databricks' concept to the Databricks cluster using the JDBC connection details
 @bind("sales_databricks","databricks batchSize=5, password='dapixxxx', host='dbc-xxxx-02fe.cloud.databricks.com'",
@@ -605,13 +606,13 @@ This example demonstrates reading data from a Databricks table.
 @input("sales_databricks").
 
 % Bind the 'sales_databricks' concept to the Databricks cluster using the JDBC connection details
-@qbind("sales_databricks","databricks batchSize=5, password='dapixxxx', host='dbc-xxxx-02fe.cloud.databricks.com'",
-      "/sql/1.0/warehouses/3283097e44ba161d", "select sale_id, product_id, sale_amount from sales").
+@qbind("sales_databricks","databricks fetchSize=5, password='dapixxxx', host='dbc-xxxx-02fe.cloud.databricks.com'",
+      "/sql/1.0/warehouses/3283097e44ba161d", "select sale_id, productId from sales").
 
-% Define a rule to extract SaleId, ProductId, and SaleAmount from the 'sales' table in Databricks
-sales_databricks_test(SaleId, ProductId, SaleAmount) :- 
-        sales_databricks(SaleId, ProductId, SaleAmount).
+% Define a rule to extract ProductId from the 'sales' table in Databricks
+sales(Product) :- 
+        sales_databricks(Sale, Product).
 
-% Declare the output concept 'sales_databricks_test' to return the processed data
-@output("sales_databricks_test").
+% Declare the output concept 'sales' to return the processed data
+@output("sales").
 ```

@@ -68,7 +68,7 @@ inferred_rules = pmtx.infer_from_schema(
     "localhost",     # Host
     port=7687,       # Neo4j default port
     database="neo4j",# Database name
-    add_bind=True    # Include bind statements in the output
+    add_bind=True    # Include bind statements to the input data source
 )
 
 # Save the inferred rules to a file
@@ -122,11 +122,33 @@ inferred_rules = pmtx.infer_from_schema(
     "localhost",     # Host
     port=5432,       # PostgreSQL default port
     database="prometheux",# Database name
-    add_bind=True    # Include bind statements in the output
+    add_bind=True    # Include bind statements to the input data source
 )
 
 # Save the inferred rules to a file
 vada_file = "infer-from-postgresql.vada"
+with open(vada_file, 'w') as file:
+    file.write(inferred_rules)
+```
+
+### **Example 4: Inferring Schema from Databricks**
+
+This example connects to a **Databricks** cluster and infers Vadalog rules.
+
+```python
+# Infer Vadalog rules from a Databricks cluster
+inferred_rules = pmtx.infer_from_schema(
+    "databricks",      # Database type
+    "token",           # Username
+    "dapixxxx",        # Password
+    "dbc-xxxx-02fe.cloud.databricks.com",     # Host
+    port=443,       # PostgreSQL default port
+    database="/sql/1.0/warehouses/3283xxxx",# Database name
+    add_bind=True    # Include bind statements to the input data source
+)
+
+# Save the inferred rules to a file
+vada_file = "infer-from-databricks.vada"
 with open(vada_file, 'w') as file:
     file.write(inferred_rules)
 ```

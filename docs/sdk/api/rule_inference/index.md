@@ -31,6 +31,12 @@ def infer_from_schema(type, user, password, host, port, database, add_bind=False
 - **database** (`str`):  
   The name of the database or the filename (e.g., `"myDatabase"` or `"myFile.csv"`).
 
+- **table** (`str`, optional):  
+  The name of the table from which to infer the schema. Defaults to `None`.
+
+- **query** (`str`, optional):  
+  A custom query to use for schema inference. If provided, this query will be used instead of inferring from a table. Defaults to `None`.  
+
 - **add_bind** (`bool`, optional):  
   Whether to add a **bind** statement in the inferred schema. Defaults to `False`.
 
@@ -142,13 +148,37 @@ inferred_rules = pmtx.infer_from_schema(
     "token",           # Username
     "dapixxxx",        # Password
     "dbc-xxxx-02fe.cloud.databricks.com",     # Host
-    port=443,       # PostgreSQL default port
+    port=443,       # Databricks default port
     database="/sql/1.0/warehouses/3283xxxx",# Database name
     add_bind=True    # Include bind statements to the input data source
 )
 
 # Save the inferred rules to a file
 vada_file = "infer-from-databricks.vada"
+with open(vada_file, 'w') as file:
+    file.write(inferred_rules)
+```
+
+
+### **Example 5: Inferring Schema from Databricks with table**
+
+This example connects to a **Databricks** cluster and infers Vadalog rule from a specific table.
+
+```python
+# Infer Vadalog rules from a Databricks cluster
+inferred_rules = pmtx.infer_from_schema(
+    "databricks",      # Database type
+    "token",           # Username
+    "dapixxxx",        # Password
+    "dbc-xxxx-02fe.cloud.databricks.com",     # Host
+    port=443,       # Databricks default port
+    database="/sql/1.0/warehouses/3283xxxx",# Database name
+    add_bind=True,   # Include bind statements to the input data source
+    table="my_catalog.my_schema.my_table" # Specify the table (or simply my_table)
+)
+
+# Save the inferred rules to a file
+vada_file = "infer-from-databricks-with-table.vada"
 with open(vada_file, 'w') as file:
     file.write(inferred_rules)
 ```

@@ -399,34 +399,51 @@ choice(Chosen) :- choose_from(OptionA, OptionB),
 
 ### Cast Datatypes Functions
 The library `dataTypes` implements functions for casting of data types 
-- `asString(X)`: casts X to string datatype.
-- `asInteger(X)`: casts X to int datatype.
-- `asDouble(X)`: casts X to double datatype.
-- `asLong(X)`: casts X to long datatype.
-- `asDate(X)`: casts X to date datatype.
+- `as_string(X)`: casts X to string datatype.
+- `as_int(X)`: casts X to int datatype.
+- `as_double(X)`: casts X to double datatype.
+- `as_long(X)`: casts X to long datatype.
+- `as_date(X)`: casts X to date datatype.
 
 To use any of these, add the library prefix `dataTypes:`. For example:
 
 ```prolog
-a(D) :- b(X), D = dataTypes:asDate("22-02-2022").
+a(D) :- b(X), D = as_date("22-02-2022").
 ```
 
 ### Temporal Functions
 The library `date` implements functions for manipulation of temporal operations 
-- `currentDate()`: returns the current date at the start of reasoning evaluation as a date.
-- `currentTimestamp()`: returns the current date at the start of query evaluation as a date.
-- `nextDay(Date)`: returns the date that is one days after Date
+- `current_date()`: returns the current date at the start of reasoning evaluation as a date.
+- `current_timestamp()`: returns the current date at the start of query evaluation as a date.
+- `next_day(Date)`: returns the date that is one days after Date
 - `add(Start,Days)`: returns the date that is Days days after Start
-- `prevDay(Date)`: returns the date that is one days before Date
+- `prev_day(Date)`: returns the date that is one days before Date
 - `sub(Start,Days)`: returns the date that is Days days before Start
 - `diff(End,Start)`: returns the number of days from Start to End.
+- `to_timestamp(DateExpr, Format)` : returns a timestamp value by converting the given input string according to the specified format.
+- `format(DateExpr, Format)`: date/timestamp/string to a value of string in the format specified by the date format given by the second argument
 
-To use any of these, add the library prefix `date:`. For example:
+This program defines rules for working with dates. The rule `a(D)` assigns the current date to `D`. The rule `next_day(Next)` calculates the next day from the current date. The rule `add_ten_days(Next)` adds ten days to the current date.
 
 ```prolog
 a(D) :- b(X), D = date:currentDate().
-next_day(Next) :- a(D), Next = date:nextDay(D).
+next_day(Next) :- a(D), Next = date:next_day(D).
 add_ten_days(Next) :- a(D), Next = date:add(D,10).
+```
+
+This program defines rules for converting and formatting date strings. The `myDates` facts store raw date strings. The rule `tmpDates(Raw, Ts)` converts raw date strings to timestamps. The rule `convertedDates(Raw, Formatted)` formats the timestamps into ISO 8601 format.
+
+```prolog
+myDates("23-2-11 16:47:35,985 +0000").
+myDates("23-2-12 17:00:00,123 +0000").
+
+tmpDates(Raw, Ts) :-
+  myDates(Raw),
+  Ts = date:to_timestamp(Raw, "yy-M-dd HH:mm:ss,SSS Z").
+
+convertedDates(Raw, Formatted) :-
+  tmpDates(Raw, Ts),
+  Formatted = date:format(Ts, "yyyy-MM-dd'T'HH:mm:ssZ").
 ```
 
 ## Negation

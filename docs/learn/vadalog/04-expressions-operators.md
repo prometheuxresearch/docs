@@ -365,7 +365,7 @@ collections, such as lists and sets..
 
 - `size(X)`: returns the size of the collection `X`.
 - `contains(X, Y)`: returns `true` if `Y` is in `X`, `false` otherwise.
-- `containsAll(X, Y)`: returns `true` if collection X contains all the elements
+- `contains_all(X, Y)`: returns `true` if collection X contains all the elements
   of collection Y, `false` otherwise.
 - `sort(X)`: returns a copy of the list `X` with elements sorted in ascending
   order.
@@ -378,11 +378,31 @@ collections, such as lists and sets..
   elements from the collection `Y`.
 - `difference(X, Y)`: returns a copy of the collection `X` which does not
   contain elements from the collection `Y`.
+- `transform(Arr,StringLambdaF)`: Returns an array of elements after applying a transformation to each element in the input array.
+- `filter(Arr,StringLambdaF)`: Returns an array of elements for which a predicate holds in a given array.
 
 To use any of these, add the library prefix `collections:`. For example:
 
 ```prolog
 rule(X, Size) :- fact(X), Size = collections:size(X).
+```
+
+Example using lambda functions:
+
+```prolog
+input([1,2,3]).
+
+transformed(T) :- input(X), T = collections:transform(X, "x -> x+1").
+
+input([1,2,3]).
+
+transformed(T) :- input(X), T = transform(X, "(x, i) -> x + i"). % prepending collections: is optional for transform
+
+input([1,2,3,4]).
+filtered(Out) :- input(Arr), Out = filter(Arr, "x -> x>2"). prepending collections: is optional for filter
+
+input([10,20,30,40]).
+filtered(Out) :- input(Arr), Out = collections:filter(Arr, "(x, i) -> i % 2 != 0").
 ```
 
 ### Null Functions
@@ -404,8 +424,6 @@ The library `dataTypes` implements functions for casting of data types
 - `as_double(X)`: casts X to double datatype.
 - `as_long(X)`: casts X to long datatype.
 - `as_date(X)`: casts X to date datatype.
-
-To use any of these, add the library prefix `dataTypes:`. For example:
 
 ```prolog
 a(D) :- b(X), D = as_date("22-02-2022").

@@ -265,6 +265,23 @@ shipping_excel_test(OrderId, ShippingDate) :- shipping_excel(OrderId, ShippingDa
 
 ```
 
+In this example, we will read data from a specific sheet of an Excel file.
+
+```prolog
+% Declare the input concept 'shipping_excel_sheet' to read data from a specific sheet of an Excel file
+@input("shipping_excel_sheet").
+
+% Bind the 'shipping_excel_sheet' concept to the Excel file 'shipping.xls' located in 'disk/data/input_files'
+% Use 'useHeaders=true' to indicate that the first row contains column headers
+@bind("shipping_excel_sheet", "excel useHeaders=true, dataAddress=''Sheet1'!A1'", "disk/data/input_files", "shipping.xls").      
+
+% Define a rule that extracts OrderId and ShippingDate from 'shipping_excel_sheet'
+shipping_excel_sheet_test(OrderId, ShippingDate) :- shipping_excel_sheet(OrderId, ShippingDate).
+
+% Declare the output concept 'shipping_excel_sheet_test' for making the processed data available
+@output("shipping_excel_sheet_test").     
+```
+
 ## PostgreSQL Database
 PostgreSQL is a robust open-source relational database that supports a wide range of data types and advanced querying capabilities. In this section, we will explore how to integrate PostgreSQL with Vadalog by first populating a customer table from a CSV file and then reading data from it using two approaches: full table read and a custom query.
 

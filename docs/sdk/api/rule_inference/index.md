@@ -212,3 +212,61 @@ vada_file = "infer_schema.vada"
 with open(vada_file, 'w') as file:
     file.write(inferred_rules)
 ```
+
+---
+
+### **Example 7: Inferring Schema from Excel File**
+
+Excel files are treated as a dabase where its sheets are considered as tables.
+This example connects to an **Excel** file and infers Vadalog rules.
+
+```python
+from prometheux_chain.model.database import Database
+
+# Create a Database object for Excel
+db = Database(
+    database_type="excel",
+    username="",
+    password="workbookPassword",
+    host="path/to/excel_file",
+    port=None,
+    database_name="excel_file.xlsx",
+)
+
+# Infer Vadalog rules from the Excel file
+inferred_rules = pmtx.infer_schema(db, add_bind=True)
+
+# Save the inferred rules to a file
+vada_file = "infer-from-excel.vada"
+with open(vada_file, 'w') as file:
+    file.write(inferred_rules)
+```
+
+---
+
+### **Example 8: Inferring Schema from a Excel sheet**
+
+This example connects to an **Excel** file and infers Vadalog rules from a specific sheet.
+
+```python
+from prometheux_chain.model.database import Database
+
+# Create a Database object for Excel with a specific sheet
+db = Database(
+    database_type="excel",
+    username="",
+    password="workbookPassword",
+    host="path/to/excel_file",
+    port=None,
+    database_name="excel_file.xlsx",
+    options={"dataAddress": "'my_sheet'!A1"} # Specify the data address of the selected sheet
+)
+
+# Infer Vadalog rules from the Excel file
+inferred_rules = pmtx.infer_schema(db, add_bind=True)
+
+# Save the inferred rules to a file
+vada_file = "infer-from-excel-sheet.vada"
+with open(vada_file, 'w') as file:
+    file.write(inferred_rules)
+```

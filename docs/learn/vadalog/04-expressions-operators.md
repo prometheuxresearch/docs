@@ -444,7 +444,7 @@ The library `date` implements functions for manipulation of temporal operations
 This program defines rules for working with dates. The rule `a(D)` assigns the current date to `D`. The rule `next_day(Next)` calculates the next day from the current date. The rule `add_ten_days(Next)` adds ten days to the current date.
 
 ```prolog
-a(D) :- b(X), D = date:currentDate().
+a(D) :- b(X), D = date:current_date().
 next_day(Next) :- a(D), Next = date:next_day(D).
 add_ten_days(Next) :- a(D), Next = date:add(D,10).
 ```

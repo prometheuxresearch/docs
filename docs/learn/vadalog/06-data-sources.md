@@ -572,15 +572,42 @@ events_bigquery_test(EventId, EventType, EventTimestamp) :-
 ```
 
 ## Snowflake
-Snowflake is a cloud-based data warehousing service that allows for data storage, processing, and analytics. This example demonstrates reading data from a Snowflake table.
+Snowflake is a cloud-based data warehousing service that allows for data storage, processing, and analytics. 
+
+### How to Retrieve Your Snowflake Connection Info for reading or writing tables
+
+To obtain the connection details for your Snowflake account:
+
+1. Click the **user icon** in the **bottom-left corner** of the Snowflake UI.
+2. Select **"Connect a tool to Snowflake"**.
+3. Go to the **"Connectors / Drivers"** section.
+4. Choose **"JDBC"** as the connection method.
+5. Select your **warehouse**, **database**, and set **"Password"** as the authentication method.
+
+This will generate a JDBC connection string in the following format:
+
+```
+jdbc:snowflake://A778xxx-IVxxxx.snowflakecomputing.com/?user=PROMETHEUX&warehouse=COMPUTE_WH&db=TEST&schema=PUBLIC&password=my_password
+```
+
+From this string, you can extract the following values for your bind configuration:
+
+- `url = 'A778xxx-IVxxxx.snowflakecomputing.com'`
+- `username = 'PROMETHEUX'`
+- `password = 'my_password'`
+- `warehouse = 'COMPUTE_WH'`
+- `database = 'TEST'` (note: database names are usually uppercase)
+
+
+This example demonstrates reading data from a Snowflake table.
 
 ```prolog
 % Declare the input concept 'transactions_snowflake' to read data from the 'transactions' table in Snowflake
 @input("transactions_snowflake").
 
 % Bind the 'transactions_snowflake' concept to the Snowflake database using the JDBC connection details
-@bind("transactions_snowflake", "snowflake account='myAccount', username='myUser', password='myPassword', warehouse='myWarehouse', database='myDatabase'", 
-      "transactions", "transaction_data").
+@bind("transactions_snowflake", "snowflake url='A778xxx-IVxxxx.snowflakecomputing.com', username='PROMETHEUX', password='myPassword', warehouse='COMPUTE_WH'", 
+      "TEST", "transaction_data").
 
 % Define a rule to extract TransactionId, CustomerId, and Amount from the 'transactions' table in Snowflake
 transactions_snowflake_test(TransactionId, CustomerId, Amount) :- 

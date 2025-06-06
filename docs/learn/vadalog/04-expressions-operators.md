@@ -386,8 +386,9 @@ To use any of these, add the library prefix `collections:`. For example:
 ```prolog
 rule(X, Size) :- fact(X), Size = collections:size(X).
 ```
+Lambda `filter` and `transform` functions are compliant with Apache Spark SQL functions Library nomenclature.
 
-Example using lambda functions:
+Examples using lambda functions:
 
 ```prolog
 input([1,2,3]).
@@ -399,10 +400,41 @@ input([1,2,3]).
 transformed(T) :- input(X), T = transform(X, "(x, i) -> x + i"). % prepending collections: is optional for transform
 
 input([1,2,3,4]).
-filtered(Out) :- input(Arr), Out = filter(Arr, "x -> x>2"). prepending collections: is optional for filter
+filtered(Out) :- input(Arr), Out = filter(Arr, "x -> x>2"). % prepending collections: is optional for filter
 
 input([10,20,30,40]).
 filtered(Out) :- input(Arr), Out = collections:filter(Arr, "(x, i) -> i % 2 != 0").
+```
+
+Example using lambda functions to group databases related to specific pharmaceutical components from the `robokopkg.renci.org` KG
+
+```prolog
+@qbind("node","neo4j host='robokopkg.renci.org'","neo4j",
+                    "
+                    MATCH (n:`biolink:Gene`) RETURN 
+                    'Gene', n.equivalent_identifiers 
+                    LIMIT 50000
+                    ").
+@qbind("node","neo4j host='robokopkg.renci.org'","neo4j",
+                    "
+                    MATCH (n:`biolink:Pathway`) RETURN 
+                    'Pathway', n.equivalent_identifiers 
+                    LIMIT 50000
+                    ").
+@qbind("node","neo4j host='robokopkg.renci.org'","neo4j",
+                    "
+                    MATCH (n:`biolink:Disease`) RETURN 
+                    'Disease', n.equivalent_identifiers 
+                    LIMIT 50000
+                    ").
+
+node_equivalent_identifiers_all(Component, Equivalent_identifiers_All) :- 
+                                    node(Component, Equivalent_identifiers), 
+                                    Equivalent_identifiers_All = munion(Equivalent_identifiers). % flat all databases in a list and group by component
+element_to_database(Component, Equivalent_identifiers_all_distinct) :- 
+                                    node_equivalent_identifiers_all(Component, Equivalent_identifiers_All), 
+                                    Equivalent_identifiers_all_distinct = collections:distinct(transform(Equivalent_identifiers_All,"x -> element_at(split(x,':'),1)")). % get the database name by cleaning up the equivalent identifier
+@output("element_to_database").
 ```
 
 ### Null Functions

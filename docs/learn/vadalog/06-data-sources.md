@@ -37,6 +37,7 @@ where `datasource_type` should be one of:
 - `presto` for Presto
 - `snowflake` for Snowflake
 - `databricks` for Databricks
+- `api` for consuming data via API
 
 And the available configuration options are:
 
@@ -475,6 +476,61 @@ user(X) :- user_s3(X).
 % Declare the output concept 'user' for making the data available after reading from S3
 @output("user").
 ```
+
+## Consuming API Data
+
+This example shows how to connect to an external API endpoint that returns data in JSON, XML, CSV format
+
+Below is a full example for ingesting weather data from the Meteomatics API in CSV format.
+
+```prolog
+% Bind the predicate to the API endpoint
+@bind(
+    "meteo",
+    "api delimiter=';', username='my_username', password='my_password'",
+    "csv",
+    "https://api.meteomatics.com/2025-06-09T00:00:00Z--2025-06-12T00:00:00Z:PT3H/t_2m:C,relative_humidity_2m:p/47.423336,9.377225/csv"
+).
+
+% Declare an output predicate
+@output("meteo_out").
+
+% Map the data to the output predicate
+meteo_out(Valid_Date, T_2m_C, Relative_humidity_2m_p) :- meteo(Valid_Date, T_2m_C, Relative_humidity_2m_p).
+```
+
+## Example: S3 Storage Integration
+
+You can use a similar approach to bind predicates to CSV files stored in Amazon S3:
+
+```prolog
+% Declare the input concept 'user_s3' to read data from the CSV file in the S3 bucket
+@input("user_s3").
+
+% Bind the 'user_s3' concept to the CSV file 'user.csv' located in the specified S3 bucket
+@bind("user_s3", "csv", "s3a://your-s3-bucket/", "user.csv").
+
+% Map the data as needed
+user(X) :- user_s3(X).
+
+% Declare the output concept
+@output("user").
+```
+
+---
+
+## Customization
+
+* **API format**: The pattern above supports any API providing CSV data. For JSON/XML APIs, adjust the format parameter and data mapping accordingly (e.g. use `json` or `xml` in the `@bind`).
+* **Authentication**: Many APIs support token-based auth (use `token='your_token'` instead of username/password).
+* **Delimiter**: Update the `delimiter` parameter to match your API's CSV format if not using semicolons.
+
+---
+
+## License
+
+This example is provided for demonstration purposes. Please check the license of Vadalog and any API or dataset you use.
+
 
 ## HDFS File system
 HDFS (Hadoop Distributed File System) is designed for distributed storage and large-scale data processing. Vadalog can integrate with HDFS by reading from and writing to files stored in HDFS clusters. This example shows how to read a CSV file from an HDFS location and process it within a Prometheux workflow.

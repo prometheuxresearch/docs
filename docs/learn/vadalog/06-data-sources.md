@@ -487,9 +487,9 @@ Below is a full example for ingesting weather data from the Meteomatics API in C
 % Bind the predicate to the API endpoint
 @bind(
     "meteo",
-    "api delimiter=';', username='my_username', password='my_password'",
-    "csv",
-    "https://api.meteomatics.com/2025-06-09T00:00:00Z--2025-06-12T00:00:00Z:PT3H/t_2m:C,relative_humidity_2m:p/47.423336,9.377225/csv"
+    "api delimiter=';', username='my_username', password='my_password', responseFormat='csv'",
+    "https://api.meteomatics.com/",
+    "2025-06-09T00:00:00Z--2025-06-12T00:00:00Z:PT3H/t_2m:C,relative_humidity_2m:p/47.423336,9.377225/csv"
 ).
 
 % Declare an output predicate

@@ -35,6 +35,7 @@ def infer_schema(database, add_bind=True, add_model=False):
 - **Exception**:  
   If the database or data source is unreachable, or any unexpected error occurs during schema inference.
 
+--- 
 
 ## Examples
 
@@ -43,6 +44,7 @@ def infer_schema(database, add_bind=True, add_model=False):
 This example connects to a **Neo4j** database running locally on port **7687** and infers Vadalog rules.
 
 ```python
+import prometheux_chain as pmtx
 from prometheux_chain.model.database import Database
 
 # Create a Database object for Neo4j
@@ -72,6 +74,7 @@ This example connects to a **CSV file** stored in an **Amazon S3 bucket** using 
 It provides additional AWS-related options such as region, endpoint, and credentials provider.
 
 ```python
+import prometheux_chain as pmtx
 from prometheux_chain.model.database import Database
 
 # Create a Database object for CSV in S3
@@ -106,6 +109,7 @@ with open(vada_file, 'w') as file:
 This example connects to a **PostgreSQL** database running locally on port **5432** and infers Vadalog rules.
 
 ```python
+import prometheux_chain as pmtx
 from prometheux_chain.model.database import Database
 
 # Create a Database object for PostgreSQL
@@ -134,6 +138,7 @@ with open(vada_file, 'w') as file:
 This example connects to a **Databricks** cluster and infers Vadalog rules.
 
 ```python
+import prometheux_chain as pmtx
 from prometheux_chain.model.database import Database
 
 # Create a Database object for Databricks
@@ -162,6 +167,7 @@ with open(vada_file, 'w') as file:
 This example connects to a **Databricks** cluster and infers Vadalog rule from a specific table.
 
 ```python
+import prometheux_chain as pmtx
 from prometheux_chain.model.database import Database
 
 # Create a Database object for Databricks with a specific table
@@ -221,6 +227,7 @@ Excel files are treated as a dabase where its sheets are considered as tables.
 This example connects to an **Excel** file and infers Vadalog rules.
 
 ```python
+import prometheux_chain as pmtx
 from prometheux_chain.model.database import Database
 
 # Create a Database object for Excel
@@ -267,6 +274,69 @@ inferred_rules = pmtx.infer_schema(db, add_bind=True)
 
 # Save the inferred rules to a file
 vada_file = "infer-from-excel-sheet.vada"
+with open(vada_file, 'w') as file:
+    file.write(inferred_rules)
+```
+
+### **Example 9: Inferring Schema from Snowflake**
+
+This example connects to a **Snowflake** database and infers Vadalog rules.
+
+```python
+import prometheux_chain as pmtx
+from prometheux_chain.model.database import Database
+
+#"jdbc:snowflake://A778858265xxxx-IV3xxxx.snowflakecomputing.com/?user=my_username&warehouse=my_warehouse&db=my_database&schema=my_schema&password=my_password"
+
+# Create a Database object for Snowflake
+db = Database(
+    database_type="snowflake",
+    username="my_username",
+    password="my_password",
+    host="jdbc:snowflake://A77885826xxxx-IV3xxxx.snowflakecomputing.com",
+    port=443,
+    database_name="my_database",
+    schema="my_schema",
+    options={"warehouse": "my_warehouse"}
+)
+
+# Infer Vadalog rules from the Snowflake database
+inferred_rules = pmtx.infer_schema(db, add_bind=True)
+
+# Save the inferred rules to a file
+vada_file = "infer-from-snowflake.vada"
+with open(vada_file, 'w') as file:
+    file.write(inferred_rules)
+```
+
+---
+
+### **Example 10: Inferring Schema from a Snowflake table**
+
+This example connects to a **Snowflake** database and infers Vadalog rules from a specific table.
+
+```python
+import prometheux_chain as pmtx
+from prometheux_chain.model.database import Database
+
+# Create a Database object for Snowflake with a specific table
+db = Database(
+    database_type="snowflake",
+    username="my_username",
+    password="my_password",
+    host="jdbc:snowflake://A77885826xxxx-IV3xxxx.snowflakecomputing.com",
+    port=443,
+    database_name="my_database",
+    schema="my_schema",
+    options={"warehouse": "my_warehouse"},
+    tables=["my_table"]
+)
+
+# Infer Vadalog rules from the Snowflake database
+inferred_rules = pmtx.infer_schema(db, add_bind=True)
+
+# Save the inferred rules to a file
+vada_file = "infer-from-snowflake-table.vada"
 with open(vada_file, 'w') as file:
     file.write(inferred_rules)
 ```

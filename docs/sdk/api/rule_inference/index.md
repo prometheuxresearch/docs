@@ -44,6 +44,10 @@ def infer_schema(database, add_bind=True, add_model=False):
 This example connects to a **Neo4j** database running locally on port **7687** and infers Vadalog rules.
 
 ```python
+import os
+TOKEN="eyJhbGci••••••••••••bz2U39Yc" # API Key generated in the Prometheux Platform
+os.environ["PMTX_TOKEN"] = TOKEN
+
 import prometheux_chain as pmtx
 from prometheux_chain.model.database import Database
 
@@ -74,6 +78,10 @@ This example connects to a **CSV file** stored in an **Amazon S3 bucket** using 
 It provides additional AWS-related options such as region, endpoint, and credentials provider.
 
 ```python
+import os
+TOKEN="eyJhbGci••••••••••••bz2U39Yc" # API Key generated in the Prometheux Platform
+os.environ["PMTX_TOKEN"] = TOKEN
+
 import prometheux_chain as pmtx
 from prometheux_chain.model.database import Database
 
@@ -109,6 +117,10 @@ with open(vada_file, 'w') as file:
 This example connects to a **PostgreSQL** database running locally on port **5432** and infers Vadalog rules.
 
 ```python
+import os
+TOKEN="eyJhbGci••••••••••••bz2U39Yc" # API Key generated in the Prometheux Platform
+os.environ["PMTX_TOKEN"] = TOKEN
+
 import prometheux_chain as pmtx
 from prometheux_chain.model.database import Database
 
@@ -138,6 +150,10 @@ with open(vada_file, 'w') as file:
 This example connects to a **Databricks** cluster and infers Vadalog rules.
 
 ```python
+import os
+TOKEN="eyJhbGci••••••••••••bz2U39Yc" # API Key generated in the Prometheux Platform
+os.environ["PMTX_TOKEN"] = TOKEN
+
 import prometheux_chain as pmtx
 from prometheux_chain.model.database import Database
 
@@ -167,6 +183,10 @@ with open(vada_file, 'w') as file:
 This example connects to a **Databricks** cluster and infers Vadalog rule from a specific table.
 
 ```python
+import os
+TOKEN="eyJhbGci••••••••••••bz2U39Yc" # API Key generated in the Prometheux Platform
+os.environ["PMTX_TOKEN"] = TOKEN
+
 import prometheux_chain as pmtx
 from prometheux_chain.model.database import Database
 
@@ -195,6 +215,10 @@ with open(vada_file, 'w') as file:
 This example connects to a **Databricks** cluster and infers Vadalog rules from a specific schema.
 
 ```python
+import os
+TOKEN="eyJhbGci••••••••••••bz2U39Yc" # API Key generated in the Prometheux Platform
+os.environ["PMTX_TOKEN"] = TOKEN
+
 import prometheux_chain as pmtx
 from prometheux_chain.model.database import Database
 
@@ -227,6 +251,10 @@ Excel files are treated as a dabase where its sheets are considered as tables.
 This example connects to an **Excel** file and infers Vadalog rules.
 
 ```python
+import os
+TOKEN="eyJhbGci••••••••••••bz2U39Yc" # API Key generated in the Prometheux Platform
+os.environ["PMTX_TOKEN"] = TOKEN
+
 import prometheux_chain as pmtx
 from prometheux_chain.model.database import Database
 
@@ -256,6 +284,11 @@ with open(vada_file, 'w') as file:
 This example connects to an **Excel** file and infers Vadalog rules from a specific sheet.
 
 ```python
+import os
+TOKEN="eyJhbGci••••••••••••bz2U39Yc" # API Key generated in the Prometheux Platform
+os.environ["PMTX_TOKEN"] = TOKEN
+
+import prometheux_chain as pmtx
 from prometheux_chain.model.database import Database
 
 # Create a Database object for Excel with a specific sheet
@@ -283,6 +316,10 @@ with open(vada_file, 'w') as file:
 This example connects to a **Snowflake** database and infers Vadalog rules.
 
 ```python
+import os
+TOKEN="eyJhbGci••••••••••••bz2U39Yc" # API Key generated in the Prometheux Platform
+os.environ["PMTX_TOKEN"] = TOKEN
+
 import prometheux_chain as pmtx
 from prometheux_chain.model.database import Database
 
@@ -316,6 +353,10 @@ with open(vada_file, 'w') as file:
 This example connects to a **Snowflake** database and infers Vadalog rules from a specific table.
 
 ```python
+import os
+TOKEN="eyJhbGci••••••••••••bz2U39Yc" # API Key generated in the Prometheux Platform
+os.environ["PMTX_TOKEN"] = TOKEN
+
 import prometheux_chain as pmtx
 from prometheux_chain.model.database import Database
 

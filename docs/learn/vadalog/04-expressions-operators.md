@@ -292,7 +292,10 @@ operators are:
 - `log(X)`: computes the natural logarithm of `X`.
 - `pow(X,Y)`: computes `X` to the power of `Y`. Returns a value of type double.
 - `exp(X)`: computes `e^X`.
-- `round(X)`: returns the closest integer to `X`.
+- `round(X)`: returns `X` rounded to 0 decimal with HALF_UP round mode.
+- `round(X,Y)`: returns `X` rounded to `Y` decimal places with HALF_UP round mode if `scale` is greater than or equal to 0 or at integral part when `scale` is less than 0.
+- `bround(X)` : returns `X` rounded to 0 decimal with HALF_UP round mode.
+- `bround(X,Y)` : returns `X` rounded to `Y` decimal places with HALF_UP round mode if `scale` is greater than or equal to 0 or at integral part when `scale` is less than 0.
 - `ceil(X)`: computes the smallest integer `Y` that is equal to or greater than
   `X`.
 - `floor(X)`: computes the largest integer `Y` that is equal to or smaller than
@@ -737,6 +740,7 @@ The functions are:
 - `mmin(X, K1, K2, …)` for the incremental computation of minimal
 - `mmax(X, K1, K2, …)` for the incremental computation of maximal
 - `munion(X, K1, K2, …)` for the incremental union of sets
+- `avg(X, K1, K2, …)` for the incremental computation of averages
 
 Upon invocation, all functions return the currently accumulated value for the
 respective aggregate. All functions, except `mcount`, take as first argument the
@@ -769,6 +773,7 @@ pmin(X, Sum) :- a(X, Y, Z, U), Sum = mmin(Y).
 pmax(X, Sum) :- a(X, Y, Z, U), Sum = mmax(Y).
 ccount(X, Sum) :- a(X, Y, Z, U), Sum = mcount(X).
 ccount_other(X, Sum) :- a(X, Y, Z, U), Sum = mcount(X).
+aavg(X, AVG) :- a(X, Y, Z, U), AVG = avg(Y).
 
 @output("ssum").
 @output("pprod").
@@ -776,14 +781,58 @@ ccount_other(X, Sum) :- a(X, Y, Z, U), Sum = mcount(X).
 @output("pmax").
 @output("ccount").
 @output("ccount_other").
+@output("aavg").
 ```
 
-After execution, the relation `ssum` could contain the following tuples:
+After execution, the relation `ssum` contains the following tuples:
 
 ```prolog
 ssum("one", 12.0)
 ssum("two", 19.0)
 ```
+
+The relation `pprod` contains the following tuples:
+
+```prolog
+pprod("one", 360.0)
+pprod("two", 12600.0)
+```
+
+The relation `pmin` contains the following tuples:
+
+```prolog
+pmin("one", 1.0)
+pmin("two", 2.0)
+```
+
+The relation `pmax` contains the following tuples:
+
+```prolog
+pmax("one", 6.0)
+pmax("two", 7.0)
+```
+
+The relation `ccount` contains the following tuples:
+
+```prolog
+ccount("one", 4)
+ccount("two", 5)
+```
+
+The relation `ccount_other` contains the following tuples:
+
+```prolog
+ccount_other("one", 4)
+ccount_other("two", 5)
+```
+
+The relation `aavg` contains the following tuples:
+
+```prolog
+aavg("one", 3.0)
+aavg("two", 4.0)
+```
+
 
 A rule with an assignment using an aggregation operator has the general form:
 
@@ -1024,3 +1073,4 @@ c(15552,"Alternative").
 
 synonyms(Id, NewSynonyms) :- c(Id,Synonym), NewSynonyms = munion({}|Synonym).
 ```
+

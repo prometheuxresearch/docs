@@ -13,8 +13,7 @@ tc_function(X,Y)  :-  #TC(edge).          % transitive closure on edge/2
 asp_function(X,Y,Z) :-  #ASP(edge).         % all‑shortest paths on weighted edge/3
 ```
 
-Variables on the left receive the algorithm’s results.  
-The function literal never appears in a rule head.
+Variables on the head of the rule with the function receive the algorithm’s results.  
 
 ## Built‑in graph function catalogue
 
@@ -63,8 +62,12 @@ edge_large(3,4,6).
 edge_short(2,3,2).
 edge_short(4,1,1).
 
+unweighted_edge(1,5).
+unweighted_edge(5,2).
+
 edge(X,Y,Z) :- edge_large(X,Y,Z).
 edge(X,Y,Z) :- edge_short(X,Y,Z).
+edge(X,Y,1) :- unweighted_edge(X,Y). % We assign a default distance = 1
 
 asp_function(X,Y,Z) :- #ASP(edge).
 max_asp(X,Y,M) :- asp_function(X,Y,Z), M = mmax(Z).

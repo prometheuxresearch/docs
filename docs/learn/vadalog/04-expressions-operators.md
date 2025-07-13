@@ -728,19 +728,19 @@ extended version of the manual further examples.
 
 ## Aggregations
 
-Aggregations are functions for incremental and recursion-friendly
+Monotonic aggregations are functions for incremental and recursion-friendly
 computation of aggregate values. They mainstain state outside of the program, allowing you to perform calculations across recursive steps.
 
 The functions are:
 
-- `msum(X, [K1, …, Kn], [C1, …, Cm])` for the incremental computation of sums
-- `mprod(X, [K1, …, Kn], [C1, …, Cm])` for the incremental computation of
+- `msum(X, [K1, …, Kn])` for the incremental computation of sums
+- `mprod(X, [K1, …, Kn])` for the incremental computation of
   products
-- `mcount(K1, K2, …)` for the incremental computation of counts
-- `mmin(X, K1, K2, …)` for the incremental computation of minimal
-- `mmax(X, K1, K2, …)` for the incremental computation of maximal
-- `munion(X, K1, K2, …)` for the incremental union of sets
-- `avg(X, K1, K2, …)` for the incremental computation of averages
+- `mcount([K1])` for the incremental computation of counts
+- `mmin(X, [K1, …, Kn)` for the incremental computation of minimal
+- `mmax(X, [K1, …, Kn])` for the incremental computation of maximal
+- `munion(X, [K1, …, Kn])` for the incremental union of sets
+- `mavg(X)` for the incremental computation of averages
 
 Upon invocation, all functions return the currently accumulated value for the
 respective aggregate. All functions, except `mcount`, take as first argument the
@@ -752,6 +752,17 @@ and the third argument is the list of contributors.
 Finally, all functions besides `msum` and `mprod` take a list of values, called
 keys, to be used as a group identifier (i.e. they play the role of group by
 variables in standard SQL).
+
+Some aggregate functions cannot be used inside a recursive rule because the
+value they return may change in a non-monotonic way when new facts arrive
+(e.g., the “winner” of an election can be replaced by a later vote).
+These functions are fully supported in non-recursive queries or as a
+post-processing step after the recursive evaluation has converged.
+
+These functions are:
+- `maxcount()` selects, for each group identified by the keys, the row that occurs most often and the corresponding count.
+
+The framework currently provides one such function:
 
 As an example consider the following program:
 
@@ -773,7 +784,7 @@ pmin(X, Sum) :- a(X, Y, Z, U), Sum = mmin(Y).
 pmax(X, Sum) :- a(X, Y, Z, U), Sum = mmax(Y).
 ccount(X, Sum) :- a(X, Y, Z, U), Sum = mcount(X).
 ccount_other(X, Sum) :- a(X, Y, Z, U), Sum = mcount(X).
-aavg(X, AVG) :- a(X, Y, Z, U), AVG = avg(Y).
+aavg(X, AVG) :- a(X, Y, Z, U), AVG = mavg(Y).
 
 @output("ssum").
 @output("pprod").
@@ -1072,5 +1083,24 @@ c(15552,"Synonym").
 c(15552,"Alternative").
 
 synonyms(Id, NewSynonyms) :- c(Id,Synonym), NewSynonyms = munion({}|Synonym).
+```
+
+The aggregate `maxcount` returns the key tuple with the highest frequency
+
+```prolog
+@output("hotspot").
+affects("Component1","Component2").
+affects("Component3","Component2").
+affects("Component4","Component2").
+affects("Component5","Component1").
+affects("Component2","Component1").
+affects("Component6","Component7").
+hotspot(Component2,MaxCount) :- affects(Component1,Component2), MaxCount=maxcount().
+```
+
+The expected output is
+
+```
+hotspot("Component2", 3).
 ```
 

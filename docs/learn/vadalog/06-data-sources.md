@@ -32,7 +32,7 @@ where `datasource_type` should be one of:
 - `sybase` for Sybase databases
 - `teradata` for Teradata databases
 - `redshift` for Redshift databases
-- `bigquery` for BigQuery
+- `bigquery` for Google BigQuery
 - `hive` for Hive
 - `presto` for Presto
 - `snowflake` for Snowflake
@@ -603,22 +603,157 @@ analytics_redshift_test(AnalysisId, Metric, Value) :-
 ```
 
 ## Google BigQuery
-Google BigQuery is a serverless, highly scalable, and cost-effective multi-cloud data warehouse. This example demonstrates querying data from a BigQuery dataset.
+Google BigQuery is a serverless, highly scalable, and cost-effective multi-cloud data warehouse. This example demonstrates configuring and querying data from a BigQuery dataset.
+
+#### Setting up Google Cloud Access
+
+This guide shows how to:
+
+1. Enable the required Google Cloud APIs  
+2. Create a service account for Prometheux jobs  
+3. Grant the minimum IAM roles (data access & Storage API)  
+4. Allow a human user to **impersonate** the service account and obtain short‑lived access tokens  
+5. Create a JSON key file  
+6. Generate a one‑hour access token  
+
+> **Project ID example:** `project-example-358816`  
+> **Service account name example:** `example-sa`  
+> **Human user example:** `example@gmail.com`
+
+---
+Open a Google Cloud Shell within your Google Project and execute the following commands:
+#### 1  Enable required APIs
+
+```bash
+gcloud services enable   compute.googleapis.com   bigquery.googleapis.com   bigquerystorage.googleapis.com   iamcredentials.googleapis.com   --project=project-example-358816
+```
+
+---
+
+#### 2  Create the service account
+
+```bash
+PROJECT_ID=project-example-358816
+SA_NAME=example-sa
+
+gcloud iam service-accounts create "$SA_NAME"   --project="$PROJECT_ID"   --display-name="Spark BigQuery SA"
+```
+
+Resulting e‑mail:  
+`example-sa@project-example-358816.iam.gserviceaccount.com`
+
+---
+
+#### 3  Grant **minimum BigQuery roles** to the service account
+
+```bash
+gcloud projects add-iam-policy-binding "$PROJECT_ID"   --member="serviceAccount:$SA_NAME@$PROJECT_ID.iam.gserviceaccount.com"   --role="roles/bigquery.dataViewer"
+
+gcloud projects add-iam-policy-binding "$PROJECT_ID"   --member="serviceAccount:$SA_NAME@$PROJECT_ID.iam.gserviceaccount.com"   --role="roles/bigquery.jobUser"
+
+gcloud projects add-iam-policy-binding "$PROJECT_ID"   --member="serviceAccount:$SA_NAME@$PROJECT_ID.iam.gserviceaccount.com"   --role="roles/bigquery.readSessionUser"
+```
+
+---
+
+#### 4  Allow your user to **impersonate** the service account
+
+```bash
+gcloud iam service-accounts add-iam-policy-binding   "$SA_NAME@$PROJECT_ID.iam.gserviceaccount.com"   --member="user:example@gmail.com"   --role="roles/iam.serviceAccountTokenCreator"
+```
+
+Verify:
+
+```bash
+gcloud iam service-accounts get-iam-policy   "$SA_NAME@$PROJECT_ID.iam.gserviceaccount.com"   --filter="bindings.role:roles/iam.serviceAccountTokenCreator"
+```
+
+---
+
+#### 5 Create a JSON key file
+
+If you prefer file‑based creds:
+
+```bash
+gcloud iam service-accounts keys create ~/gcp-credentials.json   --iam-account="$SA_NAME@$PROJECT_ID.iam.gserviceaccount.com"
+```
+
+Read the content
+```bash
+cat ~/gcp-credentials.json
+```
+
+Copy and paste it into a new file in your laptop or environment in your `/path/to/gcp-credentials.json`
+
+This authMode is the default one.
+
+Set the ENV var (in Docker or via `EXPORT`)
+`GOOGLE_APPLICATION_CREDENTIALS=/path/to/gcp-credentials.json`, **or** set the `bigquery.credentialsFile=/path/to/gcp-credentials.json` in the `pmtx.properties` configuration file **or** declare the path via `credentialsFile=/path/to/gcp-credentials.json` as an option in the bind annotation.
+
+---
+
+#### 6  Generate a one‑hour access token (impersonation)
+
+If you prefer token‑based creds:
+
+```bash
+gcloud auth print-access-token   --impersonate-service-account="$SA_NAME@$PROJECT_ID.iam.gserviceaccount.com"
+```
+Enable token-based authMode by setting set the `bigquery.authMode` in the `pmtx.properties`configuration file **or** declare it as an option in the bind annotation `authMode=gcpAccessToken` and set the ENV var (in Docker or via `EXPORT`)
+`GCP_ACCESS_TOKEN=my-token`, **or** set the `bigquery.gcpAccessToken=my-token` config property **or** pass it via `gcpAccessToken=my-token` as option in the bind annotation.
+
+### Example using credentials file
 
 ```prolog
-% Declare the input concept 'events_bigquery' to read data from the 'events' table in BigQuery
-@input("events_bigquery").
+% Bind the BigQuery table with credentials file
+@bind("table",
+      "bigquery credentialsFile=/path/to/gcp-credentials.json",
+      "project-example--358816",
+      "bigquery-public-data.thelook_ecommerce.order_items").
 
-% Bind the 'events_bigquery' concept to BigQuery using the JDBC connection details
-@bind("events_bigquery", "bigquery projectId='myProjectId', dataset='myDataset', accessKey='myAccessKey', secretKey='mySecretKey'", 
-      "events", "event_data").
+% Rule to project the first three columns from the BigQuery table
+bigquery_table(X,Y,Z) :- table(X,Y,Z).
 
-% Define a rule to extract EventId, EventType, and EventTimestamp from the 'events' table in BigQuery
-events_bigquery_test(EventId, EventType, EventTimestamp) :- 
-        events_bigquery(EventId, EventType, EventTimestamp).
+% Post-process the BigQuery table to limit the results to 10
+@post("bigquery_table","limit(10)").
 
-% Declare the output concept 'events_bigquery_test' for making the processed data available
-@output("events_bigquery_test").
+% Define the output for the BigQuery table
+@output("bigquery_table").
+```
+
+### Example using token
+
+```prolog
+% Bind the BigQuery table with token
+@bind("table",
+      "bigquery authMode=gcpAccessToken, token=/path/to/gcp-credentials.json",
+      "project-example--358816",
+      "bigquery-public-data.thelook_ecommerce.order_items").
+
+% Rule to project the first three columns from the BigQuery table
+bigquery_table(X,Y,Z) :- table(X,Y,Z).
+
+% Define the output for the BigQuery table
+@output("bigquery_table").
+% Post-process the BigQuery table to limit the results to 10
+@post("bigquery_table","limit(10)").
+```
+
+### Example via query
+
+```prolog
+% Bind a BigQuery query to retrieve product revenue data
+@qbind("query",
+       "bigquery credentialsFile=src/test/resources/bigquery-credentials.json",
+       "quantum-feat-358816",
+       "SELECT product_id, SUM(sale_price) AS revenue FROM `bigquery-public-data.thelook_ecommerce.order_items` 
+        WHERE sale_price > 100 GROUP BY product_id ORDER BY revenue DESC LIMIT 10").
+
+% Define a rule to map the query results to the bigquery_query predicate
+bigquery_query(X,Y) :- query(X,Y).
+
+% Declare the output for the bigquery_query predicate
+@output("bigquery_query").
 ```
 
 ## Snowflake

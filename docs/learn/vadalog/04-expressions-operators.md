@@ -355,7 +355,46 @@ b("hello", "not_null").
 b("not_null", "not_null").
 ```
 
-**Example 13: Using `and(args)` with condition enforcement**
+**Example 13: Nested `if` statements for credit rating**
+
+This example demonstrates complex nested `if` statements to implement a credit rating system based on credit scores. Each nested `if` evaluates a range of credit scores and assigns a corresponding rating value.
+
+```prolog
+@output("credit_rating").
+credit_score(450.0).
+credit_score(580.0).
+credit_score(720.0).
+credit_score(780.0).
+credit_score(820.0).
+credit_score(850.0).
+credit_score(920.0).
+
+credit_rating(Val) :- credit_score(Score), Val = if(Score < 500.0, -3.250,
+                                                    if(and(Score >= 500.0, Score < 600.0), -2.150,
+                                                    if(and(Score >= 600.0, Score < 700.0), -1.200,
+                                                    if(and(Score >= 700.0, Score < 750.0), -0.500,
+                                                    if(and(Score >= 750.0, Score < 800.0), 0.250,
+                                                    if(and(Score >= 800.0, Score < 850.0), 0.750,
+                                                    if(and(Score >= 850.0, Score < 900.0), 1.200,
+                                                    if(and(Score >= 900.0, Score < 950.0), 1.650,
+                                                    if(and(Score >= 950.0, Score < 1000.0), 2.100,
+                                                    if(and(Score >= 1000.0, Score < 1100.0), 2.550, 
+                                                                                            3.000)))))))))).
+```
+
+**Expected output:**
+
+```prolog
+credit_rating(-3.250).
+credit_rating(-2.150).
+credit_rating(-1.200).
+credit_rating(-0.500).
+credit_rating(0.250).
+credit_rating(0.750).
+credit_rating(1.200).
+```
+
+**Example 14: Using `and(args)` with condition enforcement**
 
 In this example, the `and(args)` operator is used to evaluate conditions on `X`, and the result is compared to `#T` to enforce that all conditions must be true. The rule `b(X)` only succeeds if `X` is greater than 2, less than 5, and equal to 3.
 

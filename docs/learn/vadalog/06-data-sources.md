@@ -708,7 +708,7 @@ Enable token-based authMode by setting set the `bigquery.authMode` in the `pmtx.
 % Bind the BigQuery table with credentials file
 @bind("table",
       "bigquery credentialsFile=/path/to/gcp-credentials.json",
-      "project-example--358816",
+      "project-example-358816",
       "bigquery-public-data.thelook_ecommerce.order_items").
 
 % Rule to project the first three columns from the BigQuery table
@@ -727,7 +727,7 @@ bigquery_table(X,Y,Z) :- table(X,Y,Z).
 % Bind the BigQuery table with token
 @bind("table",
       "bigquery authMode=gcpAccessToken, token=/path/to/gcp-credentials.json",
-      "project-example--358816",
+      "project-example-358816",
       "bigquery-public-data.thelook_ecommerce.order_items").
 
 % Rule to project the first three columns from the BigQuery table

@@ -381,3 +381,43 @@ vada_file = "infer-from-snowflake-table.vada"
 with open(vada_file, 'w') as file:
     file.write(inferred_rules)
 ```
+### **Example 11: Inferring Schema from BigQuery**
+
+This example connects to a **Google BigQuery** project and infers Vadalog rules from datasets.
+
+```python
+import os
+TOKEN="eyJhbGci••••••••••••bz2U39Yc" # API Key generated in the Prometheux Platform
+os.environ["PMTX_TOKEN"] = TOKEN
+gcpAccessToken = os.environ["GCP_ACCESS_TOKEN"]
+
+import prometheux_chain as pmtx
+from prometheux_chain.model.database import Database
+
+# Create a Database object for BigQuery
+db = Database(
+    database_type="bigquery",
+    username="",
+    password="",
+    host="",
+    port=None,
+    database_name="my_project_id",
+    schema="datasetId",  # optional - specify dataset ID
+    options={
+        "authMode": "gcpAccessToken",  # auth default mode is credentialsFile, here we use gcpAccessToken
+        "gcpAccessToken": gcpAccessToken,
+        "parentProject": "my_parent_project_id",  # optional - parent project ID
+        "billingProjectId": "my_billing_project_id",  # optional - billing project ID
+        "region": "us-central1"  # optional - BigQuery region
+    }
+)
+
+# Infer Vadalog rules from the BigQuery dataset
+inferred_rules = pmtx.infer_schema(db, add_bind=True, add_model=True)
+
+# Save the inferred rules to a file
+vada_file = "infer-from-bigquery.vada"
+with open(vada_file, 'w') as file:
+    file.write(inferred_rules)
+```
+

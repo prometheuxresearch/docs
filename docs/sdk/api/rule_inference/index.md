@@ -421,3 +421,112 @@ with open(vada_file, 'w') as file:
     file.write(inferred_rules)
 ```
 
+---
+
+### **Example 12: Inferring Schema from Text File**
+
+This example connects to a **text file** and infers Vadalog rules representing concepts extracted from the text content. The result is a list of knowledge graph schemas representing concepts and relationships found in the text.
+
+```python
+import os
+TOKEN="eyJhbGci••••••••••••bz2U39Yc" # API Key generated in the Prometheux Platform
+os.environ["PMTX_TOKEN"] = TOKEN
+
+import prometheux_chain as pmtx
+from prometheux_chain.model.database import Database
+
+# Create a Database object for text file
+db = Database(
+    database_type="text",
+    username="",
+    password="",
+    host="path/to/file",
+    port=None,
+    database_name="harry_potter.txt"
+)
+
+# Infer Vadalog rules from the text file
+inferred_rules = pmtx.infer_schema(db, add_bind=True, add_model=False)
+
+# Save the inferred rules to a file
+vada_file = "harry_potter.vada"
+with open(vada_file, 'w') as file:
+    file.write(inferred_rules)
+```
+
+---
+
+### **Example 13: Inferring Schema from Binary File**
+
+Binary files support various formats including **PDF**, **JPG**, **PNG**, and other binary formats. This example connects to a **PDF file** and infers Vadalog rules representing concepts extracted from the document content. The result is a list of knowledge graph schemas representing concepts and relationships found in the binary file.
+
+```python
+import os
+TOKEN="eyJhbGci••••••••••••bz2U39Yc" # API Key generated in the Prometheux Platform
+os.environ["PMTX_TOKEN"] = TOKEN
+
+import prometheux_chain as pmtx
+from prometheux_chain.model.database import Database
+
+# Create a Database object for binary file
+db = Database(
+    database_type="binaryFile",
+    username="",
+    password="",
+    host="path/to/file",
+    port=None,
+    database_name="harry_potter.pdf"
+)
+
+# Infer Vadalog rules from the binary file
+inferred_rules = pmtx.infer_schema(db, add_bind=True, add_model=False)
+
+# Save the inferred rules to a file
+vada_file = "harry_potter.vada"
+with open(vada_file, 'w') as file:
+    file.write(inferred_rules)
+```
+
+---
+
+### **Example 14: Inferring Schema from Common Known Business Documents**
+
+Binary files of this kind include structured documents such as **ID documents**, **receipts**, **tax forms**, **mortgage documents**, and other standardized business documents. The API supports various document types including:
+
+- **Financial Documents**: check.us, bankStatement.us, payStub.us, creditCard, invoice
+- **ID Documents**: idDocument.driverLicense, idDocument.passport, idDocument.nationalIdentityCard, idDocument.residencePermit, idDocument.usSocialSecurityCard
+- **Receipts**: receipt.retailMeal, receipt.creditCard, receipt.gas, receipt.parking, receipt.hotel
+- **Tax Documents**: tax.us.1040.2023, tax.us.w2, tax.us.w4, tax.us.1095A, tax.us.1098, tax.us.1099 (various forms)
+- **Mortgage Documents**: mortgage.us.1003 (URLA), mortgage.us.1004 (URAR), mortgage.us.closingDisclosure
+- **Other Documents**: contract, healthInsuranceCard.us, marriageCertificate.us
+
+This example connects to a **driver's license document** and infers Vadalog rules representing concepts extracted from the document content. The result is a list of knowledge graph schemas representing concepts and relationships found in the structured document.
+
+```python
+import os
+TOKEN="eyJhbGci••••••••••••bz2U39Yc" # API Key generated in the Prometheux Platform
+os.environ["PMTX_TOKEN"] = TOKEN
+
+import prometheux_chain as pmtx
+from prometheux_chain.model.database import Database
+
+# Create a Database object for structured binary file
+db = Database(
+    database_type="binaryFile",
+    username="",
+    password="",
+    host="path/to/file",
+    port=None,
+    database_name="driver_license.pdf",
+    options={"documentType": "idDocument.driverLicense"}
+)
+
+# Infer Vadalog rules from the structured binary file
+inferred_rules = pmtx.infer_schema(db, add_bind=True, add_model=False)
+
+# Save the inferred rules to a file
+vada_file = "driver_license.vada"
+with open(vada_file, 'w') as file:
+    file.write(inferred_rules)
+```
+

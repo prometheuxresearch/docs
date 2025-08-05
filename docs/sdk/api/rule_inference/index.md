@@ -470,7 +470,7 @@ from prometheux_chain.model.database import Database
 
 # Create a Database object for binary file
 db = Database(
-    database_type="binaryFile",
+    database_type="binaryfile",
     username="",
     password="",
     host="path/to/file",
@@ -512,7 +512,7 @@ from prometheux_chain.model.database import Database
 
 # Create a Database object for structured binary file
 db = Database(
-    database_type="binaryFile",
+    database_type="binaryfile",
     username="",
     password="",
     host="path/to/file",

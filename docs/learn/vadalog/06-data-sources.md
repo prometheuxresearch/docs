@@ -526,6 +526,69 @@ meteo_out(Valid_Date, T_2m_C, Relative_humidity_2m_p) :- meteo(Valid_Date, T_2m_
 
 ---
 
+## Text Files
+Text files can be processed directly in Vadalog to extract concepts and relationships from textual content. The text datasource supports various text formats and can extract structured information from unstructured text.
+
+### Example: Reading from Text File
+
+This example demonstrates how to read from a text file and extract structured information.
+
+```prolog
+% Define the data model for the 'location' concept
+@model("location","['Name:string', 'Description:string']").
+
+% Bind the 'location' concept to the text file
+@bind("location","text","/path/to/file","hansel_gretel_excerpt.txt").
+
+% Define a rule to extract Name and Description from the text file
+location_head(Name,Description) :- location(Name,Description).
+
+% Declare the output concept 'location_head' for making the processed data available
+@output("location_head").
+```
+
+## Binary Files
+Binary files support various formats including **PDF**, **JPG**, **PNG**, and other formats. Vadalog can extract concepts and relationships from binary files, making it suitable for processing documents and images.
+
+### Example: Reading from PDF File
+
+This example demonstrates how to read from a PDF file and extract structured information.
+
+```prolog
+% Bind the 'person' concept to the PDF file
+@bind("person","binaryfile","/path/to/file","hansel_gretel_excerpt.pdf").
+
+% Define a rule to extract Name and Role from the PDF file
+person_head(Name,Role) :- person(Name,Role).
+
+% Declare the output concept 'person_head' for making the processed data available
+@output("person_head").
+```
+
+### Example: Reading from Business Document (Invoice)
+
+Binary files also support structured business documents such as **ID documents**, **receipts**, **tax forms**, **mortgage documents**, and other standardized business documents. The API supports various document types including:
+
+- **Financial Documents**: check.us, bankStatement.us, payStub.us, creditCard, invoice
+- **ID Documents**: idDocument.driverLicense, idDocument.passport, idDocument.nationalIdentityCard, idDocument.residencePermit, idDocument.usSocialSecurityCard
+- **Receipts**: receipt.retailMeal, receipt.creditCard, receipt.gas, receipt.parking, receipt.hotel
+- **Tax Documents**: tax.us.1040.2023, tax.us.w2, tax.us.w4, tax.us.1095A, tax.us.1098, tax.us.1099 (various forms)
+- **Mortgage Documents**: mortgage.us.1003 (URLA), mortgage.us.1004 (URAR), mortgage.us.closingDisclosure
+- **Other Documents**: contract, healthInsuranceCard.us, marriageCertificate.us
+
+This example demonstrates how to read from an invoice PDF and extract structured business information.
+
+```prolog
+% Bind the 'iNV_pdf' concept to the invoice PDF file with document type specification
+@bind("iNV_pdf","binaryfile documentType='invoice'","/path/to/invoice","INV.pdf").
+
+% Define a rule to extract comprehensive invoice information from the PDF file
+iNV__pdf_head(CustomerName,CustomerId,PurchaseOrder,InvoiceId,InvoiceDate,DueDate,VendorName,VendorAddress,VendorAddressRecipient,CustomerAddress,CustomerAddressRecipient,BillingAddress,BillingAddressRecipient,ShippingAddress,ShippingAddressRecipient,SubTotal,TotalDiscount,TotalTax,InvoiceTotal,AmountDue,PreviousUnpaidBalance,RemittanceAddress,RemittanceAddressRecipient,ServiceAddress,ServiceAddressRecipient,ServiceStartDate,ServiceEndDate,VendorTaxId,CustomerTaxId,PaymentTerm,KVKNumber,PaymentUrl,PaymentDetails,TaxDetails,PaidInFourInstallements,Items) :- iNV_pdf(CustomerName,CustomerId,PurchaseOrder,InvoiceId,InvoiceDate,DueDate,VendorName,VendorAddress,VendorAddressRecipient,CustomerAddress,CustomerAddressRecipient,BillingAddress,BillingAddressRecipient,ShippingAddress,ShippingAddressRecipient,SubTotal,TotalDiscount,TotalTax,InvoiceTotal,AmountDue,PreviousUnpaidBalance,RemittanceAddress,RemittanceAddressRecipient,ServiceAddress,ServiceAddressRecipient,ServiceStartDate,ServiceEndDate,VendorTaxId,CustomerTaxId,PaymentTerm,KVKNumber,PaymentUrl,PaymentDetails,TaxDetails,PaidInFourInstallements,Items).
+
+% Declare the output concept 'iNV_2026_002_000521_pdf_head' for making the processed data available
+@output("iNV_2026_002_000521_pdf_head").
+```
+
 ## HDFS File system
 HDFS (Hadoop Distributed File System) is designed for distributed storage and large-scale data processing. Vadalog can integrate with HDFS by reading from and writing to files stored in HDFS clusters. This example shows how to read a CSV file from an HDFS location and process it within a Prometheux workflow.
 
@@ -845,3 +908,4 @@ sales(Product) :-
 % Declare the output concept 'sales' to return the processed data
 @output("sales").
 ```
+

@@ -880,6 +880,23 @@ convertedDates(Raw, Formatted) :-
   Formatted = date:format(Ts, "yyyy-MM-dd'T'HH:mm:ssZ").
 ```
 
+## Embeddings Functions
+
+The embeddings library provides functions for working with vector representations of data, enabling similarity calculations and semantic analysis.
+
+### `embeddings:vectorize`
+
+The `embeddings:vectorize` function converts input arguments into vector embeddings using OpenAI's embedding model. This function takes multiple arguments and returns an array of double values representing the semantic vector.
+
+**Example:**
+```prolog
+person("Luca","Rossi").
+
+% Convert person data to embeddings
+person_embeddings(Vector) :- person(X,Y,Z), Vector = embeddings:vectorize(X,Y).
+
+@output("person_embeddings").
+
 ### `embeddings:cosine_sim`
 
 The `embeddings:cosine_sim` function calculates the cosine similarity between two embedding vectors. Cosine similarity measures the cosine of the angle between two vectors, providing a value between -1 and 1, where 1 indicates identical vectors and 0 indicates orthogonal vectors.
@@ -1538,24 +1555,6 @@ The expected output is
 hotspot("Component2", 3).
 ```
 
----
-
-## Embeddings Functions
-
-The embeddings library provides functions for working with vector representations of data, enabling similarity calculations and semantic analysis.
-
-### `embeddings:vectorize`
-
-The `embeddings:vectorize` function converts input arguments into vector embeddings using OpenAI's embedding model. This function takes multiple arguments and returns an array of double values representing the semantic vector.
-
-**Example:**
-```prolog
-person("Luca","Rossi").
-
-% Convert person data to embeddings
-person_embeddings(Vector) :- person(X,Y,Z), Vector = embeddings:vectorize(X,Y).
-
-@output("person_embeddings").
 ```
 
 ### LLM Integration

@@ -896,6 +896,7 @@ person("Luca","Rossi").
 person_embeddings(Vector) :- person(X,Y,Z), Vector = embeddings:vectorize(X,Y).
 
 @output("person_embeddings").
+```
 
 ### `embeddings:cosine_sim`
 
@@ -1553,8 +1554,6 @@ The expected output is
 
 ```
 hotspot("Component2", 3).
-```
-
 ```
 
 ### LLM Integration

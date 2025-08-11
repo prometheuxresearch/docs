@@ -802,6 +802,49 @@ The library `dataTypes` implements functions for casting of data types
 a(D) :- b(X), D = as_date("22-02-2022").
 ```
 
+
+### Interval Operators
+
+The interval operators allow for checking if a value falls within a specified range. These operators can be used to define conditions with different inclusivity options.
+
+#### `between`
+The `between` operator checks if a value is strictly between two other values, excluding the boundaries.
+
+Example:
+```prolog
+% Check if X is strictly between 5 and 10 (excludes 5 and 10)
+range_check(X) :- b(X), Between = between(X, 5, 10), Between == #T.
+```
+
+#### `_between` (Left Inclusive)
+The `_between` operator checks if a value is between two other values, including the left boundary but excluding the right boundary.
+
+Example:
+```prolog
+% Check if X is between 5 and 10 (includes 5, excludes 10)
+left_inclusive_check(X) :- b(X), Between = _between(X, 5, 10), Between == #T.
+```
+
+#### `between_` (Right Inclusive)
+The `between_` operator checks if a value is between two other values, excluding the left boundary but including the right boundary.
+
+Example:
+```prolog
+% Check if X is between 5 and 10 (excludes 5, includes 10)
+right_inclusive_check(X) :- b(X), Between = between_(X, 5, 10), Between == #T.
+```
+
+#### `_between_` (Left and Right Inclusive)
+The `_between_` operator checks if a value is between two other values, including both boundaries.
+
+Example:
+```prolog
+% Check if X is between 5 and 10 (includes both 5 and 10)
+inclusive_check(X) :- b(X), Between = _between_(X, 5, 10), Between == #T.
+```
+
+
+
 ### Temporal Functions
 The library `date` implements functions for manipulation of temporal operations 
 - `current_date()`: returns the current date at the start of reasoning evaluation as a date.
@@ -836,6 +879,59 @@ convertedDates(Raw, Formatted) :-
   tmpDates(Raw, Ts),
   Formatted = date:format(Ts, "yyyy-MM-dd'T'HH:mm:ssZ").
 ```
+
+### `embeddings:cosine_sim`
+
+The `embeddings:cosine_sim` function calculates the cosine similarity between two embedding vectors. Cosine similarity measures the cosine of the angle between two vectors, providing a value between -1 and 1, where 1 indicates identical vectors and 0 indicates orthogonal vectors.
+
+**Example:**
+```prolog
+person("Luca","Rossi").
+employee("Luca","Red").
+
+% Convert data to embeddings
+person_embeddings(Vector) :- person(X,Y,Z), Vector = embeddings:vectorize(X,Y,Z).
+employee_embeddings(Vector) :- employee(X,Y,Z), Vector = embeddings:vectorize(X,Y,Z).
+
+% Calculate cosine similarity between embeddings
+cosineSim(SimilarityScore) :- 
+    employee_embeddings(Vector_1), 
+    person_embeddings(Vector_2), 
+    SimilarityScore = embeddings:cosine_sim(Vector_1, Vector_2).
+
+@output("cosineSim").
+```
+
+**Complete Example with Similarity Analysis:**
+This example demonstrates how to use both functions together to analyze semantic similarity between different data representations:
+
+```prolog
+% Sample data
+person("Luca","Rossi",1993).
+employee("Luca","Red",1993).
+person("Maria","Bianchi",1985).
+employee("Maria","Green",1985).
+
+% Generate embeddings for person data
+person_embeddings(Name, Vector) :- 
+    person(Name,Surname,Year), 
+    Vector = embeddings:vectorize(Name,Surname,Year).
+
+% Generate embeddings for employee data  
+employee_embeddings(Name, Vector) :- 
+    employee(Name,Color,Year), 
+    Vector = embeddings:vectorize(Name,Color,Year).
+
+% Calculate similarity between corresponding person and employee embeddings
+similarity_analysis(Name, SimilarityScore) :- 
+    person_embeddings(Name, PersonEmbedding),
+    employee_embeddings(Name, EmployeeEmbedding),
+    SimilarityScore = embeddings:cosine_sim(PersonEmbedding, EmployeeEmbedding).
+
+@output("similarity_analysis").
+```
+
+This program will generate embeddings for both person and employee data, then calculate the cosine similarity between corresponding entries to measure how semantically similar the different representations are.
 
 ## Negation
 
@@ -1442,3 +1538,87 @@ The expected output is
 hotspot("Component2", 3).
 ```
 
+---
+
+## Embeddings Functions
+
+The embeddings library provides functions for working with vector representations of data, enabling similarity calculations and semantic analysis.
+
+### `embeddings:vectorize`
+
+The `embeddings:vectorize` function converts input arguments into vector embeddings using OpenAI's embedding model. This function takes multiple arguments and returns an array of double values representing the semantic vector.
+
+**Example:**
+```prolog
+person("Luca","Rossi").
+
+% Convert person data to embeddings
+person_embeddings(Vector) :- person(X,Y,Z), Vector = embeddings:vectorize(X,Y).
+
+@output("person_embeddings").
+```
+
+### LLM Integration
+
+The `llm:generate` function uses LLMs to generate content based on a prompt template and input arguments. This function allows you to create dynamic, AI-generated responses by substituting variables in a prompt with actual values.
+
+**Syntax:**
+```prolog
+llm:generate(prompt, outputType, arg1, arg2, ..., argN)
+```
+
+**Parameters:**
+- `prompt`: A string template containing placeholders like `${arg_1}`, `${arg_2}`, etc.
+- `outputType`: The expected return type (string, int, double, float, boolean, or list variants)
+- `arg1, arg2, ..., argN`: Arguments that will substitute the placeholders in the prompt
+
+**Supported Output Types:**
+- `string`, `int`, `double`, `boolean`
+- `list<string>`, `list<int>`, `list<double>`, `list<float>`, `list<boolean>`
+
+**Example:**
+```prolog
+% Sample data: characters from a fantasy world
+character("Gandalf", "Wizard", "Middle-earth").
+character("Aragorn", "Ranger", "Gondor").
+character("Legolas", "Elf", "Mirkwood").
+character("Gimli", "Dwarf", "Moria").
+
+% Generate epic battle descriptions using LLM
+epic_battle_description(CharName, CharClass, BattleScene) :- 
+    character(CharName, CharClass, Realm),
+    BattleScene = llm:generate(
+        "Create an epic battle scene where ${arg_1}, a legendary ${arg_2} from ${arg_3}, faces off against a powerful enemy. Make it dramatic and heroic, max 2 sentences.",
+        "string",
+        CharName, CharClass, Realm
+    ).
+
+% Generate character backstory using LLM
+character_backstory(CharName, Backstory) :- 
+    character(CharName, CharClass, Realm),
+    Backstory = llm:generate(
+        "Write a compelling origin story for ${arg_1}, a ${arg_2} from ${arg_3}. Focus on their greatest achievement and deepest secret. Max 3 sentences.",
+        "string",
+        CharName, CharClass, Realm
+    ).
+
+@output("epic_battle_description").
+@output("character_backstory").
+```
+
+**How it works:**
+1. The prompt template contains placeholders `${arg_1}`, `${arg_2}`, etc.
+2. The function substitutes these placeholders with the provided arguments
+3. The LLM processes the completed prompt and generates a response
+4. The response is cast to the specified output type
+
+**Prompt Template Examples:**
+- `"Generate a summary for ${arg_1}":` - Single argument substitution
+- `"Compare ${arg_1} and ${arg_2}":` - Multiple argument substitution
+- `"Analyze the relationship between ${arg_1}, ${arg_2}, and ${arg_3}":` - Complex multi-argument prompts
+
+This function is particularly useful for:
+- Dynamic content generation
+- Natural language processing tasks
+- AI-powered data transformation
+- Creative text generation based on structured data

@@ -1556,7 +1556,7 @@ The expected output is
 hotspot("Component2", 3).
 ```
 
-### LLM Integration
+## LLM Integration
 
 The `llm:generate` function uses LLMs to generate content based on a prompt template and input arguments. This function allows you to create dynamic, AI-generated responses by substituting variables in a prompt with actual values.
 

@@ -798,9 +798,18 @@ The library `dataTypes` implements functions for casting of data types
 - `as_long(X)`: casts X to long datatype.
 - `as_date(X)`: casts X to date datatype.
 
+#### Example of casting to date
 ```prolog
-a(D) :- b(X), D = as_date("22-02-2022").
+a(D) :- b(X), D = as_date("2022-02-22").
 ```
+
+#### Example of casting raw string to date
+```prolog
+@output("b").
+a("29/10/2023").
+b(DateValue) :- a(Input), DateValue=as_date(date:to_timestamp(Input, "dd/MM/yyyy")).
+```
+
 
 
 ### Interval Operators

@@ -37,7 +37,7 @@ def visualize_schema(vada_file_path: str):
 Below is an example of how you might use the `visualize_schema` function in a Python script or notebook:
 
 ```python
-import prometheux_chain as pmtx
+import prometheux_chain as px
 import os
 
 # Set your PMTX token for authentication
@@ -47,7 +47,7 @@ os.environ['PMTX_TOKEN'] = 'my_pmtx_token'
 vada_file_path = "path/to/file.vada"
 
 # Call the visualization function
-pmtx.visualize_schema(vada_file_path)
+px.visualize_schema(vada_file_path)
 ```
 
 Given the following `.vada` file

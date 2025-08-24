@@ -31,14 +31,14 @@ Exception in the following cases:
 
 **Example**
 ```python
-import prometheux_chain as pmtx
+import prometheux_chain as px
 import os
 
 # Define the path to the .vada file to be used for reasoning
 os.environ['PMTX_TOKEN'] = 'my_pmtx_token'
 
 # Perform reasoning on the .vada file
-virtual_kg = pmtx.reason(
+virtual_kg = px.reason(
     vada_file_paths="min_distance_from_city.vada",
     params={"filter": "New York", "min_distance": 100.0},
     to_explain=True,

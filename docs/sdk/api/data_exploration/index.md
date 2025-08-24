@@ -32,7 +32,7 @@ def all_pairs_join(databases: list[Database], to_evaluate: bool = True, parallel
 This example demonstrates how to use the `all_pairs_join` function with a PostgreSQL database.
 
 ```python
-import prometheux_chain as pmtx
+import prometheux_chain as px
 from prometheux_chain.model.database import Database
 
 # Define the PostgreSQL database
@@ -47,7 +47,7 @@ db = Database(
 )
 
 # Use the all_pairs_join function
-all_pairs_program = pmtx.all_pairs_join([db], to_evaluate=False)
+all_pairs_program = px.all_pairs_join([db], to_evaluate=False)
 
 # Save the Vadalog program to a file
 vada_file = "all_pairs_program.vada"
@@ -60,7 +60,7 @@ with open(vada_file, 'w') as file:
 This example shows how to use the `all_pairs_join` function with a Databricks cluster, specifying particular tables.
 
 ```python
-import prometheux_chain as pmtx
+import prometheux_chain as px
 from prometheux_chain.model.database import Database
 
 # Define the Databricks database with specific tables
@@ -76,7 +76,7 @@ db = Database(
 )
 
 # Use the all_pairs_join function
-all_pairs_program = pmtx.all_pairs_join([db], to_evaluate=False)
+all_pairs_program = px.all_pairs_join([db], to_evaluate=False)
 
 # Save the Vadalog program to a file
 vada_file = "all_pairs_program.vada"
@@ -89,7 +89,7 @@ with open(vada_file, 'w') as file:
 This example demonstrates how to use the `all_pairs_join` function with a Databricks cluster, specifying a schema.
 
 ```python
-import prometheux_chain as pmtx
+import prometheux_chain as px
 from prometheux_chain.model.database import Database
 
 # Define the Databricks database with a specific schema
@@ -104,7 +104,7 @@ db = Database(
 )
 
 # Use the all_pairs_join function
-all_pairs_program = pmtx.all_pairs_join([db], to_evaluate=False)
+all_pairs_program = px.all_pairs_join([db], to_evaluate=False)
 
 # Save the Vadalog program to a file
 vada_file = "all_pairs_program.vada"
@@ -117,7 +117,7 @@ with open(vada_file, 'w') as file:
 This example demonstrates how to use the `all_pairs_join` function with a PostgreSQL database, specifying all tables.
 
 ```python
-import prometheux_chain as pmtx
+import prometheux_chain as px
 from prometheux_chain.model.database import Database
 
 # Define the PostgreSQL database
@@ -131,7 +131,7 @@ db = Database(
 )
 
 # Use the all_pairs_join function
-all_pairs_program = pmtx.all_pairs_join([db], to_evaluate=False)
+all_pairs_program = px.all_pairs_join([db], to_evaluate=False)
 
 # Save the Vadalog program to a file
 vada_file = "all_pairs_program.vada"

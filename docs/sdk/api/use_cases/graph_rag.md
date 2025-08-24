@@ -24,7 +24,7 @@ The file path to the .vada file containing the Vadalog program with reasoning ru
 The following example demonstrates how to perform a Graph RAG task:
 
 ```python
-import prometheux_chain as pmtx
+import prometheux_chain as px
 
 # Connect data via reasoning using the Vadalog program "connect_data.vada".
 px.graph_rag(vadalog_program="connect_data.vada")

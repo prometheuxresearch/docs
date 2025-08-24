@@ -23,10 +23,10 @@ If an HTTP error occurs during the cleanup process, an exception is raised with 
 
 ## Usage Example
 ```python 
-import prometheux_chain as pmtx
+import prometheux_chain as px
 
 try:
-    pmtx.cleanup()  # Cleans up all virtual KG resources
+    px.cleanup()  # Cleans up all virtual KG resources
 except Exception as e:
     print(f"An error occurred during cleanup: {e}")
 ```

@@ -29,14 +29,14 @@ Optional parameters for the query, allowing customization of the execution.
 
 **Example**
 ```python
-import prometheux_chain as pmtx
+import prometheux_chain as px
 import os
 
 # Define the path to the .vada file to be used for reasoning
 os.environ['PMTX_TOKEN'] = 'my_pmtx_token'
 
 # Perform reasoning on the .vada file
-virtual_kg = pmtx.reason(
+virtual_kg = px.reason(
     vada_file_paths="min_distance_from_city.vada",
     params={"min_distance": 100.0},
     to_explain=True,
@@ -44,13 +44,13 @@ virtual_kg = pmtx.reason(
 )
 
 # Perform query in vadalog over the virtual kg file
-results_vada_str = pmtx.query(
+results_vada_str = px.query(
     virtual_kg,
     "?- min_distance(X,Y), Y == \"Brooklin\""
 )
 
 # Perform query in sql over the virtual kg file
-results_sql_str = pmtx.query(
+results_sql_str = px.query(
     virtual_kg,
     "SELECT X,Y FROM min_distance WHERE Y = \"Brooklin\";"
 )

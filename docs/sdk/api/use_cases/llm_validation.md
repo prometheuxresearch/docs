@@ -27,7 +27,7 @@ A dictionary containing:
 The following example demonstrates how to validate an LLM's output:
 
 ```python
-import prometheux_chain as pmtx
+import prometheux_chain as px
 
 # An output from an LLM to validate
 llm_response = "Yes, there is a refund of category Electronics that occurred 10 days ago, for a MacBook Pro, with a price of 999 dollars" 

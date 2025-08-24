@@ -16,37 +16,51 @@ The syntax is as follows:
 ```
 
 where `datasource_type` should be one of:
-- `csv`
-- `parquet`
-- `excel`
-- `json`
-- `postgresql`
-- `neo4j`
-- `db2`
-- `mariadb`
-- `oracle`
-- `sqlite`
-- `mysql`
-- `sqlserver`
-- `h2`
-- `sybase`
-- `teradata`
-- `redshift`
-- `bigquery`
-- `snowflake`
-- `hive`
-- `presto`
+- `csv` for CSV files
+- `parquet` for Parquet files
+- `excel` for Excel files
+- `json` for JSON files
+- `postgresql` for PostgreSQL databases
+- `neo4j` for Neo4j databases
+- `db2` for DB2 databases
+- `mariadb` for MariaDB databases               
+- `oracle` for Oracle databases
+- `sqlite` for SQLite databases
+- `mysql` for MySQL databases
+- `sqlserver` for SQL Server databases
+- `h2` for H2 databases
+- `sybase` for Sybase databases
+- `teradata` for Teradata databases
+- `redshift` for Redshift databases
+- `bigquery` for Google BigQuery
+- `hive` for Hive
+- `presto` for Presto
+- `snowflake` for Snowflake
+- `databricks` for Databricks
+- `api` for consuming data via API
 
-And the available configuration options are
+And the available configuration options are:
 
-- `host`: Database host (e.g. localhost)
+- `url`: URL to use for the database connection (e.g. `jdbc:postgresql://localhost:5432/prometheux`)
+- `protocol`: Protocol to use for the database connection (e.g. `jdbc`, `odbc`, `jdbc-odbc`, `bolt`)
+- `host`: Database host (e.g. `localhost`)
 - `port`: Database port (e.g., `5432` for postgres, `7678` for neo4j)
+- `database`: Database name (e.g. `prometheux`)
 - `username`: Username to login with.
 - `password`: Password to login with.
 
 ## Configuring credential access
 
-Sensitive credentials such as database connection details (e.g., username, password) or AWS credentials (e.g., accessKey, secretKey) can be specified directly as options in the @bind annotations. This method allows for streamlined integration within the same code, ensuring that each datasource has its necessary credentials attached during the binding process.
+Sensitive credentials such as database connection details (e.g., username, password) or AWS credentials (e.g., accessKey, secretKey) can be specified directly as options in the @bind annotations.
+Example:
+
+```prolog
+@bind("concept_name",
+      "datasource_type option_1 = 'value_1', option_2 = 'value_2', …, option_n = 'value_n'",
+      "database_name",
+      "table_name").
+```
+This method allows for streamlined integration within the same code, ensuring that each datasource has its necessary credentials attached during the binding process.
 
 However, for better security and flexibility, these credentials can also be stored in external configurations:
 
@@ -252,6 +266,23 @@ shipping_excel_test(OrderId, ShippingDate) :- shipping_excel(OrderId, ShippingDa
 
 ```
 
+In this example, we will read data from a specific sheet of an Excel file.
+
+```prolog
+% Declare the input concept 'shipping_excel_sheet' to read data from a specific sheet of an Excel file
+@input("shipping_excel_sheet").
+
+% Bind the 'shipping_excel_sheet' concept to the Excel file 'shipping.xls' located in 'disk/data/input_files'
+% Use 'useHeaders=true' to indicate that the first row contains column headers
+@bind("shipping_excel_sheet", "excel useHeaders=true, dataAddress=''Sheet1'!A1'", "disk/data/input_files", "shipping.xls").      
+
+% Define a rule that extracts OrderId and ShippingDate from 'shipping_excel_sheet'
+shipping_excel_sheet_test(OrderId, ShippingDate) :- shipping_excel_sheet(OrderId, ShippingDate).
+
+% Declare the output concept 'shipping_excel_sheet_test' for making the processed data available
+@output("shipping_excel_sheet_test").     
+```
+
 ## PostgreSQL Database
 PostgreSQL is a robust open-source relational database that supports a wide range of data types and advanced querying capabilities. In this section, we will explore how to integrate PostgreSQL with Vadalog by first populating a customer table from a CSV file and then reading data from it using two approaches: full table read and a custom query.
 
@@ -360,13 +391,10 @@ person_neo4j(CustomerId, Name, Surname, Email) :-
 
 % Bind the 'person_neo4j' concept to a Neo4j node with label 'Person'
 @output("person_neo4j").
-@bind("person_neo4j", "neo4j username='neo4j', password='myPassw', host='neo4j-host', port=7680", ":Person", "node").
+@bind("person_neo4j", "neo4j username='neo4j', password='myPassw', host='neo4j-host', port=7680", "neo4j", "(:Person)").
 
 % Map the 'person_neo4j' concept's fields to the Neo4j 'Person' node properties
-@mapping("person_neo4j", 0, "customerId(ID)", "int").
-@mapping("person_neo4j", 1, "name", "string").
-@mapping("person_neo4j", 2, "surname", "string").
-@mapping("person_neo4j", 3, "email", "string").
+@model("person_neo4j", "['customerId(ID):int', 'name:string', 'surname:string', 'email:string']").
 
 % Define the 'order' concept by extracting order details from the CSV file
 order(OrderId, Cost) :- 
@@ -374,7 +402,7 @@ order(OrderId, Cost) :-
 
 % Bind the 'order' concept to a Neo4j node with label 'Order'
 @output("order").
-@bind("order", "neo4j username='neo4j', password='myPassw', host='neo4j-host', port=7680", ":Order", "node").
+@bind("order", "neo4j username='neo4j', password='myPassw', host='neo4j-host', port=7680", "neo4j", "(:Order)").
 
 % Map the 'order' concept's fields to the Neo4j 'Order' node properties
 @mapping("order", 0, "orderId(ID)", "int").
@@ -386,7 +414,7 @@ order_person_rel_neo4j(OrderId, CustomerId) :-
 
 % Bind the 'order_person_rel_neo4j' concept to create a relationship between the 'Order' and 'Person' nodes in Neo4j
 @output("order_person_rel_neo4j").
-@bind("order_person_rel_neo4j", "neo4j username='neo4j', password='myPassw', host='neo4j-host', port=7680", "(:Order)-[IS_RELATED_TO]->(:Person)", "relationship").
+@bind("order_person_rel_neo4j", "neo4j username='neo4j', password='myPassw', host='neo4j-host', port=7680", "neo4j", "(:Order)-[IS_RELATED_TO]->(:Person)").
 
 % Map the 'order_person_rel_neo4j' concept's fields to the relationship between Order and Person
 @mapping("order_person_rel_neo4j", 0, "orderId:orderId(sID)", "int").
@@ -447,6 +475,118 @@ user(X) :- user_s3(X).
 
 % Declare the output concept 'user' for making the data available after reading from S3
 @output("user").
+```
+
+## Example: S3 Storage Integration
+
+You can use a similar approach to bind predicates to CSV files stored in Amazon S3:
+
+```prolog
+% Declare the input concept 'user_s3' to read data from the CSV file in the S3 bucket
+@input("user_s3").
+
+% Bind the 'user_s3' concept to the CSV file 'user.csv' located in the specified S3 bucket
+@bind("user_s3", "csv", "s3a://your-s3-bucket/", "user.csv").
+
+% Map the data as needed
+user(X) :- user_s3(X).
+
+% Declare the output concept
+@output("user").
+```
+---
+
+## Consuming Data via API
+
+This example shows how to connect to an external API endpoint that returns data in JSON, XML, CSV format
+
+Below is a full example for ingesting weather data from the Meteomatics API in CSV format.
+
+```prolog
+% Bind the predicate to the API endpoint
+@bind(
+    "meteo",
+    "api delimiter=';', username='my_username', password='my_password', responseFormat='csv'",
+    "https://api.meteomatics.com/",
+    "2025-06-09T00:00:00Z--2025-06-12T00:00:00Z:PT3H/t_2m:C,relative_humidity_2m:p/47.423336,9.377225/csv"
+).
+
+% Declare an output predicate
+@output("meteo_out").
+
+% Map the data to the output predicate
+meteo_out(Valid_Date, T_2m_C, Relative_humidity_2m_p) :- meteo(Valid_Date, T_2m_C, Relative_humidity_2m_p).
+```
+
+## Customization
+
+* **API format**: The pattern above supports any API providing CSV data. For JSON/XML APIs, adjust the format parameter and data mapping accordingly (e.g. use `json` or `xml` in the `@bind`).
+* **Authentication**: Many APIs support token-based auth (use `token='your_token'` instead of username/password).
+* **Delimiter**: Update the `delimiter` parameter to match your API's CSV format if not using semicolons.
+
+---
+
+## Text Files
+Text files can be processed directly in Vadalog to extract concepts and relationships from textual content. The text datasource supports various text formats and can extract structured information from unstructured text.
+
+### Example: Reading from Text File
+
+This example demonstrates how to read from a text file and extract structured information.
+
+```prolog
+% Define the data model for the 'location' concept
+@model("location","['Name:string', 'Description:string']").
+
+% Bind the 'location' concept to the text file
+@bind("location","text","/path/to/file","hansel_gretel_excerpt.txt").
+
+% Define a rule to extract Name and Description from the text file
+location_head(Name,Description) :- location(Name,Description).
+
+% Declare the output concept 'location_head' for making the processed data available
+@output("location_head").
+```
+
+## Binary Files
+Binary files support various formats including **PDF**, **JPG**, **PNG**, and other formats. Vadalog can extract concepts and relationships from binary files, making it suitable for processing documents and images.
+
+### Example: Reading from PDF File
+
+This example demonstrates how to read from a PDF file and extract structured information.
+
+```prolog
+% Bind the 'person' concept to the PDF file
+@bind("person","binaryfile","/path/to/file","hansel_gretel_excerpt.pdf").
+
+% Define a rule to extract Name and Role from the PDF file
+person_head(Name,Role) :- person(Name,Role).
+
+% Declare the output concept 'person_head' for making the processed data available
+@output("person_head").
+```
+
+### Example: Reading from Business Document (Invoice)
+
+Binary files also support structured business documents such as **ID documents**, **receipts**, **tax forms**, **mortgage documents**, and other standardized business documents. The API supports various document types including:
+
+- **Financial Documents**: check.us, bankStatement.us, payStub.us, creditCard, invoice
+- **ID Documents**: idDocument.driverLicense, idDocument.passport, idDocument.nationalIdentityCard, idDocument.residencePermit, idDocument.usSocialSecurityCard
+- **Receipts**: receipt.retailMeal, receipt.creditCard, receipt.gas, receipt.parking, receipt.hotel
+- **Tax Documents**: tax.us.1040.2023, tax.us.w2, tax.us.w4, tax.us.1095A, tax.us.1098, tax.us.1099 (various forms)
+- **Mortgage Documents**: mortgage.us.1003 (URLA), mortgage.us.1004 (URAR), mortgage.us.closingDisclosure
+- **Other Documents**: contract, healthInsuranceCard.us, marriageCertificate.us
+
+This example demonstrates how to read from an invoice PDF and extract structured business information.
+
+```prolog
+% Bind the 'iNV_pdf' concept to the invoice PDF file with document type specification
+@bind("iNV_pdf","binaryfile documentType='invoice'","/path/to/invoice","INV.pdf").
+
+% Define a rule to extract comprehensive invoice information from the PDF file
+iNV__pdf_head(CustomerName,CustomerId,PurchaseOrder,InvoiceId,InvoiceDate,DueDate,VendorName,VendorAddress,VendorAddressRecipient,CustomerAddress,CustomerAddressRecipient,BillingAddress,BillingAddressRecipient,ShippingAddress,ShippingAddressRecipient,SubTotal,TotalDiscount,TotalTax,InvoiceTotal,AmountDue,PreviousUnpaidBalance,RemittanceAddress,RemittanceAddressRecipient,ServiceAddress,ServiceAddressRecipient,ServiceStartDate,ServiceEndDate,VendorTaxId,CustomerTaxId,PaymentTerm,KVKNumber,PaymentUrl,PaymentDetails,TaxDetails,PaidInFourInstallements,Items) :- iNV_pdf(CustomerName,CustomerId,PurchaseOrder,InvoiceId,InvoiceDate,DueDate,VendorName,VendorAddress,VendorAddressRecipient,CustomerAddress,CustomerAddressRecipient,BillingAddress,BillingAddressRecipient,ShippingAddress,ShippingAddressRecipient,SubTotal,TotalDiscount,TotalTax,InvoiceTotal,AmountDue,PreviousUnpaidBalance,RemittanceAddress,RemittanceAddressRecipient,ServiceAddress,ServiceAddressRecipient,ServiceStartDate,ServiceEndDate,VendorTaxId,CustomerTaxId,PaymentTerm,KVKNumber,PaymentUrl,PaymentDetails,TaxDetails,PaidInFourInstallements,Items).
+
+% Declare the output concept 'iNV_2026_002_000521_pdf_head' for making the processed data available
+@output("iNV_2026_002_000521_pdf_head").
 ```
 
 ## HDFS File system
@@ -526,34 +666,196 @@ analytics_redshift_test(AnalysisId, Metric, Value) :-
 ```
 
 ## Google BigQuery
-Google BigQuery is a serverless, highly scalable, and cost-effective multi-cloud data warehouse. This example demonstrates querying data from a BigQuery dataset.
+Google BigQuery is a serverless, highly scalable, and cost-effective multi-cloud data warehouse. This example demonstrates configuring and querying data from a BigQuery dataset.
+
+#### Setting up Google Cloud Access
+
+This guide shows how to:
+
+1. Enable the required Google Cloud APIs  
+2. Create a service account for Prometheux jobs  
+3. Grant the minimum IAM roles (data access & Storage API)  
+4. Allow a human user to **impersonate** the service account and obtain short‑lived access tokens  
+5. Create a JSON key file  
+6. Generate a one‑hour access token  
+
+> **Project ID example:** `project-example-358816`  
+> **Service account name example:** `example-sa`  
+> **Human user example:** `example@gmail.com`
+
+---
+Open a Google Cloud Shell within your Google Project and execute the following commands:
+#### 1  Enable required APIs
+
+```bash
+gcloud services enable   compute.googleapis.com   bigquery.googleapis.com   bigquerystorage.googleapis.com   iamcredentials.googleapis.com   --project=project-example-358816
+```
+
+---
+
+#### 2  Create the service account
+
+```bash
+PROJECT_ID=project-example-358816
+SA_NAME=example-sa
+
+gcloud iam service-accounts create "$SA_NAME"   --project="$PROJECT_ID"   --display-name="Spark BigQuery SA"
+```
+
+Resulting e‑mail:  
+`example-sa@project-example-358816.iam.gserviceaccount.com`
+
+---
+
+#### 3  Grant **minimum BigQuery roles** to the service account
+
+```bash
+gcloud projects add-iam-policy-binding "$PROJECT_ID"   --member="serviceAccount:$SA_NAME@$PROJECT_ID.iam.gserviceaccount.com"   --role="roles/bigquery.dataViewer"
+
+gcloud projects add-iam-policy-binding "$PROJECT_ID"   --member="serviceAccount:$SA_NAME@$PROJECT_ID.iam.gserviceaccount.com"   --role="roles/bigquery.jobUser"
+
+gcloud projects add-iam-policy-binding "$PROJECT_ID"   --member="serviceAccount:$SA_NAME@$PROJECT_ID.iam.gserviceaccount.com"   --role="roles/bigquery.readSessionUser"
+```
+
+---
+
+#### 4  Allow your user to **impersonate** the service account
+
+```bash
+gcloud iam service-accounts add-iam-policy-binding   "$SA_NAME@$PROJECT_ID.iam.gserviceaccount.com"   --member="user:example@gmail.com"   --role="roles/iam.serviceAccountTokenCreator"
+```
+
+Verify:
+
+```bash
+gcloud iam service-accounts get-iam-policy   "$SA_NAME@$PROJECT_ID.iam.gserviceaccount.com"   --filter="bindings.role:roles/iam.serviceAccountTokenCreator"
+```
+
+---
+
+#### 5 Create a JSON key file
+
+If you prefer file‑based creds:
+
+```bash
+gcloud iam service-accounts keys create ~/gcp-credentials.json   --iam-account="$SA_NAME@$PROJECT_ID.iam.gserviceaccount.com"
+```
+
+Read the content
+```bash
+cat ~/gcp-credentials.json
+```
+
+Copy and paste it into a new file in your laptop or environment in your `/path/to/gcp-credentials.json`
+
+This authMode is the default one.
+
+Set the ENV var (in Docker or via `EXPORT`)
+`GOOGLE_APPLICATION_CREDENTIALS=/path/to/gcp-credentials.json`, **or** set the `bigquery.credentialsFile=/path/to/gcp-credentials.json` in the `pmtx.properties` configuration file **or** declare the path via `credentialsFile=/path/to/gcp-credentials.json` as an option in the bind annotation.
+
+---
+
+#### 6  Generate a one‑hour access token (impersonation)
+
+If you prefer token‑based creds:
+
+```bash
+gcloud auth print-access-token   --impersonate-service-account="$SA_NAME@$PROJECT_ID.iam.gserviceaccount.com"
+```
+Enable token-based authMode by setting set the `bigquery.authMode` in the `pmtx.properties`configuration file **or** declare it as an option in the bind annotation `authMode=gcpAccessToken` and set the ENV var (in Docker or via `EXPORT`)
+`GCP_ACCESS_TOKEN=my-token`, **or** set the `bigquery.gcpAccessToken=my-token` config property **or** pass it via `gcpAccessToken=my-token` as option in the bind annotation.
+
+### Example using credentials file
 
 ```prolog
-% Declare the input concept 'events_bigquery' to read data from the 'events' table in BigQuery
-@input("events_bigquery").
+% Bind the BigQuery table with credentials file
+@bind("table",
+      "bigquery credentialsFile=/path/to/gcp-credentials.json",
+      "project-example-358816",
+      "bigquery-public-data.thelook_ecommerce.order_items").
 
-% Bind the 'events_bigquery' concept to BigQuery using the JDBC connection details
-@bind("events_bigquery", "bigquery projectId='myProjectId', dataset='myDataset', accessKey='myAccessKey', secretKey='mySecretKey'", 
-      "events", "event_data").
+% Rule to project the first three columns from the BigQuery table
+bigquery_table(X,Y,Z) :- table(X,Y,Z).
 
-% Define a rule to extract EventId, EventType, and EventTimestamp from the 'events' table in BigQuery
-events_bigquery_test(EventId, EventType, EventTimestamp) :- 
-        events_bigquery(EventId, EventType, EventTimestamp).
+% Post-process the BigQuery table to limit the results to 10
+@post("bigquery_table","limit(10)").
 
-% Declare the output concept 'events_bigquery_test' for making the processed data available
-@output("events_bigquery_test").
+% Define the output for the BigQuery table
+@output("bigquery_table").
+```
+
+### Example using token
+
+```prolog
+% Bind the BigQuery table with token
+@bind("table",
+      "bigquery authMode=gcpAccessToken, token='my-gcp-access-token'",
+      "project-example-358816",
+      "bigquery-public-data.thelook_ecommerce.order_items").
+
+% Rule to project the first three columns from the BigQuery table
+bigquery_table(X,Y,Z) :- table(X,Y,Z).
+
+% Define the output for the BigQuery table
+@output("bigquery_table").
+% Post-process the BigQuery table to limit the results to 10
+@post("bigquery_table","limit(10)").
+```
+
+### Example via query
+
+```prolog
+% Bind a BigQuery query to retrieve product revenue data
+@qbind("query",
+       "bigquery credentialsFile=src/test/resources/bigquery-credentials.json",
+       "quantum-feat-358816",
+       "SELECT product_id, SUM(sale_price) AS revenue FROM `bigquery-public-data.thelook_ecommerce.order_items` 
+        WHERE sale_price > 100 GROUP BY product_id ORDER BY revenue DESC LIMIT 10").
+
+% Define a rule to map the query results to the bigquery_query predicate
+bigquery_query(X,Y) :- query(X,Y).
+
+% Declare the output for the bigquery_query predicate
+@output("bigquery_query").
 ```
 
 ## Snowflake
-Snowflake is a cloud-based data warehousing service that allows for data storage, processing, and analytics. This example demonstrates reading data from a Snowflake table.
+Snowflake is a cloud-based data warehousing service that allows for data storage, processing, and analytics. 
+
+### How to Retrieve Your Snowflake Connection Info for reading or writing tables
+
+To obtain the connection details for your Snowflake account:
+
+1. Click the **user icon** in the **bottom-left corner** of the Snowflake UI.
+2. Select **"Connect a tool to Snowflake"**.
+3. Go to the **"Connectors / Drivers"** section.
+4. Choose **"JDBC"** as the connection method.
+5. Select your **warehouse**, **database**, and set **"Password"** as the authentication method.
+
+This will generate a JDBC connection string in the following format:
+
+```
+jdbc:snowflake://A778xxx-IVxxxx.snowflakecomputing.com/?user=PROMETHEUX&warehouse=COMPUTE_WH&db=TEST&schema=PUBLIC&password=my_password
+```
+
+From this string, you can extract the following values for your bind configuration:
+
+- `url = 'A778xxx-IVxxxx.snowflakecomputing.com'`
+- `username = 'PROMETHEUX'`
+- `password = 'my_password'`
+- `warehouse = 'COMPUTE_WH'`
+- `database = 'TEST'` (note: database names are usually uppercase)
+
+
+This example demonstrates reading data from a Snowflake table.
 
 ```prolog
 % Declare the input concept 'transactions_snowflake' to read data from the 'transactions' table in Snowflake
 @input("transactions_snowflake").
 
 % Bind the 'transactions_snowflake' concept to the Snowflake database using the JDBC connection details
-@bind("transactions_snowflake", "snowflake account='myAccount', username='myUser', password='myPassword', warehouse='myWarehouse', database='myDatabase'", 
-      "transactions", "transaction_data").
+@bind("transactions_snowflake", "snowflake url='A778xxx-IVxxxx.snowflakecomputing.com', username='PROMETHEUX', password='myPassword', warehouse='COMPUTE_WH'", 
+      "TEST", "transaction_data").
 
 % Define a rule to extract TransactionId, CustomerId, and Amount from the 'transactions' table in Snowflake
 transactions_snowflake_test(TransactionId, CustomerId, Amount) :- 
@@ -562,3 +864,48 @@ transactions_snowflake_test(TransactionId, CustomerId, Amount) :-
 % Declare the output concept 'transactions_snowflake_test' for making the processed data available
 @output("transactions_snowflake_test").
 ```
+
+## Databricks
+Databricks is a cloud-based platform for data engineering and data science.
+
+This example demonstrates writing data to a Databricks table.
+
+```prolog
+% Declare the input concept 'sales_postgres' to read data from the 'sales' table in Postgres
+@input("sales_postgres").
+
+% Bind the 'sales_postgres' concept to the Postgres database using the JDBC connection details
+@qbind("sales_postgres","postgresql host='postgres-host', port=5432, username='prometheux', password='myPassw'",
+      "postgres", "select sale_id, product_id, sale_amount from sales").
+
+% Define a rule to extract SaleId, ProductId, and SaleAmount from the 'sales' table in Postgres
+sales_databricks(SaleId, ProductId, SaleAmount) :- 
+        sales_postgres(SaleId, ProductId, SaleAmount).
+
+% Declare the output concept 'sales_databricks' to write data to the Databricks table   
+@output("sales_databricks").
+@model("sales_databricks", "['sale_id:int', 'productId:int', 'sale_amount:int']").
+
+% Bind the 'sales_databricks' concept to the Databricks cluster using the JDBC connection details
+@bind("sales_databricks","databricks batchSize=5, password='dapixxxx', host='dbc-xxxx-02fe.cloud.databricks.com'",
+      "/sql/1.0/warehouses/3283xxxx", "sales").
+```
+
+This example demonstrates reading data from a Databricks table.
+
+```prolog
+% Declare the input concept 'sales_databricks' to read data from the 'sales' table in Databricks
+@input("sales_databricks").
+
+% Bind the 'sales_databricks' concept to the Databricks cluster using the JDBC connection details
+@qbind("sales_databricks","databricks fetchSize=5, password='dapixxxx', host='dbc-xxxx-02fe.cloud.databricks.com'",
+      "/sql/1.0/warehouses/3283xxxx", "select sale_id, productId from sales").
+
+% Define a rule to extract ProductId from the 'sales' table in Databricks
+sales(Product) :- 
+        sales_databricks(Sale, Product).
+
+% Declare the output concept 'sales' to return the processed data
+@output("sales").
+```
+

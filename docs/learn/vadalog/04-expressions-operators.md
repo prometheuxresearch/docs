@@ -28,7 +28,7 @@ _multi-facts operators_ (called **aggregation operators**).
 | list          | `concat`, `contains`                                                                              |
 | integer       | (monadic) `-`, `*`, `/`, `+`, `-`, `( )`                                                                |
 | double        | (monadic) `-`, `*`, `/`, `+`, `-`, `( )`                                                                |
-| Boolean       | `&&` (and), `\|\|` (or), `not`, `( )` for associativity                                                    |
+| Boolean       | `&&` and([args], `\|\|`, or(args), `not`, `( )` for associativity                                                    |
 | set           | `\|` (union), `&` (intersection), `( )` for associativity                                                  |
 
 
@@ -75,6 +75,344 @@ Precedence can be altered with parentheses.
 
 The Boolean operators are and (`&&`), or (`||`) or `not`. They can be used to
 combine Boolean data types.
+
+
+### Logical operators
+
+Vadalog supports a comprehensive set of logical operators that allow for combining and manipulating Boolean expressions. These operators can be used to evaluate complex logical conditions and can be assigned to variables for further processing.
+
+#### `and(args)`
+The `and(args)` operator evaluates to true if all the conditions in `args` are true. You can assign the result to a variable and use `==#T` to enforce that all conditions must be true.
+
+**Example 1: Basic `and(args)` usage**
+
+This example shows the use of the `and(args)` operator to evaluate multiple conditions on the variable `X`. The rule `b(X, IsIn)` checks if `X` is greater than 2, less than 5, and equal to 3. The result of this conjunction is stored in `IsIn`.
+
+```prolog
+@output("b").
+a(1).
+a(2).
+a(3).
+a(4).
+a(5).
+b(X, IsIn) :- a(X), IsIn=and(X>2, X<5, X==3).
+```
+
+**Expected output:**
+
+```prolog
+b(1, #F).
+b(2, #F).
+b(3, #T).
+b(4, #F).
+b(5, #F).
+```
+
+#### `or(args)`
+The `or(args)` operator evaluates to true if any of the conditions in `args` are true. You can assign the result to a variable and use `==#T` to enforce that at least one condition must be true.
+
+**Example 2: Basic `or(args)` usage**
+
+This example illustrates the use of the `or(args)` operator to evaluate multiple conditions on the variable `X`. The rule `b(X, IsIn)` checks if `X` is less than 2, equal to 4, or equal to 6. The result of this disjunction is stored in `IsIn`.
+
+```prolog
+@output("b").
+a(1).
+a(2).
+a(3).
+a(4).
+a(5).
+b(X, IsIn) :- a(X), IsIn=or(X<2, X==4, X==6).
+```
+
+**Expected output:**
+
+```prolog
+b(1, #T).
+b(2, #F).
+b(3, #F).
+b(4, #T).
+b(5, #F).
+```
+
+#### `not(expression)`
+The `not(expression)` operator negates the Boolean value of the expression. It returns `#T` if the expression is `#F`, and `#F` if the expression is `#T`.
+
+**Example 3: Basic `not(expression)` usage**
+
+This example demonstrates the use of the `not` operator to negate a condition.
+
+```prolog
+@output("b").
+a(1).
+a(2).
+a(3).
+b(X, IsNotTwo) :- a(X), IsNotTwo=not(X==2).
+```
+
+**Expected output:**
+
+```prolog
+b(1, #T).
+b(2, #F).
+b(3, #T).
+```
+
+#### `xor(expression1, expression2)`
+The `xor(expression1, expression2)` operator (exclusive or) evaluates to true if exactly one of the two expressions is true, but not both.
+
+**Example 4: Basic `xor(expression1, expression2)` usage**
+
+This example shows the exclusive or operation between two conditions.
+
+```prolog
+@output("b").
+a(1).
+a(2).
+a(3).
+b(X, IsExclusive) :- a(X), IsExclusive=xor(X>1, X<3).
+```
+
+**Expected output:**
+
+```prolog
+b(1, #F).
+b(2, #F).
+b(3, #T).
+```
+
+#### `nand(expression1, expression2)`
+The `nand(expression1, expression2)` operator (not and) evaluates to true if at least one of the expressions is false.
+
+**Example 5: Basic `nand(expression1, expression2)` usage**
+
+This example demonstrates the NAND operation.
+
+```prolog
+@output("b").
+a(1).
+a(2).
+a(3).
+b(X, IsNand) :- a(X), IsNand=nand(X>1, X<3).
+```
+
+**Expected output:**
+
+```prolog
+b(1, #T).
+b(2, #F).
+b(3, #T).
+```
+
+#### `nor(expression1, expression2)`
+The `nor(expression1, expression2)` operator (not or) evaluates to true only if both expressions are false.
+
+**Example 6: Basic `nor(expression1, expression2)` usage**
+
+This example demonstrates the NOR operation.
+
+```prolog
+@output("b").
+a(1).
+a(2).
+a(3).
+b(X, IsNor) :- a(X), IsNor=nor(X>1, X<3).
+```
+
+**Expected output:**
+
+```prolog
+b(1, #F).
+b(2, #F).
+b(3, #F).
+```
+
+#### `xnor(expression1, expression2)`
+The `xnor(expression1, expression2)` operator (exclusive nor) evaluates to true if both expressions have the same Boolean value.
+
+**Example 7: Basic `xnor(expression1, expression2)` usage**
+
+This example demonstrates the XNOR operation.
+
+```prolog
+@output("b").
+a(1).
+a(2).
+a(3).
+b(X, IsXnor) :- a(X), IsXnor=xnor(X>1, X<3).
+```
+
+**Expected output:**
+
+```prolog
+b(1, #T).
+b(2, #T).
+b(3, #F).
+```
+
+#### `implies(expression1, expression2)`
+The `implies(expression1, expression2)` operator (implication) evaluates to false only if the first expression is true and the second is false.
+
+**Example 8: Basic `implies(expression1, expression2)` usage**
+
+This example demonstrates logical implication.
+
+```prolog
+@output("b").
+a(1).
+a(2).
+a(3).
+b(X, IsImplied) :- a(X), IsImplied=implies(X>1, X<3).
+```
+
+**Expected output:**
+
+```prolog
+b(1, #T).
+b(2, #T).
+b(3, #F).
+```
+
+#### `iff(expression1, expression2)`
+The `iff(expression1, expression2)` operator (if and only if) evaluates to true if both expressions have the same Boolean value.
+
+**Example 9: Basic `iff(expression1, expression2)` usage**
+
+This example demonstrates the if and only if operation.
+
+```prolog
+@output("b").
+a(1).
+a(2).
+a(3).
+b(X, IsIff) :- a(X), IsIff=iff(X>1, X<3).
+```
+
+**Expected output:**
+
+```prolog
+b(1, #T).
+b(2, #T).
+b(3, #F).
+```
+
+#### `if(condition, true_value, false_value)`
+The `if(condition, true_value, false_value)` operator provides conditional logic. It returns `true_value` if the condition is true, otherwise it returns `false_value`.
+
+**Example 10: Basic `if(condition, true_value, false_value)` usage**
+
+This example demonstrates conditional logic using the `if` operator to classify numbers as positive or non-positive.
+
+```prolog
+@output("b").
+a(1).
+a(-1).
+b(Result, Value) :- a(Value), GTZero=Value>0, Result=if(GTZero, "positive", "non-positive").
+```
+
+**Expected output:**
+
+```prolog
+b("positive", 1).
+b("non-positive", -1).
+```
+
+**Example 11: String condition with `if` operator**
+
+This example uses the `if` operator to check if a string is empty and return appropriate labels.
+
+```prolog
+@output("b").
+a("").
+a("NonEmpty").
+a(" ").
+b(El, IsEmpty) :- a(El), IsEmpty=if(is_empty(El), "is_empty", "is_not_empty").
+```
+
+**Expected output:**
+
+```prolog
+b("", "is_empty").
+b("NonEmpty", "is_not_empty").
+b(" ", "is_not_empty").
+```
+
+**Example 12: Null check with `if` operator**
+
+This example uses the `if` operator to check if a string is not null and return appropriate labels.
+
+```prolog
+@output("b").
+a("hello").
+a("not_null").
+b(El, State) :- a(El), State=if(is_not_null(El), "not_null", "is_null").
+```
+
+**Expected output:**
+
+```prolog
+b("hello", "not_null").
+b("not_null", "not_null").
+```
+
+**Example 13: Nested `if` statements for credit rating**
+
+This example demonstrates complex nested `if` statements to implement a credit rating system based on credit scores. Each nested `if` evaluates a range of credit scores and assigns a corresponding rating value.
+
+```prolog
+@output("credit_rating").
+credit_score(450.0).
+credit_score(580.0).
+credit_score(720.0).
+credit_score(780.0).
+credit_score(820.0).
+credit_score(850.0).
+credit_score(920.0).
+
+credit_rating(Val) :- credit_score(Score), Val = if(Score < 500.0, -3.250,
+                                                    if(and(Score >= 500.0, Score < 600.0), -2.150,
+                                                    if(and(Score >= 600.0, Score < 700.0), -1.200,
+                                                    if(and(Score >= 700.0, Score < 750.0), -0.500,
+                                                    if(and(Score >= 750.0, Score < 800.0), 0.250,
+                                                    if(and(Score >= 800.0, Score < 850.0), 0.750,
+                                                    if(and(Score >= 850.0, Score < 900.0), 1.200,
+                                                    if(and(Score >= 900.0, Score < 950.0), 1.650,
+                                                    if(and(Score >= 950.0, Score < 1000.0), 2.100,
+                                                    if(and(Score >= 1000.0, Score < 1100.0), 2.550, 
+                                                                                            3.000)))))))))).
+```
+
+**Expected output:**
+
+```prolog
+credit_rating(-3.250).
+credit_rating(-2.150).
+credit_rating(-1.200).
+credit_rating(-0.500).
+credit_rating(0.250).
+credit_rating(0.750).
+credit_rating(1.200).
+```
+
+**Example 14: Using `and(args)` with condition enforcement**
+
+In this example, the `and(args)` operator is used to evaluate conditions on `X`, and the result is compared to `#T` to enforce that all conditions must be true. The rule `b(X)` only succeeds if `X` is greater than 2, less than 5, and equal to 3.
+
+```prolog
+@output("b").
+a(1).
+a(2).
+a(3).
+a(4).
+a(5).
+b(X) :- a(X), IsIn=and(X>2, X<5, X==3), IsIn==#T.
+```
+
+**Expected output:**
+
+```prolog
+b(3).
+```
 
 ### String operators
 
@@ -292,7 +630,10 @@ operators are:
 - `log(X)`: computes the natural logarithm of `X`.
 - `pow(X,Y)`: computes `X` to the power of `Y`. Returns a value of type double.
 - `exp(X)`: computes `e^X`.
-- `round(X)`: returns the closest integer to `X`.
+- `round(X)`: returns `X` rounded to 0 decimal with HALF_UP round mode.
+- `round(X,Y)`: returns `X` rounded to `Y` decimal places with HALF_UP round mode if `scale` is greater than or equal to 0 or at integral part when `scale` is less than 0.
+- `bround(X)` : returns `X` rounded to 0 decimal with HALF_UP round mode.
+- `bround(X,Y)` : returns `X` rounded to `Y` decimal places with HALF_UP round mode if `scale` is greater than or equal to 0 or at integral part when `scale` is less than 0.
 - `ceil(X)`: computes the smallest integer `Y` that is equal to or greater than
   `X`.
 - `floor(X)`: computes the largest integer `Y` that is equal to or smaller than
@@ -365,7 +706,7 @@ collections, such as lists and sets..
 
 - `size(X)`: returns the size of the collection `X`.
 - `contains(X, Y)`: returns `true` if `Y` is in `X`, `false` otherwise.
-- `containsAll(X, Y)`: returns `true` if collection X contains all the elements
+- `contains_all(X, Y)`: returns `true` if collection X contains all the elements
   of collection Y, `false` otherwise.
 - `sort(X)`: returns a copy of the list `X` with elements sorted in ascending
   order.
@@ -378,11 +719,63 @@ collections, such as lists and sets..
   elements from the collection `Y`.
 - `difference(X, Y)`: returns a copy of the collection `X` which does not
   contain elements from the collection `Y`.
+- `transform(Arr,StringLambdaF)`: Returns an array of elements after applying a transformation to each element in the input array.
+- `filter(Arr,StringLambdaF)`: Returns an array of elements for which a predicate holds in a given array.
 
 To use any of these, add the library prefix `collections:`. For example:
 
 ```prolog
 rule(X, Size) :- fact(X), Size = collections:size(X).
+```
+Lambda `filter` and `transform` functions are compliant with Apache Spark SQL functions Library nomenclature.
+
+Examples using lambda functions:
+
+```prolog
+input([1,2,3]).
+
+transformed(T) :- input(X), T = collections:transform(X, "x -> x+1").
+
+input([1,2,3]).
+
+transformed(T) :- input(X), T = transform(X, "(x, i) -> x + i"). % prepending collections: is optional for transform
+
+input([1,2,3,4]).
+filtered(Out) :- input(Arr), Out = filter(Arr, "x -> x>2"). % prepending collections: is optional for filter
+
+input([10,20,30,40]).
+filtered(Out) :- input(Arr), Out = collections:filter(Arr, "(x, i) -> i % 2 != 0").
+```
+
+Example using lambda functions to group databases related to specific pharmaceutical components from the `robokopkg.renci.org` KG
+
+```prolog
+@qbind("node","neo4j host='robokopkg.renci.org'","neo4j",
+                    "
+                    MATCH (n:`biolink:Gene`) RETURN 
+                    'Gene', n.equivalent_identifiers 
+                    LIMIT 50000
+                    ").
+@qbind("node","neo4j host='robokopkg.renci.org'","neo4j",
+                    "
+                    MATCH (n:`biolink:Pathway`) RETURN 
+                    'Pathway', n.equivalent_identifiers 
+                    LIMIT 50000
+                    ").
+@qbind("node","neo4j host='robokopkg.renci.org'","neo4j",
+                    "
+                    MATCH (n:`biolink:Disease`) RETURN 
+                    'Disease', n.equivalent_identifiers 
+                    LIMIT 50000
+                    ").
+
+node_equivalent_identifiers_all(Component, Equivalent_identifiers_All) :- 
+                                    node(Component, Equivalent_identifiers), 
+                                    Equivalent_identifiers_All = munion(Equivalent_identifiers). % flat all databases in a list and group by component
+element_to_database(Component, Equivalent_identifiers_all_distinct) :- 
+                                    node_equivalent_identifiers_all(Component, Equivalent_identifiers_All), 
+                                    Equivalent_identifiers_all_distinct = collections:distinct(transform(Equivalent_identifiers_All,"x -> element_at(split(x,':'),1)")). % get the database name by cleaning up the equivalent identifier
+@output("element_to_database").
 ```
 
 ### Null Functions
@@ -399,35 +792,173 @@ choice(Chosen) :- choose_from(OptionA, OptionB),
 
 ### Cast Datatypes Functions
 The library `dataTypes` implements functions for casting of data types 
-- `asString(X)`: casts X to string datatype.
-- `asInteger(X)`: casts X to int datatype.
-- `asDouble(X)`: casts X to double datatype.
-- `asLong(X)`: casts X to long datatype.
-- `asDate(X)`: casts X to date datatype.
+- `as_string(X)`: casts X to string datatype.
+- `as_int(X)`: casts X to int datatype.
+- `as_double(X)`: casts X to double datatype.
+- `as_long(X)`: casts X to long datatype.
+- `as_date(X)`: casts X to date datatype.
 
-To use any of these, add the library prefix `dataTypes:`. For example:
-
+#### Example of casting to date
 ```prolog
-a(D) :- b(X), D = dataTypes:asDate("22-02-2022").
+a(D) :- b(X), D = as_date("2022-02-22").
 ```
+
+#### Example of casting raw string to date
+```prolog
+@output("b").
+a("29/10/2023").
+b(DateValue) :- a(Input), DateValue=as_date(date:to_timestamp(Input, "dd/MM/yyyy")).
+```
+
+
+
+### Interval Operators
+
+The interval operators allow for checking if a value falls within a specified range. These operators can be used to define conditions with different inclusivity options.
+
+#### `between`
+The `between` operator checks if a value is strictly between two other values, excluding the boundaries.
+
+Example:
+```prolog
+% Check if X is strictly between 5 and 10 (excludes 5 and 10)
+range_check(X) :- b(X), Between = between(X, 5, 10), Between == #T.
+```
+
+#### `_between` (Left Inclusive)
+The `_between` operator checks if a value is between two other values, including the left boundary but excluding the right boundary.
+
+Example:
+```prolog
+% Check if X is between 5 and 10 (includes 5, excludes 10)
+left_inclusive_check(X) :- b(X), Between = _between(X, 5, 10), Between == #T.
+```
+
+#### `between_` (Right Inclusive)
+The `between_` operator checks if a value is between two other values, excluding the left boundary but including the right boundary.
+
+Example:
+```prolog
+% Check if X is between 5 and 10 (excludes 5, includes 10)
+right_inclusive_check(X) :- b(X), Between = between_(X, 5, 10), Between == #T.
+```
+
+#### `_between_` (Left and Right Inclusive)
+The `_between_` operator checks if a value is between two other values, including both boundaries.
+
+Example:
+```prolog
+% Check if X is between 5 and 10 (includes both 5 and 10)
+inclusive_check(X) :- b(X), Between = _between_(X, 5, 10), Between == #T.
+```
+
+
 
 ### Temporal Functions
 The library `date` implements functions for manipulation of temporal operations 
-- `currentDate()`: returns the current date at the start of reasoning evaluation as a date.
-- `currentTimestamp()`: returns the current date at the start of query evaluation as a date.
-- `nextDay(Date)`: returns the date that is one days after Date
+- `current_date()`: returns the current date at the start of reasoning evaluation as a date.
+- `current_timestamp()`: returns the current date at the start of query evaluation as a date.
+- `next_day(Date)`: returns the date that is one days after Date
 - `add(Start,Days)`: returns the date that is Days days after Start
-- `prevDay(Date)`: returns the date that is one days before Date
+- `prev_day(Date)`: returns the date that is one days before Date
 - `sub(Start,Days)`: returns the date that is Days days before Start
 - `diff(End,Start)`: returns the number of days from Start to End.
+- `to_timestamp(DateExpr, Format)` : returns a timestamp value by converting the given input string according to the specified format.
+- `format(DateExpr, Format)`: date/timestamp/string to a value of string in the format specified by the date format given by the second argument
 
-To use any of these, add the library prefix `date:`. For example:
+This program defines rules for working with dates. The rule `a(D)` assigns the current date to `D`. The rule `next_day(Next)` calculates the next day from the current date. The rule `add_ten_days(Next)` adds ten days to the current date.
 
 ```prolog
-a(D) :- b(X), D = date:currentDate().
-next_day(Next) :- a(D), Next = date:nextDay(D).
+a(D) :- b(X), D = date:current_date().
+next_day(Next) :- a(D), Next = date:next_day(D).
 add_ten_days(Next) :- a(D), Next = date:add(D,10).
 ```
+
+This program defines rules for converting and formatting date strings. The `myDates` facts store raw date strings. The rule `tmpDates(Raw, Ts)` converts raw date strings to timestamps. The rule `convertedDates(Raw, Formatted)` formats the timestamps into ISO 8601 format.
+
+```prolog
+myDates("23-2-11 16:47:35,985 +0000").
+myDates("23-2-12 17:00:00,123 +0000").
+
+tmpDates(Raw, Ts) :-
+  myDates(Raw),
+  Ts = date:to_timestamp(Raw, "yy-M-dd HH:mm:ss,SSS Z").
+
+convertedDates(Raw, Formatted) :-
+  tmpDates(Raw, Ts),
+  Formatted = date:format(Ts, "yyyy-MM-dd'T'HH:mm:ssZ").
+```
+
+## Embeddings Functions
+
+The embeddings library provides functions for working with vector representations of data, enabling similarity calculations and semantic analysis.
+
+### `embeddings:vectorize`
+
+The `embeddings:vectorize` function converts input arguments into vector embeddings using OpenAI's embedding model. This function takes multiple arguments and returns an array of double values representing the semantic vector.
+
+**Example:**
+```prolog
+person("Luca","Rossi").
+
+% Convert person data to embeddings
+person_embeddings(Vector) :- person(X,Y,Z), Vector = embeddings:vectorize(X,Y).
+
+@output("person_embeddings").
+```
+
+### `embeddings:cosine_sim`
+
+The `embeddings:cosine_sim` function calculates the cosine similarity between two embedding vectors. Cosine similarity measures the cosine of the angle between two vectors, providing a value between -1 and 1, where 1 indicates identical vectors and 0 indicates orthogonal vectors.
+
+**Example:**
+```prolog
+person("Luca","Rossi").
+employee("Luca","Red").
+
+% Convert data to embeddings
+person_embeddings(Vector) :- person(X,Y,Z), Vector = embeddings:vectorize(X,Y,Z).
+employee_embeddings(Vector) :- employee(X,Y,Z), Vector = embeddings:vectorize(X,Y,Z).
+
+% Calculate cosine similarity between embeddings
+cosineSim(SimilarityScore) :- 
+    employee_embeddings(Vector_1), 
+    person_embeddings(Vector_2), 
+    SimilarityScore = embeddings:cosine_sim(Vector_1, Vector_2).
+
+@output("cosineSim").
+```
+
+**Complete Example with Similarity Analysis:**
+This example demonstrates how to use both functions together to analyze semantic similarity between different data representations:
+
+```prolog
+% Sample data
+person("Luca","Rossi",1993).
+employee("Luca","Red",1993).
+person("Maria","Bianchi",1985).
+employee("Maria","Green",1985).
+
+% Generate embeddings for person data
+person_embeddings(Name, Vector) :- 
+    person(Name,Surname,Year), 
+    Vector = embeddings:vectorize(Name,Surname,Year).
+
+% Generate embeddings for employee data  
+employee_embeddings(Name, Vector) :- 
+    employee(Name,Color,Year), 
+    Vector = embeddings:vectorize(Name,Color,Year).
+
+% Calculate similarity between corresponding person and employee embeddings
+similarity_analysis(Name, SimilarityScore) :- 
+    person_embeddings(Name, PersonEmbedding),
+    employee_embeddings(Name, EmployeeEmbedding),
+    SimilarityScore = embeddings:cosine_sim(PersonEmbedding, EmployeeEmbedding).
+
+@output("similarity_analysis").
+```
+
+This program will generate embeddings for both person and employee data, then calculate the cosine similarity between corresponding entries to measure how semantically similar the different representations are.
 
 ## Negation
 
@@ -658,18 +1189,19 @@ extended version of the manual further examples.
 
 ## Aggregations
 
-Aggregations are functions for incremental and recursion-friendly
+Monotonic aggregations are functions for incremental and recursion-friendly
 computation of aggregate values. They mainstain state outside of the program, allowing you to perform calculations across recursive steps.
 
 The functions are:
 
-- `msum(X, [K1, …, Kn], [C1, …, Cm])` for the incremental computation of sums
-- `mprod(X, [K1, …, Kn], [C1, …, Cm])` for the incremental computation of
+- `msum(X, [K1, …, Kn])` for the incremental computation of sums
+- `mprod(X, [K1, …, Kn])` for the incremental computation of
   products
-- `mcount(K1, K2, …)` for the incremental computation of counts
-- `mmin(X, K1, K2, …)` for the incremental computation of minimal
-- `mmax(X, K1, K2, …)` for the incremental computation of maximal
-- `munion(X, K1, K2, …)` for the incremental union of sets
+- `mcount([K1])` for the incremental computation of counts
+- `mmin(X, [K1, …, Kn)` for the incremental computation of minimal
+- `mmax(X, [K1, …, Kn])` for the incremental computation of maximal
+- `munion(X, [K1, …, Kn])` for the incremental union of sets
+- `mavg(X)` for the incremental computation of averages
 
 Upon invocation, all functions return the currently accumulated value for the
 respective aggregate. All functions, except `mcount`, take as first argument the
@@ -681,6 +1213,17 @@ and the third argument is the list of contributors.
 Finally, all functions besides `msum` and `mprod` take a list of values, called
 keys, to be used as a group identifier (i.e. they play the role of group by
 variables in standard SQL).
+
+Some aggregate functions cannot be used inside a recursive rule because the
+value they return may change in a non-monotonic way when new facts arrive
+(e.g., the “winner” of an election can be replaced by a later vote).
+These functions are fully supported in non-recursive queries or as a
+post-processing step after the recursive evaluation has converged.
+
+These functions are:
+- `maxcount()` selects, for each group identified by the keys, the row that occurs most often and the corresponding count.
+
+The framework currently provides one such function:
 
 As an example consider the following program:
 
@@ -702,6 +1245,7 @@ pmin(X, Sum) :- a(X, Y, Z, U), Sum = mmin(Y).
 pmax(X, Sum) :- a(X, Y, Z, U), Sum = mmax(Y).
 ccount(X, Sum) :- a(X, Y, Z, U), Sum = mcount(X).
 ccount_other(X, Sum) :- a(X, Y, Z, U), Sum = mcount(X).
+aavg(X, AVG) :- a(X, Y, Z, U), AVG = mavg(Y).
 
 @output("ssum").
 @output("pprod").
@@ -709,14 +1253,58 @@ ccount_other(X, Sum) :- a(X, Y, Z, U), Sum = mcount(X).
 @output("pmax").
 @output("ccount").
 @output("ccount_other").
+@output("aavg").
 ```
 
-After execution, the relation `ssum` could contain the following tuples:
+After execution, the relation `ssum` contains the following tuples:
 
 ```prolog
 ssum("one", 12.0)
 ssum("two", 19.0)
 ```
+
+The relation `pprod` contains the following tuples:
+
+```prolog
+pprod("one", 360.0)
+pprod("two", 12600.0)
+```
+
+The relation `pmin` contains the following tuples:
+
+```prolog
+pmin("one", 1.0)
+pmin("two", 2.0)
+```
+
+The relation `pmax` contains the following tuples:
+
+```prolog
+pmax("one", 6.0)
+pmax("two", 7.0)
+```
+
+The relation `ccount` contains the following tuples:
+
+```prolog
+ccount("one", 4)
+ccount("two", 5)
+```
+
+The relation `ccount_other` contains the following tuples:
+
+```prolog
+ccount_other("one", 4)
+ccount_other("two", 5)
+```
+
+The relation `aavg` contains the following tuples:
+
+```prolog
+aavg("one", 3.0)
+aavg("two", 4.0)
+```
+
 
 A rule with an assignment using an aggregation operator has the general form:
 
@@ -957,3 +1545,87 @@ c(15552,"Alternative").
 
 synonyms(Id, NewSynonyms) :- c(Id,Synonym), NewSynonyms = munion({}|Synonym).
 ```
+
+The aggregate `maxcount` returns the key tuple with the highest frequency
+
+```prolog
+@output("hotspot").
+affects("Component1","Component2").
+affects("Component3","Component2").
+affects("Component4","Component2").
+affects("Component5","Component1").
+affects("Component2","Component1").
+affects("Component6","Component7").
+hotspot(Component2,MaxCount) :- affects(Component1,Component2), MaxCount=maxcount().
+```
+
+The expected output is
+
+```
+hotspot("Component2", 3).
+```
+
+## LLM Integration
+
+The `llm:generate` function uses LLMs to generate content based on a prompt template and input arguments. This function allows you to create dynamic, AI-generated responses by substituting variables in a prompt with actual values.
+
+**Syntax:**
+```prolog
+llm:generate(prompt, outputType, arg1, arg2, ..., argN)
+```
+
+**Parameters:**
+- `prompt`: A string template containing placeholders like `${arg_1}`, `${arg_2}`, etc.
+- `outputType`: The expected return type (string, int, double, float, boolean, or list variants)
+- `arg1, arg2, ..., argN`: Arguments that will substitute the placeholders in the prompt
+
+**Supported Output Types:**
+- `string`, `int`, `double`, `boolean`
+- `list<string>`, `list<int>`, `list<double>`, `list<float>`, `list<boolean>`
+
+**Example:**
+```prolog
+% Sample data: characters from a fantasy world
+character("Gandalf", "Wizard", "Middle-earth").
+character("Aragorn", "Ranger", "Gondor").
+character("Legolas", "Elf", "Mirkwood").
+character("Gimli", "Dwarf", "Moria").
+
+% Generate epic battle descriptions using LLM
+epic_battle_description(CharName, CharClass, BattleScene) :- 
+    character(CharName, CharClass, Realm),
+    BattleScene = llm:generate(
+        "Create an epic battle scene where ${arg_1}, a legendary ${arg_2} from ${arg_3}, faces off against a powerful enemy. Make it dramatic and heroic, max 2 sentences.",
+        "string",
+        CharName, CharClass, Realm
+    ).
+
+% Generate character backstory using LLM
+character_backstory(CharName, Backstory) :- 
+    character(CharName, CharClass, Realm),
+    Backstory = llm:generate(
+        "Write a compelling origin story for ${arg_1}, a ${arg_2} from ${arg_3}. Focus on their greatest achievement and deepest secret. Max 3 sentences.",
+        "string",
+        CharName, CharClass, Realm
+    ).
+
+@output("epic_battle_description").
+@output("character_backstory").
+```
+
+**How it works:**
+1. The prompt template contains placeholders `${arg_1}`, `${arg_2}`, etc.
+2. The function substitutes these placeholders with the provided arguments
+3. The LLM processes the completed prompt and generates a response
+4. The response is cast to the specified output type
+
+**Prompt Template Examples:**
+- `"Generate a summary for ${arg_1}":` - Single argument substitution
+- `"Compare ${arg_1} and ${arg_2}":` - Multiple argument substitution
+- `"Analyze the relationship between ${arg_1}, ${arg_2}, and ${arg_3}":` - Complex multi-argument prompts
+
+This function is particularly useful for:
+- Dynamic content generation
+- Natural language processing tasks
+- AI-powered data transformation
+- Creative text generation based on structured data

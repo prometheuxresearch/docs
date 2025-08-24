@@ -8,10 +8,10 @@ The `visualizer` module provides functions to visualize Vadalog schemas (i.e., t
 
 ```python
 def visualize_schema(vada_file_path: str):
-"""
-Reads a Vadalog file, extracts its content, and sends it to the /api/visualize endpoint.
-Automatically chooses the visualization method based on the environment.
-"""
+  """
+  Reads a Vadalog file, extracts its content, and sends it to the /api/visualize endpoint.
+  Automatically chooses the visualization method based on the environment.
+  """
 ...
 ```
 
@@ -23,18 +23,16 @@ Automatically chooses the visualization method based on the environment.
 - Attempts to open and read the `.vada` file from the provided path.
 - Sends the file content to an API endpoint for parsing.
 - Retrieves the graph structure (nodes and edges) and visualizes them with either:
-    - [ipycytoscape](https://github.com/cytoscape/ipycytoscape) if in a Jupyter environment.
-    - [PyVis](https://pyvis.readthedocs.io/) otherwise.
+  - [ipycytoscape](https://github.com/cytoscape/ipycytoscape) if in a Jupyter environment.
+  - [PyVis](https://pyvis.readthedocs.io/) otherwise.
 
 **Raises**
 - **Exception** if:
-    1. The `.vada` file cannot be opened or read.
-    2. The API returns an error or fails to provide a valid graph structure.
-    3. An unexpected error occurs during visualization.
+  1. The `.vada` file cannot be opened or read.
+  2. The API returns an error or fails to provide a valid graph structure.
+  3. An unexpected error occurs during visualization.
 
----
-
-## Example (Python)
+**Example**
 
 Below is an example of how you might use the `visualize_schema` function in a Python script or notebook:
 
@@ -51,10 +49,6 @@ vada_file_path = "path/to/file.vada"
 # Call the visualization function
 pmtx.visualize_schema(vada_file_path)
 ```
-
----
-
-## Example
 
 Given the following `.vada` file
 

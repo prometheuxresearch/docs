@@ -7,17 +7,17 @@ The `graph_rag` function performs GraphRAG (Graph Retrieval-Augmented Generation
 ## Function
 
 ```python
-def graph_rag(workspace_id="workspace_id", project_id=None, question=None, graph_concepts=None, rag_concepts=None, rag_records=None, project_scope="user", llm=None, top_k=5)
+def graph_rag(workspace_id="workspace_id", project_id, question, graph_concepts=None, rag_concepts=None, rag_records=None, project_scope="user", llm=None, top_k=5)
 ```
 
 **Parameters**
 - `workspace_id` _(str, optional)_:
   The workspace identifier. Defaults to "workspace_id".
 
-- `project_id` _(str, optional)_:
+- `project_id` _(str)_:
   The project identifier. Required for GraphRAG operations.
 
-- `question` _(str, optional)_:
+- `question` _(str)_:
   The question to answer. Required for GraphRAG operations.
 
 - `graph_concepts` _(list, optional)_:
@@ -47,40 +47,99 @@ def graph_rag(workspace_id="workspace_id", project_id=None, question=None, graph
 
 ---
 
+## GraphRAG Modes
+
+GraphRAG supports different modes for both embeddings and graph concepts:
+
+### Embedding Modes
+
+1. **Internal Embeddings**: The system performs embedding-based retrieval internally by specifying which concept and field to embed using `rag_concepts`.
+
+2. **External Embeddings**: You provide the results of embedding-based retrieval directly using `rag_records`.
+
+### Graph Concept Modes
+
+1. **Explicit Graph Concepts**: You explicitly specify which graph concepts to run using `graph_concepts`.
+
+2. **Implicit Graph Concepts**: The LLM-based orchestrator automatically decides which concepts to run based on the question and available concepts in the virtual knowledge graph.
+
+---
+
 ## Examples
 
-### Basic GraphRAG with Graph Concepts
+### Internal Embeddings + Explicit Graph Concepts
 
 ```python
 import prometheux_chain as px
 
-# Perform GraphRAG with graph concepts
+# Full control over both embedding and graph operations
 result = px.graph_rag(
     project_id="my_project_id",
     question="What companies are located in California?",
-    graph_concepts=["company", "location"],
-    top_k=10
+    rag_concepts=[
+        {"concept": "company", "field_to_embed": "name"},
+        {"concept": "location", "field_to_embed": "city"}
+    ],
+    graph_concepts=["company", "location"]
 )
 ```
 
-### GraphRAG with RAG Concepts
+### External Embeddings + Implicit Graph Concepts
 
 ```python
 import prometheux_chain as px
 
-# Perform GraphRAG with RAG concepts
+# Provide your own embeddings, let orchestrator choose graph concepts
+rag_records = {
+    "company": [["Apple", "Google", "Microsoft"]],
+    "location": [["Redwood City, CA", "Mountain View, CA", "Redmond, WA"]]
+}
+
 result = px.graph_rag(
     project_id="my_project_id",
-    question="What are the latest product reviews?",
-    rag_concepts=[
-        {"concept": "reviews", "field_to_embed": "content"},
-        {"concept": "products", "field_to_embed": "description"}
-    ],
-    llm={"model": "gpt-4", "temperature": 0.7}
+    question="Which companies are in California?",
+    rag_records=rag_records
+    # No graph_concepts specified - orchestrator will choose automatically
 )
 ```
 
-### Complete GraphRAG Workflow
+### Internal Embeddings + Implicit Graph Concepts
+
+```python
+import prometheux_chain as px
+
+# Control embeddings, let orchestrator choose graph concepts
+result = px.graph_rag(
+    project_id="my_project_id",
+    question="Find companies in California",
+    rag_concepts=[
+        {"concept": "location", "field_to_embed": "city"}
+    ]
+    # No graph_concepts specified - orchestrator will choose automatically
+)
+```
+
+### External Embeddings + Explicit Graph Concepts
+
+```python
+import prometheux_chain as px
+
+# Provide your own embeddings, specify graph concepts
+rag_records = {
+    "company": [["Apple", "Google", "Microsoft"]]
+}
+
+result = px.graph_rag(
+    project_id="my_project_id",
+    question="Which companies are in California?",
+    rag_records=rag_records,
+    graph_concepts=["location"]
+)
+```
+
+---
+
+## Complete Workflow Example
 
 ```python
 import prometheux_chain as px
@@ -109,52 +168,17 @@ px.save_concept(project_id=project_id, concept_logic=concept_logic)
 # Run the concept
 px.run_concept(project_id=project_id, concept_name="location")
 
+# Save the virtual knowledge graph with the concepts of interest
+px.save_kg(
+    project_id=project_id,
+    concepts=["location"]
+)
+
 # Perform GraphRAG query
 rag_result = px.graph_rag(
     project_id=project_id,
     question="Which companies are in California?",
-    graph_concepts=["location"],
-    top_k=5
+    graph_concepts=["location"]
 )
 ```
 
----
-
-## Use Cases
-
-### Company Control Analysis
-
-```python
-# Define company ownership concepts
-ownership_logic = """
-@input("ownership").
-@bind("ownership","postgresql","ownership_db","ownership_table").
-
-own(From,To) :- ownership(From,To,Weight).
-@output("own").
-"""
-
-# Perform GraphRAG for control analysis
-result = px.graph_rag(
-    project_id=project_id,
-    question="Can you explain why the company C-Corp owns Q-Tech?",
-    graph_concepts=["own"],
-    llm={"model": "gpt-4", "temperature": 0.3}
-)
-```
-
-### Financial Data Analysis
-
-```python
-# Perform GraphRAG on financial data
-result = px.graph_rag(
-    project_id=project_id,
-    question="What are the risk factors for non-performing loans?",
-    rag_concepts=[
-        {"concept": "loans", "field_to_embed": "risk_assessment"},
-        {"concept": "financial_reports", "field_to_embed": "content"}
-    ],
-    top_k=10,
-    llm={"model": "gpt-4", "temperature": 0.5}
-)
-```

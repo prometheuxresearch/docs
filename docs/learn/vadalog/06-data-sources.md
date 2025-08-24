@@ -64,7 +64,7 @@ This method allows for streamlined integration within the same code, ensuring th
 
 However, for better security and flexibility, these credentials can also be stored in external configurations:
 
-- Credentials can be stored the `pmtx.properties` file to centralize sensitive information and allow reusability without hardcoding values within the @bind annotations.
+- Credentials can be stored the `px.properties` file to centralize sensitive information and allow reusability without hardcoding values within the @bind annotations.
 - REST APIs for dynamic configuration management, where you can set individual credentials or update multiple settings at once through [API endpoints](../on-prem/04-rest-api.md).
 
 ## CSV Datasource
@@ -751,7 +751,7 @@ Copy and paste it into a new file in your laptop or environment in your `/path/t
 This authMode is the default one.
 
 Set the ENV var (in Docker or via `EXPORT`)
-`GOOGLE_APPLICATION_CREDENTIALS=/path/to/gcp-credentials.json`, **or** set the `bigquery.credentialsFile=/path/to/gcp-credentials.json` in the `pmtx.properties` configuration file **or** declare the path via `credentialsFile=/path/to/gcp-credentials.json` as an option in the bind annotation.
+`GOOGLE_APPLICATION_CREDENTIALS=/path/to/gcp-credentials.json`, **or** set the `bigquery.credentialsFile=/path/to/gcp-credentials.json` in the `px.properties` configuration file **or** declare the path via `credentialsFile=/path/to/gcp-credentials.json` as an option in the bind annotation.
 
 ---
 
@@ -762,7 +762,7 @@ If you prefer token‑based creds:
 ```bash
 gcloud auth print-access-token   --impersonate-service-account="$SA_NAME@$PROJECT_ID.iam.gserviceaccount.com"
 ```
-Enable token-based authMode by setting set the `bigquery.authMode` in the `pmtx.properties`configuration file **or** declare it as an option in the bind annotation `authMode=gcpAccessToken` and set the ENV var (in Docker or via `EXPORT`)
+Enable token-based authMode by setting set the `bigquery.authMode` in the `px.properties`configuration file **or** declare it as an option in the bind annotation `authMode=gcpAccessToken` and set the ENV var (in Docker or via `EXPORT`)
 `GCP_ACCESS_TOKEN=my-token`, **or** set the `bigquery.gcpAccessToken=my-token` config property **or** pass it via `gcpAccessToken=my-token` as option in the bind annotation.
 
 ### Example using credentials file

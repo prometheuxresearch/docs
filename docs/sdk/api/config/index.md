@@ -21,7 +21,7 @@ The value associated with the specified key, or None if the key does not exist.
 
 **Example:**
 ```python
-token = pmtx.config.get("PMTX_TOKEN")
+token = px.config.get("PMTX_TOKEN")
 print(token)
 ```
 
@@ -41,7 +41,7 @@ Sets a configuration value for the specified key and saves the updated configura
 
 **Example:**
 ```python
-pmtx.config.set("PMTX_TOKEN", "new_token")
+px.config.set("PMTX_TOKEN", "new_token")
 ```
 
 ---
@@ -59,7 +59,7 @@ Update multiple configuration values at once from a dictionary.
 **Example:**
 
 ```python
-pmtx.config.update_config({
+px.config.update_config({
     "PMTX_TOKEN": "updated_token",
     "LLM_API_KEY": "new_api_key"
 })
@@ -85,9 +85,9 @@ os.environ['PMTX_TOKEN'] = 'pmtx_token'
 You can use the SDK's configuration interface to set the token:
 
 ```python
-import prometheux_chain as pmtx
+import prometheux_chain as px
 
-pmtx.config.set("PMTX_TOKEN", "pmtx_token")
+px.config.set("PMTX_TOKEN", "pmtx_token")
 ```
 
 

@@ -530,3 +530,160 @@ with open(vada_file, 'w') as file:
     file.write(inferred_rules)
 ```
 
+---
+
+### **Example 15: Inferring Schema from Amazon DynamoDB**
+
+This example connects to an **Amazon DynamoDB** database and infers Vadalog rules from table schemas. The schema retriever automatically discovers table structures, column types, and maintains consistent ordering with the DynamoDB reader.
+
+**Note**: The AWS region can be specified either as an `options` property or as the `database_name` parameter.
+
+```python
+import os
+TOKEN="eyJhbGci••••••••••••bz2U39Yc" # API Key generated in the Prometheux Platform
+os.environ["PMTX_TOKEN"] = TOKEN
+
+import prometheux_chain as pmtx
+from prometheux_chain.model.database import Database
+
+# Create a Database object for DynamoDB (region as option)
+db = Database(
+    database_type="dynamodb",
+    username="AKIA4xxxx12",  # AWS Access Key ID
+    password="JyxxxxU+",     # AWS Secret Access Key
+    host="",                 # Leave empty for AWS DynamoDB
+    port=None,
+    database_name="",        # Leave empty to discover all tables
+    options={
+        "region": "us-east-1",  # Region specified as option
+        "endpoint": "",         # Leave empty for AWS DynamoDB
+        "sessionToken": "",     # Optional: for temporary credentials
+        "sampleLimit": "100"    # Optional: number of items to sample for schema inference
+    }
+)
+
+# Infer Vadalog rules from the DynamoDB tables
+inferred_rules = pmtx.infer_schema(db, add_bind=True, add_model=True)
+
+# Save the inferred rules to a file
+vada_file = "infer-from-dynamodb.vada"
+with open(vada_file, 'w') as file:
+    file.write(inferred_rules)
+```
+
+---
+
+### **Example 16: Inferring Schema from DynamoDB with Region as Database Name**
+
+This example shows an alternative way to specify the AWS region by using the `database_name` parameter instead of the options.
+
+```python
+import os
+TOKEN="eyJhbGci••••••••••••bz2U39Yc" # API Key generated in the Prometheux Platform
+os.environ["PMTX_TOKEN"] = TOKEN
+
+import prometheux_chain as pmtx
+from prometheux_chain.model.database import Database
+
+# Create a Database object for DynamoDB (region as database_name)
+db = Database(
+    database_type="dynamodb",
+    username="AKIA4xxxx12",  # AWS Access Key ID
+    password="JyxxxxU+",     # AWS Secret Access Key
+    host="",
+    port=None,
+    database_name="eu-west-2",  # Region specified as database_name
+    options={
+        "endpoint": "",         # Leave empty for AWS DynamoDB
+        "sessionToken": "",     # Optional: for temporary credentials
+        "sampleLimit": "50"     # Optional: number of items to sample
+    }
+)
+
+# Infer Vadalog rules from the DynamoDB tables
+inferred_rules = pmtx.infer_schema(db, add_bind=True, add_model=True)
+
+# Save the inferred rules to a file
+vada_file = "infer-from-dynamodb-region.vada"
+with open(vada_file, 'w') as file:
+    file.write(inferred_rules)
+```
+
+---
+
+### **Example 17: Inferring Schema from DynamoDB Local**
+
+This example connects to a **DynamoDB Local** instance running on localhost and infers Vadalog rules from specific tables.
+
+```python
+import os
+TOKEN="eyJhbGci••••••••••••bz2U39Yc" # API Key generated in the Prometheux Platform
+os.environ["PMTX_TOKEN"] = TOKEN
+
+import prometheux_chain as pmtx
+from prometheux_chain.model.database import Database
+
+# Create a Database object for DynamoDB Local with specific tables
+db = Database(
+    database_type="dynamodb",
+    username="test",         # Dummy credentials for DynamoDB Local
+    password="test",
+    host="",
+    port=None,
+    database_name="us-east-1",  # Region for DynamoDB Local
+    tables=["users_table", "orders_table"],  # Specify tables to infer
+    options={
+        "endpoint": "http://localhost:8000",  # DynamoDB Local endpoint
+        "sampleLimit": "50"
+    }
+)
+
+# Infer Vadalog rules from specific DynamoDB tables
+inferred_rules = pmtx.infer_schema(db, add_bind=True, add_model=True)
+
+# Save the inferred rules to a file
+vada_file = "infer-from-dynamodb-local.vada"
+with open(vada_file, 'w') as file:
+    file.write(inferred_rules)
+```
+
+---
+
+### **Example 18: Inferring Schema from DynamoDB with Advanced Options**
+
+This example demonstrates advanced DynamoDB configuration options including temporary credentials and custom sampling limits.
+
+```python
+import os
+TOKEN="eyJhbGci••••••••••••bz2U39Yc" # API Key generated in the Prometheux Platform
+os.environ["PMTX_TOKEN"] = TOKEN
+
+import prometheux_chain as pmtx
+from prometheux_chain.model.database import Database
+
+# Create a Database object for DynamoDB with advanced options
+db = Database(
+    database_type="dynamodb",
+    username="ASIA4xxxx12",     # Temporary Access Key ID
+    password="JyxxxxU+",        # Temporary Secret Access Key
+    host="",
+    port=None,
+    database_name="",           # Empty to discover all tables
+    tables=["specific_table"],  # Optional: limit to specific tables
+    options={
+        "region": "ap-southeast-2",
+        "endpoint": "",
+        "sessionToken": "IQoJb3JpZ2luX2VjEND...",  # Required for temporary credentials
+        "sampleLimit": "200"    # Increase sample size for better schema inference
+    }
+)
+
+# Infer Vadalog rules from the DynamoDB tables
+inferred_rules = pmtx.infer_schema(db, add_bind=True, add_model=True)
+
+# Save the inferred rules to a file
+vada_file = "infer-from-dynamodb-advanced.vada"
+with open(vada_file, 'w') as file:
+    file.write(inferred_rules)
+```
+

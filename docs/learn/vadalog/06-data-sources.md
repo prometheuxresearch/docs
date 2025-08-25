@@ -37,7 +37,10 @@ where `datasource_type` should be one of:
 - `presto` for Presto
 - `snowflake` for Snowflake
 - `databricks` for Databricks
+- `dynamodb` for Amazon DynamoDB
 - `api` for consuming data via API
+- `text` for consuming data from plain text files 
+- `binary` for consuming data from binary files (PDF, images, etc)
 
 And the available configuration options are:
 
@@ -438,6 +441,192 @@ persons_order_neo4j_test(CustomerId, OrderId) :-
 % Declare the output concept 'persons_order_neo4j_test' to make the query result available
 @output("persons_order_neo4j_test").
 ```
+
+## Amazon DynamoDB Database
+Amazon DynamoDB is a fully managed NoSQL database service that provides fast and predictable performance with seamless scalability. Prometheux supports both reading from and writing to DynamoDB tables, with automatic table creation capabilities and support for PartiQL queries.
+
+### @bind options for DynamoDB
+
+The DynamoDB connector supports the following configuration options:
+
+- `region`: AWS region for the DynamoDB instance (e.g., `us-east-1`, `eu-west-1`)
+- `username`: AWS Access Key ID for authentication
+- `password`: AWS Secret Access Key for authentication  
+- `sessionToken`: AWS Session Token for temporary credentials (optional)
+- `endpointOverride`: Custom endpoint URL (useful for DynamoDB Local testing)
+- `partitionKey`: The partition key attribute name for table creation
+- `sortKey`: The sort key attribute name for table creation (optional)
+- `billingMode`: Either `PAY_PER_REQUEST` (default) or `PROVISIONED`
+- `readCapacity`: Read capacity units for provisioned billing mode (default: 5)
+- `writeCapacity`: Write capacity units for provisioned billing mode (default: 5)
+- `writeBatchSize`: Number of items to write per batch (1-25, default: 25)
+- `readPageSize`: Page size for read operations (default: 100)
+- `totalSegments`: Number of segments for parallel scanning (default: 8)
+- `inferSampleLimit`: Number of items to sample for schema inference (default: 64)
+- `secondaryIndexName`: Name of Global Secondary Index to create (optional)
+- `secondaryIndexPartitionKey`: Partition key for the GSI (optional)
+- `secondaryIndexSortKey`: Sort key for the GSI (optional)
+
+### Example 1: Writing Data to DynamoDB
+
+This example shows how to read data from a CSV file and write it to a DynamoDB table with automatic table creation.
+
+```prolog
+% Declare the input concept 'users_csv' to read from the CSV file
+@input("users_csv").
+
+% Bind the 'users_csv' concept to the CSV file containing user data
+@bind("users_csv", "csv useHeaders=true", "disk/data/input", "users.csv").
+
+% Define the data model for the 'users_dynamodb' concept
+@model("users_dynamodb", "['id:string', 'name:string', 'email:string', 'age:int']").
+
+% Define a rule that maps CSV data to the DynamoDB concept
+users_dynamodb(Id, Name, Email, Age) :- 
+        users_csv(Id, Name, Email, Age).
+
+% Declare the output concept for writing to DynamoDB
+@output("users_dynamodb").
+
+% Bind the 'users_dynamodb' concept to a DynamoDB table
+% The table will be automatically created with 'id' as partition key
+% Region can be set as an option (has priority) or as third argument of the bind.
+@bind("users_dynamodb", 
+      "dynamodb username='AKIAIOSFODNN7EXAMPLE', password='wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY', partitionKey='id', billingMode='PAY_PER_REQUEST'", 
+      "us-east-1", "users").
+```
+
+### Example 2: Reading Data from DynamoDB
+
+This example demonstrates reading data from an existing DynamoDB table.
+
+```prolog
+% Bind the 'users_dynamodb' concept to the DynamoDB table
+% Region us-east-1 overrides us-east-2
+@bind("users_dynamodb", 
+      "dynamodb region='us-east-1', username='AKIAIOSFODNN7EXAMPLE', password='wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY'", 
+      "us-east-2", "users").
+
+% Define a rule to filter users by age
+young_users(Id, Name, Email) :- 
+        users_dynamodb(Id, Name, Email, Age), Age < 30.
+
+% Declare the output concept for the filtered results
+@output("young_users").
+```
+
+### Example 3: Using PartiQL Queries
+
+This example shows how to use PartiQL (SQL-compatible query language) to query DynamoDB data.
+
+```prolog
+% Use @qbind to execute a PartiQL query against DynamoDB
+@qbind("user_orders", 
+       "dynamodb username='AKIAIOSFODNN7EXAMPLE', password='wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY'", 
+       "us-east-1", 
+       "SELECT user_id, order_date, total_amount FROM orders WHERE user_id = 'u123' AND begins_with(order_date, '2025')").
+
+% Define a rule to process the query results
+recent_orders(UserId, OrderDate, Amount) :- 
+        user_orders(UserId, OrderDate, Amount).
+
+% Declare the output concept
+@output("recent_orders").
+```
+
+### Example 4: Advanced Configuration with Sort Key and GSI
+
+This example demonstrates creating a table with both partition and sort keys, plus a Global Secondary Index.
+
+```prolog
+% Bind to CSV file containing order data
+@bind("orders_csv", "csv useHeaders=true", "disk/data/input", "orders.csv").
+
+% Define the data model for orders
+@model("orders_dynamodb", "['customer_id:string', 'order_date:string', 'order_id:string', 'total_amount:double', 'status:string']").
+
+% Define a rule to map CSV data to the DynamoDB concept
+orders_dynamodb(CustomerId, OrderDate, OrderId, TotalAmount, Status) :- 
+        orders_csv(CustomerId, OrderDate, OrderId, TotalAmount, Status).
+
+% Declare the output concept
+@output("orders_dynamodb").
+
+% Bind with advanced configuration: sort key and Global Secondary Index
+@bind("orders_dynamodb", 
+      "dynamodb region='us-east-1', username='AKIAIOSFODNN7EXAMPLE', password='wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY', partitionKey='customer_id', sortKey='order_date', billingMode='PROVISIONED', readCapacity=10, writeCapacity=5, secondaryIndexName='StatusIndex', secondaryIndexPartitionKey='status'", 
+      "", "orders").
+```
+
+### Example 5: Using Session Credentials
+
+This example shows how to use temporary AWS credentials with session tokens.
+
+```prolog
+% Bind to CSV file
+@bind("products_csv", "csv useHeaders=true", "disk/data/input", "products.csv").
+
+% Define the product concept
+products_dynamodb(ProductId, Name, Price, Category) :- 
+        products_csv(ProductId, Name, Price, Category).
+
+% Declare output
+@output("products_dynamodb").
+
+% Bind with session credentials (useful for role-based access)
+@bind("products_dynamodb", 
+      "dynamodb region='us-east-1', username='AKIAIOSFODNN7EXAMPLE', password='wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY', sessionToken='AQoEXAMPLEH4aoAH0gNCAPyJxz4BlCFFxWNE1OPTgk5TthT+FvwqnKwRcOIfrRh3c/LTo6UDdyJwOOvEVPvLXCrrrUtdnniCEXAMPLE/IvU1dYUg2RVAJBanLiHb4IgRmpRV3zrkuWJOgQs8IZZaIv2BXIa2R4OlgkBN9bkUDNCJiBeb/AXlzBBko7b15fjrBs=', partitionKey='product_id', billingMode='PAY_PER_REQUEST'", 
+      "", "products").
+```
+
+### Example 6: Using DynamoDB Local for Development
+
+This example shows how to connect to DynamoDB Local for development and testing.
+
+```prolog
+% Bind to local CSV file
+@bind("test_data_csv", "csv useHeaders=true", "test/data", "sample_data.csv").
+
+% Define test data concept
+test_data(Id, Name, Value) :- 
+        test_data_csv(Id, Name, Value).
+
+% Declare output
+@output("test_data").
+
+% Bind to DynamoDB Local (running on localhost:8000)
+@bind("test_data", 
+      "dynamodb region='us-east-1', username='test', password='test', endpointOverride='http://localhost:8000', partitionKey='id', billingMode='PAY_PER_REQUEST'", 
+      "testdb", "test_table").
+```
+
+### Advanced PartiQL Features
+
+DynamoDB supports powerful PartiQL functions that can be used in queries:
+
+```prolog
+% Example using begins_with function
+@qbind("recent_logs", 
+       "dynamodb region='us-east-1', username='AKIAIOSFODNN7EXAMPLE', password='wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY'", 
+       "", 
+       "SELECT log_id, message, timestamp FROM application_logs WHERE begins_with(timestamp, '2025-01') AND contains(message, 'ERROR')").
+
+% Example using attribute_exists function
+@qbind("complete_profiles", 
+       "dynamodb username='AKIAIOSFODNN7EXAMPLE', password='wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY'", 
+       "us-east-1", 
+       "SELECT user_id, name, email FROM user_profiles WHERE attribute_exists(phone_number) AND attribute_exists(address)").
+```
+
+### Configuration Best Practices
+
+1. **Credentials Management**: Store sensitive credentials in `pmtx.properties` or environment variables rather than hardcoding them in bind annotations.
+
+2. **Billing Mode**: Use `PAY_PER_REQUEST` for variable workloads and `PROVISIONED` for predictable traffic patterns.
+
+3. **Batch Sizes**: Adjust `writeBatchSize` based on item size - use smaller batches for larger items.
+
+4. **Parallel Scanning**: Increase `totalSegments` for faster reads on large tables, but be mindful of consumed read capacity.
 
 ## S3 Storage
 Amazon S3 (Simple Storage Service) is a widely used cloud storage service that allows for scalable object storage. In Vadalog, you can both read from and write to S3 buckets by treating the S3 storage as a file system. This example demonstrates how to interact with S3, specifically by writing a CSV file to S3 and then reading from it.

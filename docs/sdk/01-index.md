@@ -21,7 +21,7 @@ Prometheux Chain is a Python SDK designed to help you create, evolve, and deploy
 ### Requirements
 - Python 3.9 or higher
 
-### Install Using pip
+### Install using pip
 
 1. Set Up a Virtual Environment (recommended):
 
@@ -30,13 +30,13 @@ python3 -m venv myenv
 source myenv/bin/activate  # On Windows: myenv\Scripts\activate
 ```
 
-2. Install the SDK from GitHub:
+2. Install the SDK:
 
 ```bash
-pip install git+https://github.com/prometheuxresearch/prometheux_chain.git
-````
+pip install --upgrade prometheux_chain
+```
 
-### Into Jupyter
+### Install into Jupyter
 
 To manually install the library in your Jupyter Lab or Jupyter Notebook follow these steps
 

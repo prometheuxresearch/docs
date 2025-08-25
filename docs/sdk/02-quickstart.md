@@ -1,6 +1,6 @@
 # Quickstart
 
-This guide demonstrates how to get started with the Prometheux Chain SDK. The example below outlines a typical workflow, including reasoning with a `.vada` file, querying a virtual knowledge graph, and explaining the results.
+This guide demonstrates how to get started with the Prometheux Chain SDK. The example below outlines a typical workflow, including creating a project, defining concept logic, and running concepts to generate results.
 
 ---
 
@@ -8,7 +8,7 @@ This guide demonstrates how to get started with the Prometheux Chain SDK. The ex
 
 ### Import the `prometheux_chain`
 ```python
-import prometheux_chain as pmtx
+import prometheux_chain as px
 import os
 ```
 
@@ -17,33 +17,36 @@ import os
 os.environ['PMTX_TOKEN'] = 'my_pmtx_token'
 ```
 
-### Perform reasoning with a .vada file to create a virtual knowledge graph
+### Configure the backend connection using your Prometheux account
 ```python
-virtual_kg = pmtx.reason(
-    vada_file_paths="min_distance_from_city.vada",  # Path to the .vada file
-    params={"min_distance": 100.0},                # Parameters for the reasoning process
-    to_explain=True,                               # Include explanations in the results
-    to_persist=True                                # Persist the virtual KG
-)
+px.config.set('JARVISPY_URL', "https://platform.prometheux.ai/jarvispy/'my_organization'/'my_username'")
 ```
 
-### Query the virtual knowledge graph
+### Create a new project
 ```python
-query_results = pmtx.query(
-    virtual_kg,                                   # Virtual KG to query
-    "?- min_distance(X,Y), Y == \"Brooklin\""     # Query in Vadalog syntax
-)
+project_id = px.save_project(project_name="test_project")
 ```
 
-### Retrieve the first result from the query
+### Define concept logic using Vadalog syntax and save it
 ```python
-first_result = query_results[0]  # Example: min_distance("New York"|"Brooklin")
+concept_logic = """
+company("Apple", "Redwood City, CA").
+company("Google", "Mountain View, CA").
+company("Microsoft", "Redmond, WA").
+company("Amazon", "Seattle, WA").
+company("Facebook", "Menlo Park, CA").
+company("Twitter", "San Francisco, CA").
+company("LinkedIn", "Sunnyvale, CA").
+company("Instagram", "Menlo Park, CA").
+
+location(Location) :- company(_,Location).
+
+@output("location").
+"""
+px.save_concept(project_id=project_id, concept_logic=concept_logic)
 ```
 
-### Explain a fact from virtual KG to explain the first query result
+### Run the concept to generate results
 ```python
-explanation = pmtx.explain(
-    virtual_kg,                                   # Virtual KG for explanation
-    first_result                                  # Fact to explain
-)
+px.run_concept(project_id=project_id, concept_name="location")
 ```

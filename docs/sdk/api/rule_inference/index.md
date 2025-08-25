@@ -48,7 +48,7 @@ import os
 TOKEN="eyJhbGci••••••••••••bz2U39Yc" # API Key generated in the Prometheux Platform
 os.environ["PMTX_TOKEN"] = TOKEN
 
-import prometheux_chain as pmtx
+import prometheux_chain as px
 from prometheux_chain.model.database import Database
 
 # Create a Database object for Neo4j
@@ -62,7 +62,7 @@ db = Database(
 )
 
 # Infer Vadalog rules from the Neo4j database
-inferred_rules = pmtx.infer_schema(db, add_bind=True)
+inferred_rules = px.infer_schema(db, add_bind=True)
 
 # Save the inferred rules to a file
 vada_file = "infer-from-neo4j.vada"
@@ -82,7 +82,7 @@ import os
 TOKEN="eyJhbGci••••••••••••bz2U39Yc" # API Key generated in the Prometheux Platform
 os.environ["PMTX_TOKEN"] = TOKEN
 
-import prometheux_chain as pmtx
+import prometheux_chain as px
 from prometheux_chain.model.database import Database
 
 # Create a Database object for CSV in S3
@@ -102,7 +102,7 @@ db = Database(
 )
 
 # Infer Vadalog rules from the CSV file
-inferred_rules = pmtx.infer_schema(db, add_bind=True)
+inferred_rules = px.infer_schema(db, add_bind=True)
 
 # Save the inferred rules to a file
 vada_file = "infer-from-csv_s3.vada"
@@ -121,7 +121,7 @@ import os
 TOKEN="eyJhbGci••••••••••••bz2U39Yc" # API Key generated in the Prometheux Platform
 os.environ["PMTX_TOKEN"] = TOKEN
 
-import prometheux_chain as pmtx
+import prometheux_chain as px
 from prometheux_chain.model.database import Database
 
 # Create a Database object for PostgreSQL
@@ -135,7 +135,7 @@ db = Database(
 )
 
 # Infer Vadalog rules from the PostgreSQL database
-inferred_rules = pmtx.infer_schema(db, add_bind=True)
+inferred_rules = px.infer_schema(db, add_bind=True)
 
 # Save the inferred rules to a file
 vada_file = "infer-from-postgresql.vada"
@@ -154,7 +154,7 @@ import os
 TOKEN="eyJhbGci••••••••••••bz2U39Yc" # API Key generated in the Prometheux Platform
 os.environ["PMTX_TOKEN"] = TOKEN
 
-import prometheux_chain as pmtx
+import prometheux_chain as px
 from prometheux_chain.model.database import Database
 
 # Create a Database object for Databricks
@@ -168,7 +168,7 @@ db = Database(
 )
 
 # Infer Vadalog rules from the Databricks cluster
-inferred_rules = pmtx.infer_schema(db, add_bind=True)
+inferred_rules = px.infer_schema(db, add_bind=True)
 
 # Save the inferred rules to a file
 vada_file = "infer-from-databricks.vada"
@@ -187,7 +187,7 @@ import os
 TOKEN="eyJhbGci••••••••••••bz2U39Yc" # API Key generated in the Prometheux Platform
 os.environ["PMTX_TOKEN"] = TOKEN
 
-import prometheux_chain as pmtx
+import prometheux_chain as px
 from prometheux_chain.model.database import Database
 
 # Create a Database object for Databricks with a specific table
@@ -202,7 +202,7 @@ db = Database(
 )
 
 # Infer Vadalog rules from the Databricks cluster
-inferred_rules = pmtx.infer_schema(db, add_bind=True)
+inferred_rules = px.infer_schema(db, add_bind=True)
 
 # Save the inferred rules to a file
 vada_file = "infer-from-databricks-with-table.vada"
@@ -219,11 +219,11 @@ import os
 TOKEN="eyJhbGci••••••••••••bz2U39Yc" # API Key generated in the Prometheux Platform
 os.environ["PMTX_TOKEN"] = TOKEN
 
-import prometheux_chain as pmtx
+import prometheux_chain as px
 from prometheux_chain.model.database import Database
 
 # Infer Vadalog rules from a Databricks cluster with a specific schema
-inferred_rules = pmtx.infer_schema(
+inferred_rules = px.infer_schema(
     Database(
         database_type="databricks",
         username="token",
@@ -255,7 +255,7 @@ import os
 TOKEN="eyJhbGci••••••••••••bz2U39Yc" # API Key generated in the Prometheux Platform
 os.environ["PMTX_TOKEN"] = TOKEN
 
-import prometheux_chain as pmtx
+import prometheux_chain as px
 from prometheux_chain.model.database import Database
 
 # Create a Database object for Excel
@@ -269,7 +269,7 @@ db = Database(
 )
 
 # Infer Vadalog rules from the Excel file
-inferred_rules = pmtx.infer_schema(db, add_bind=True)
+inferred_rules = px.infer_schema(db, add_bind=True)
 
 # Save the inferred rules to a file
 vada_file = "infer-from-excel.vada"
@@ -288,7 +288,7 @@ import os
 TOKEN="eyJhbGci••••••••••••bz2U39Yc" # API Key generated in the Prometheux Platform
 os.environ["PMTX_TOKEN"] = TOKEN
 
-import prometheux_chain as pmtx
+import prometheux_chain as px
 from prometheux_chain.model.database import Database
 
 # Create a Database object for Excel with a specific sheet
@@ -303,7 +303,7 @@ db = Database(
 )
 
 # Infer Vadalog rules from the Excel file
-inferred_rules = pmtx.infer_schema(db, add_bind=True)
+inferred_rules = px.infer_schema(db, add_bind=True)
 
 # Save the inferred rules to a file
 vada_file = "infer-from-excel-sheet.vada"
@@ -320,7 +320,7 @@ import os
 TOKEN="eyJhbGci••••••••••••bz2U39Yc" # API Key generated in the Prometheux Platform
 os.environ["PMTX_TOKEN"] = TOKEN
 
-import prometheux_chain as pmtx
+import prometheux_chain as px
 from prometheux_chain.model.database import Database
 
 #"jdbc:snowflake://A778858265xxxx-IV3xxxx.snowflakecomputing.com/?user=my_username&warehouse=my_warehouse&db=my_database&schema=my_schema&password=my_password"
@@ -338,7 +338,7 @@ db = Database(
 )
 
 # Infer Vadalog rules from the Snowflake database
-inferred_rules = pmtx.infer_schema(db, add_bind=True)
+inferred_rules = px.infer_schema(db, add_bind=True)
 
 # Save the inferred rules to a file
 vada_file = "infer-from-snowflake.vada"
@@ -357,7 +357,7 @@ import os
 TOKEN="eyJhbGci••••••••••••bz2U39Yc" # API Key generated in the Prometheux Platform
 os.environ["PMTX_TOKEN"] = TOKEN
 
-import prometheux_chain as pmtx
+import prometheux_chain as px
 from prometheux_chain.model.database import Database
 
 # Create a Database object for Snowflake with a specific table
@@ -374,7 +374,7 @@ db = Database(
 )
 
 # Infer Vadalog rules from the Snowflake database
-inferred_rules = pmtx.infer_schema(db, add_bind=True)
+inferred_rules = px.infer_schema(db, add_bind=True)
 
 # Save the inferred rules to a file
 vada_file = "infer-from-snowflake-table.vada"
@@ -391,7 +391,7 @@ TOKEN="eyJhbGci••••••••••••bz2U39Yc" # API Key generated
 os.environ["PMTX_TOKEN"] = TOKEN
 gcpAccessToken = os.environ["GCP_ACCESS_TOKEN"]
 
-import prometheux_chain as pmtx
+import prometheux_chain as px
 from prometheux_chain.model.database import Database
 
 # Create a Database object for BigQuery
@@ -413,7 +413,7 @@ db = Database(
 )
 
 # Infer Vadalog rules from the BigQuery dataset
-inferred_rules = pmtx.infer_schema(db, add_bind=True, add_model=True)
+inferred_rules = px.infer_schema(db, add_bind=True, add_model=True)
 
 # Save the inferred rules to a file
 vada_file = "infer-from-bigquery.vada"
@@ -432,7 +432,7 @@ import os
 TOKEN="eyJhbGci••••••••••••bz2U39Yc" # API Key generated in the Prometheux Platform
 os.environ["PMTX_TOKEN"] = TOKEN
 
-import prometheux_chain as pmtx
+import prometheux_chain as px
 from prometheux_chain.model.database import Database
 
 # Create a Database object for text file
@@ -446,7 +446,7 @@ db = Database(
 )
 
 # Infer Vadalog rules from the text file
-inferred_rules = pmtx.infer_schema(db, add_bind=True, add_model=False)
+inferred_rules = px.infer_schema(db, add_bind=True, add_model=False)
 
 # Save the inferred rules to a file
 vada_file = "harry_potter.vada"
@@ -465,7 +465,7 @@ import os
 TOKEN="eyJhbGci••••••••••••bz2U39Yc" # API Key generated in the Prometheux Platform
 os.environ["PMTX_TOKEN"] = TOKEN
 
-import prometheux_chain as pmtx
+import prometheux_chain as px
 from prometheux_chain.model.database import Database
 
 # Create a Database object for binary file
@@ -479,7 +479,7 @@ db = Database(
 )
 
 # Infer Vadalog rules from the binary file
-inferred_rules = pmtx.infer_schema(db, add_bind=True, add_model=False)
+inferred_rules = px.infer_schema(db, add_bind=True, add_model=False)
 
 # Save the inferred rules to a file
 vada_file = "harry_potter.vada"
@@ -507,7 +507,7 @@ import os
 TOKEN="eyJhbGci••••••••••••bz2U39Yc" # API Key generated in the Prometheux Platform
 os.environ["PMTX_TOKEN"] = TOKEN
 
-import prometheux_chain as pmtx
+import prometheux_chain as px
 from prometheux_chain.model.database import Database
 
 # Create a Database object for structured binary file
@@ -522,7 +522,7 @@ db = Database(
 )
 
 # Infer Vadalog rules from the structured binary file
-inferred_rules = pmtx.infer_schema(db, add_bind=True, add_model=False)
+inferred_rules = px.infer_schema(db, add_bind=True, add_model=False)
 
 # Save the inferred rules to a file
 vada_file = "driver_license.vada"

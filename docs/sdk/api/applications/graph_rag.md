@@ -7,7 +7,7 @@ The `graph_rag` function performs GraphRAG (Graph Retrieval-Augmented Generation
 ## Function
 
 ```python
-def graph_rag(workspace_id="workspace_id", project_id, question, graph_concepts=None, rag_concepts=None, rag_records=None, project_scope="user", llm=None, top_k=5)
+def graph_rag(workspace_id="workspace_id", project_id, question, graph_selected_concepts=None, graph_available_concepts=None, rag_concepts=None, rag_records=None, project_scope="user", llm=None, top_k=5)
 ```
 
 **Parameters**
@@ -20,8 +20,11 @@ def graph_rag(workspace_id="workspace_id", project_id, question, graph_concepts=
 - `question` _(str)_:
   The question to answer. Required for GraphRAG operations.
 
-- `graph_concepts` _(list, optional)_:
-  List of concept names to use for graph operations.
+- `graph_selected_concepts` _(list, optional)_:
+  List of concept names to directly execute for graph operations. If provided, this takes priority over `graph_available_concepts`.
+
+- `graph_available_concepts` _(list, optional)_:
+  List of concept names available to the LLM orchestrator for automatic concept selection. If neither this nor `graph_selected_concepts` is provided, the orchestrator will choose among all concepts in the project.
 
 - `rag_concepts` _(list, optional)_:
   List of dictionaries with concept and field information for RAG operations.
@@ -59,9 +62,9 @@ GraphRAG supports different modes for both embeddings and graph concepts:
 
 ### Graph Concept Modes
 
-1. **Explicit Graph Concepts**: You explicitly specify which graph concepts to run using `graph_concepts`.
+1. **Explicit Graph Concepts**: You explicitly specify which graph concepts to run using `graph_selected_concepts`.
 
-2. **Implicit Graph Concepts**: The LLM-based orchestrator automatically decides which concepts to run based on the question and available concepts in the virtual knowledge graph.
+2. **Implicit Graph Concepts**: The LLM-based orchestrator automatically decides which concepts to run based on the question and available concepts specified in `graph_available_concepts`. If neither parameter is provided, the orchestrator will choose from all concepts in the project.
 
 ---
 
@@ -80,7 +83,7 @@ result = px.graph_rag(
         {"concept": "company", "field_to_embed": "name"},
         {"concept": "location", "field_to_embed": "city"}
     ],
-    graph_concepts=["company", "location"]
+    graph_selected_concepts=["company", "location"]
 )
 ```
 
@@ -99,7 +102,7 @@ result = px.graph_rag(
     project_id="my_project_id",
     question="Which companies are in California?",
     rag_records=rag_records
-    # No graph_concepts specified - orchestrator will choose automatically
+    # No graph parameters specified - orchestrator will choose from all project concepts
 )
 ```
 
@@ -115,7 +118,7 @@ result = px.graph_rag(
     rag_concepts=[
         {"concept": "location", "field_to_embed": "city"}
     ]
-    # No graph_concepts specified - orchestrator will choose automatically
+    # No graph parameters specified - orchestrator will choose from all project concepts
 )
 ```
 
@@ -133,9 +136,11 @@ result = px.graph_rag(
     project_id="my_project_id",
     question="Which companies are in California?",
     rag_records=rag_records,
-    graph_concepts=["location"]
+    graph_selected_concepts=["location"]
 )
 ```
+
+
 
 ---
 
@@ -178,7 +183,7 @@ px.save_kg(
 rag_result = px.graph_rag(
     project_id=project_id,
     question="Which companies are in California?",
-    graph_concepts=["location"]
+    graph_selected_concepts=["location"]
 )
 ```
 

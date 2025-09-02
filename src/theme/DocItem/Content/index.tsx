@@ -11,19 +11,21 @@ export default function ContentWrapper(props: Props): JSX.Element {
   return (
     <LLMRuntimeProvider>
       <Content {...props} />
-      <AssistantModal
-        assistantMessage={{ components: { Text: MarkdownText } }}
-        composer={{
-          allowAttachments: false,
-        }}
-        assistantAvatar={{
-          src: "/assets/images/pmtx_logo.png",
-          alt: "Prometheux",
-        }}
-        welcome={{
-          message: "How can I help with Prometheux?",
-        }}
-      />
+      <div className="prometheux-chat-container">
+        <AssistantModal
+          assistantMessage={{ components: { Text: MarkdownText } }}
+          composer={{
+            allowAttachments: false,
+          }}
+          assistantAvatar={{
+            src: "/assets/images/pmtx_logo.png",
+            alt: "Prometheux",
+          }}
+          welcome={{
+            message: "How can I help with Prometheux?",
+          }}
+        />
+      </div>
     </LLMRuntimeProvider>
   );
 }

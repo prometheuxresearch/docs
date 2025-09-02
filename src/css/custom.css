@@ -40,3 +40,17 @@
 [class*="codeBlockContainer"] {
   --ifm-code-font-size: 85%;
 }
+
+/* Target ONLY the chat modal window when it's open, not the button */
+[role="dialog"][data-state="open"] {
+  width: 70vw !important;
+  max-width: 1000px !important;
+  height: 70vh !important;
+  max-height: 700px !important;
+}
+
+/* Make the chat modal content area scrollable */
+[role="dialog"][data-state="open"] > div > div {
+  overflow-y: auto !important;
+  max-height: calc(70vh - 80px) !important;
+}

@@ -1207,12 +1207,13 @@ Upon invocation, all functions return the currently accumulated value for the
 respective aggregate. All functions, except `mcount`, take as first argument the
 value to be used in the incremental computation of the aggregation.
 
-For `msum` and `mprod`, the second argument is the list of group-by variables,
-and the third argument is the list of contributors.
+**IMPORTANT**: Group-by behavior is achieved by having the same variables appear in both the rule head and body. The aggregation functions themselves do NOT take group-by variables as parameters.
 
-Finally, all functions besides `msum` and `mprod` take a list of values, called
-keys, to be used as a group identifier (i.e. they play the role of group by
-variables in standard SQL).
+**Group-by Logic**: 
+- Variables that appear in both the head and body create implicit grouping
+- The aggregation function takes only the expression to aggregate
+- Example: `dept_avg(Dept, Avg) :- employee(_, Dept, Salary), Avg = mavg(Salary).`
+- Here, `Dept` creates the grouping because it appears in both head and body
 
 Some aggregate functions cannot be used inside a recursive rule because the
 value they return may change in a non-monotonic way when new facts arrive

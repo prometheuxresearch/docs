@@ -147,7 +147,6 @@ d,e,f
 Simply reading a csv file into a relation:
 
 ```prolog showLineNumbers
-@input("myCsv").
 @bind("myCsv", "csv", "/path_to_csv/folder", "csv_name.csv").
 myAtom(X,Y,Z) :- myCsv(X,Y,Z).
 @output("myAtom").
@@ -156,7 +155,6 @@ myAtom(X,Y,Z) :- myCsv(X,Y,Z).
 We can also map the columns:
 
 ```prolog showLineNumbers
-@input("myCsv").
 @bind("myCsv", "csv useHeaders=true", "/path_to_csv/folder", "csv_name.csv").
 @mapping("myCsv", 0, "var1", "string").
 @mapping("myCsv", 1, "var2", "string").
@@ -172,7 +170,6 @@ The following reads only the the four columns with indices `0,1,2,4` from the
 CSV file, excluding the column `3`.
 
 ```prolog showLineNumbers
-@input("myCsv").
 @bind("myCsv", "csv selectedColumns=[0:2; 4]", "/path_to_csv/folder", "csv_name.csv").
 
 withoutThree(W, X,Y,Z) :- myCsv(W, X,Y,Z).
@@ -184,9 +181,8 @@ point. In this example, we read a CSV file, perform a SQL query to select Name, 
 the output into another CSV file:
 
 ```prolog
-% Define the input source as a CSV file named "users.csv" located in "/path_to_csv/folder"
+% Define the data source as a CSV file named "users.csv" located in "/path_to_csv/folder"
 % The file contains columns "Name", "Surname", "Age" and potentially other fields. Perform a `select` query over the CSV file and filter and only records where "Age > 10", which are loaded into the "user" relation.
-@input("user").
 @bind("user", "csv query='select Name,Surname,Age from user where Age > 10'", "/path_to_csv/folder", "users.csv").
 
 % Define a new relation "user_name_surname" that selects users from the "user" relation

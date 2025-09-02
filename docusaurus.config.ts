@@ -173,7 +173,9 @@ const config: Config = {
     },
   } satisfies Preset.ThemeConfig,
   customFields: {
-    docsChatUrl: "/api/docsChat",
+    docsChatUrl: process.env.NODE_ENV === 'production' 
+      ? "https://platform.prometheux.ai/docs/api/docsChat"  // Use platform.prometheux.ai in production
+      : "/api/docsChat",  // Use local API in development
     // Azure OpenAI configuration (safe to commit - endpoint is public, key is handled server-side)
     azureOpenAIEndpoint: process.env.AZURE_OPENAI_ENDPOINT || "https://davbe-mdg4jzfa-eastus2.cognitiveservices.azure.com/",
     azureOpenAIDeployment: process.env.AZURE_OPENAI_DEPLOYMENT || "gpt-4o",

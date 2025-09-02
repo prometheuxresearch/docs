@@ -1,6 +1,6 @@
 # Chat API
 
-The Prometheux documentation includes an AI-powered chat API that provides Vadalog code assistance and answers questions about the platform. This API is available at `https://docs.prometheux.ai/api/docsChat` and can be integrated into your applications.
+The Prometheux documentation includes an AI-powered chat API that provides Vadalog code assistance and answers questions about the platform. This API is available at `https://platform.prometheux.ai/docs/api/docsChat` and can be integrated into your applications.
 
 ---
 
@@ -21,7 +21,7 @@ The Chat API provides:
 
 **Purpose**: Optimized for chat interfaces and streaming responses.
 
-- **URL**: `https://docs.prometheux.ai/api/docsChat`
+- **URL**: `https://platform.prometheux.ai/docs/api/docsChat`
 - **Method**: `POST`
 - **Content-Type**: `application/json`
 - **Response**: Streaming text (AI SDK format)
@@ -55,7 +55,7 @@ Streaming text response in AI SDK format:
 
 **JavaScript/TypeScript:**
 ```javascript
-const response = await fetch('https://docs.prometheux.ai/api/docsChat', {
+const response = await fetch('https://platform.prometheux.ai/docs/api/docsChat', {
   method: 'POST',
   headers: {
     'Content-Type': 'application/json',
@@ -77,7 +77,13 @@ while (true) {
   if (done) break;
   
   const chunk = decoder.decode(value, { stream: true });
-  result += chunk.replace(/^0:"/, '').replace(/"\n$/, '');
+  // Parse AI SDK format: 0:"text"
+  const lines = chunk.split('\n');
+  for (const line of lines) {
+    if (line.startsWith('0:"') && line.endsWith('"')) {
+      result += line.slice(3, -1); // Extract text content
+    }
+  }
 }
 
 console.log(result); // Complete Vadalog code example
@@ -86,9 +92,9 @@ console.log(result); // Complete Vadalog code example
 **Python:**
 ```python
 import requests
-import json
+import re
 
-url = "https://docs.prometheux.ai/api/docsChat"
+url = "https://platform.prometheux.ai/docs/api/docsChat"
 payload = {
     "messages": [
         {"role": "user", "content": "Show me aggregation examples"}
@@ -101,15 +107,17 @@ result = ""
 for chunk in response.iter_content(chunk_size=1024, decode_unicode=True):
     if chunk:
         # Parse AI SDK format: 0:"text"
-        if chunk.startswith('0:"') and chunk.endswith('"\n'):
-            result += chunk[3:-2]  # Extract text content
+        lines = chunk.split('\n')
+        for line in lines:
+            if line.startswith('0:"') and line.endswith('"'):
+                result += line[3:-1]  # Extract text content
 
 print(result)  # Complete Vadalog code
 ```
 
 **cURL:**
 ```bash
-curl -X POST https://docs.prometheux.ai/api/docsChat \
+curl -X POST https://platform.prometheux.ai/docs/api/docsChat \
   -H "Content-Type: application/json" \
   -d '{
     "messages": [
@@ -124,7 +132,7 @@ curl -X POST https://docs.prometheux.ai/api/docsChat \
 
 **Purpose**: Standard REST API for programmatic integration.
 
-- **URL**: `https://docs.prometheux.ai/api/vadalog`
+- **URL**: `https://platform.prometheux.ai/docs/api/vadalog`
 - **Method**: `POST`
 - **Content-Type**: `application/json`
 - **Response**: Standard JSON
@@ -153,8 +161,8 @@ curl -X POST https://docs.prometheux.ai/api/docsChat \
   ],
   "relevant_docs": [
     {
-      "title": "Connecting to Databases",
-      "url": "https://docs.prometheux.ai/learn/vadalog/data-sources",
+      "title": "Connecting to Databases", 
+      "url": "https://platform.prometheux.ai/docs/learn/vadalog/data-sources",
       "excerpt": "PostgreSQL database connections..."
     }
   ],
@@ -171,7 +179,7 @@ curl -X POST https://docs.prometheux.ai/api/docsChat \
 
 **JavaScript/TypeScript:**
 ```javascript
-const response = await fetch('https://docs.prometheux.ai/api/vadalog', {
+const response = await fetch('https://platform.prometheux.ai/docs/api/vadalog', {
   method: 'POST',
   headers: {
     'Content-Type': 'application/json',
@@ -192,7 +200,7 @@ console.log(data.relevant_docs);   // Related documentation
 ```python
 import requests
 
-url = "https://docs.prometheux.ai/api/vadalog"
+url = "https://platform.prometheux.ai/docs/api/vadalog"
 payload = {
     "query": "Show me CSV file processing",
     "context": "data integration",
@@ -205,6 +213,17 @@ data = response.json()
 print(f"Response: {data['response']}")
 print(f"Code examples: {len(data['code_examples'])}")
 print(f"Related docs: {len(data['relevant_docs'])}")
+```
+
+**cURL:**
+```bash
+curl -X POST https://platform.prometheux.ai/docs/api/vadalog \
+  -H "Content-Type: application/json" \
+  -d '{
+    "query": "Show me CSV file processing",
+    "context": "data integration", 
+    "include_docs": true
+  }'
 ```
 
 ---
@@ -292,21 +311,223 @@ print(f"Related docs: {len(data['relevant_docs'])}")
 ## Examples
 
 ### **Database Connections**
-```
-Query: "How do I connect to PostgreSQL with authentication?"
-Response: Complete @bind example with connection parameters
+
+**JavaScript/TypeScript:**
+```javascript
+const response = await fetch('https://platform.prometheux.ai/docs/api/docsChat', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    messages: [
+      { role: 'user', content: 'How do I connect to PostgreSQL with authentication?' }
+    ]
+  })
+});
+
+// Parse streaming response
+const reader = response.body.getReader();
+const decoder = new TextDecoder();
+let vadalogCode = '';
+
+while (true) {
+  const { done, value } = await reader.read();
+  if (done) break;
+  
+  const chunk = decoder.decode(value, { stream: true });
+  const lines = chunk.split('\n');
+  for (const line of lines) {
+    if (line.startsWith('0:"') && line.endsWith('"')) {
+      vadalogCode += line.slice(3, -1);
+    }
+  }
+}
+
+console.log(vadalogCode); // Complete @bind example with connection parameters
 ```
 
-### **Data Processing**
-```
-Query: "Show me aggregation examples with grouping"
-Response: Working examples with mavg(), msum(), proper syntax
+**Python:**
+```python
+import requests
+
+url = "https://platform.prometheux.ai/docs/api/docsChat"
+payload = {
+    "messages": [
+        {"role": "user", "content": "How do I connect to PostgreSQL with authentication?"}
+    ]
+}
+
+response = requests.post(url, json=payload, stream=True)
+
+vadalog_code = ""
+for chunk in response.iter_content(chunk_size=1024, decode_unicode=True):
+    if chunk:
+        lines = chunk.split('\n')
+        for line in lines:
+            if line.startswith('0:"') and line.endswith('"'):
+                vadalog_code += line[3:-1]
+
+print(vadalog_code)  # Complete @bind example with connection parameters
 ```
 
-### **Advanced Features**
+**cURL:**
+```bash
+curl -X POST https://platform.prometheux.ai/docs/api/docsChat \
+  -H "Content-Type: application/json" \
+  -d '{
+    "messages": [
+      {"role": "user", "content": "How do I connect to PostgreSQL with authentication?"}
+    ]
+  }'
 ```
-Query: "How do I use LLM functions in Vadalog?"
-Response: Examples with llm:generate() and embeddings:vectorize()
+
+### **Data Processing with Aggregations**
+
+**JavaScript/TypeScript:**
+```javascript
+const response = await fetch('https://platform.prometheux.ai/docs/api/vadalog', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    query: 'Show me aggregation examples with grouping',
+    context: 'data analysis',
+    include_docs: true
+  })
+});
+
+const data = await response.json();
+console.log('Response:', data.response);
+console.log('Code Examples:', data.code_examples);
+data.code_examples.forEach(example => {
+  console.log(`\n--- ${example.description} ---`);
+  console.log(example.code);
+});
+```
+
+**Python:**
+```python
+import requests
+
+url = "https://platform.prometheux.ai/docs/api/vadalog"
+payload = {
+    "query": "Show me aggregation examples with grouping",
+    "context": "data analysis",
+    "include_docs": True
+}
+
+response = requests.post(url, json=payload)
+data = response.json()
+
+print(f"Response: {data['response']}")
+for example in data['code_examples']:
+    print(f"\n--- {example['description']} ---")
+    print(example['code'])
+```
+
+**cURL:**
+```bash
+curl -X POST https://platform.prometheux.ai/docs/api/vadalog \
+  -H "Content-Type: application/json" \
+  -d '{
+    "query": "Show me aggregation examples with grouping",
+    "context": "data analysis",
+    "include_docs": true
+  }' | jq '.code_examples[].code'
+```
+
+### **Advanced AI Features**
+
+**JavaScript/TypeScript:**
+```javascript
+const response = await fetch('https://platform.prometheux.ai/docs/api/docsChat', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    messages: [
+      { role: 'user', content: 'How do I use LLM functions and embeddings in Vadalog?' }
+    ]
+  })
+});
+
+// Handle conversation context
+const conversationHistory = [
+  { role: 'user', content: 'How do I use LLM functions and embeddings in Vadalog?' }
+];
+
+// Parse response and continue conversation
+const reader = response.body.getReader();
+const decoder = new TextDecoder();
+let assistantResponse = '';
+
+while (true) {
+  const { done, value } = await reader.read();
+  if (done) break;
+  
+  const chunk = decoder.decode(value, { stream: true });
+  const lines = chunk.split('\n');
+  for (const line of lines) {
+    if (line.startsWith('0:"') && line.endsWith('"')) {
+      assistantResponse += line.slice(3, -1);
+    }
+  }
+}
+
+// Add to conversation history for follow-up questions
+conversationHistory.push({ role: 'assistant', content: assistantResponse });
+console.log('AI Functions Example:', assistantResponse);
+```
+
+**Python:**
+```python
+import requests
+
+url = "https://platform.prometheux.ai/docs/api/docsChat"
+
+# Start conversation
+conversation = [
+    {"role": "user", "content": "How do I use LLM functions and embeddings in Vadalog?"}
+]
+
+response = requests.post(url, json={"messages": conversation}, stream=True)
+
+assistant_response = ""
+for chunk in response.iter_content(chunk_size=1024, decode_unicode=True):
+    if chunk:
+        lines = chunk.split('\n')
+        for line in lines:
+            if line.startswith('0:"') and line.endswith('"'):
+                assistant_response += line[3:-1]
+
+# Add to conversation for follow-up
+conversation.append({"role": "assistant", "content": assistant_response})
+print("AI Functions Example:", assistant_response)
+
+# Follow-up question
+conversation.append({"role": "user", "content": "Can you show me a similarity analysis example?"})
+follow_up = requests.post(url, json={"messages": conversation}, stream=True)
+# Process follow-up response...
+```
+
+**cURL:**
+```bash
+# Initial request
+curl -X POST https://platform.prometheux.ai/docs/api/docsChat \
+  -H "Content-Type: application/json" \
+  -d '{
+    "messages": [
+      {"role": "user", "content": "How do I use LLM functions and embeddings in Vadalog?"}
+    ]
+  }'
+
+# Follow-up with conversation context
+curl -X POST https://platform.prometheux.ai/docs/api/docsChat \
+  -H "Content-Type: application/json" \
+  -d '{
+    "messages": [
+      {"role": "user", "content": "How do I use LLM functions and embeddings in Vadalog?"},
+      {"role": "assistant", "content": "Previous response..."},
+      {"role": "user", "content": "Can you show me a similarity analysis example?"}
+    ]
+  }'
 ```
 
 ---

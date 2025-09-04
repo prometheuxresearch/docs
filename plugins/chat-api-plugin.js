@@ -17,7 +17,7 @@ module.exports = function chatApiPlugin(context, options) {
             
             // Handle CORS preflight requests
             devServer.app.options('/api/docsChat', (req, res) => {
-              res.setHeader('Access-Control-Allow-Origin', '*');
+              res.setHeader('Access-Control-Allow-Origin', process.env.NODE_ENV === 'production' ? 'https://docs.prometheux.ai' : '*');
               res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
               res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
               res.status(200).end();
@@ -160,7 +160,7 @@ CRITICAL: Every response should include a complete, working Vadalog code block t
 
                 // Return structured JSON response
                 res.setHeader('Content-Type', 'application/json');
-                res.setHeader('Access-Control-Allow-Origin', '*');
+                res.setHeader('Access-Control-Allow-Origin', process.env.NODE_ENV === 'production' ? 'https://docs.prometheux.ai' : '*');
                 res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
                 res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
@@ -350,7 +350,7 @@ Every response should include a complete, working Vadalog code block that users 
                 res.setHeader('Content-Type', 'text/plain; charset=utf-8');
                 res.setHeader('Cache-Control', 'no-cache');
                 res.setHeader('Connection', 'keep-alive');
-                res.setHeader('Access-Control-Allow-Origin', '*');
+                res.setHeader('Access-Control-Allow-Origin', process.env.NODE_ENV === 'production' ? 'https://docs.prometheux.ai' : '*');
                 res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
                 res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 

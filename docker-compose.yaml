@@ -1,6 +1,21 @@
-version: '3'
+version: '3.8'
+
 services:
   prometheux-docs:
     build: .
     ports:
-      - "8080:80"
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - AZURE_OPENAI_ENDPOINT=${AZURE_OPENAI_ENDPOINT}
+      - AZURE_OPENAI_KEY=${AZURE_OPENAI_KEY}
+      - AZURE_OPENAI_DEPLOYMENT=${AZURE_OPENAI_DEPLOYMENT:-gpt-4o}
+      - USE_AZURE_OPENAI=${USE_AZURE_OPENAI:-true}
+    env_file:
+      - .env.local
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3

@@ -33,7 +33,7 @@ This example demonstrates how to use the `all_pairs_join` function with a Postgr
 
 ```python
 import prometheux_chain as px
-from prometheux_chain.model.database import Database
+from prometheux_chain.data.database import Database
 
 # Define the PostgreSQL database
 db = Database(
@@ -61,7 +61,7 @@ This example shows how to use the `all_pairs_join` function with a Databricks cl
 
 ```python
 import prometheux_chain as px
-from prometheux_chain.model.database import Database
+from prometheux_chain.data.database import Database
 
 # Define the Databricks database with specific tables
 db = Database(
@@ -90,7 +90,7 @@ This example demonstrates how to use the `all_pairs_join` function with a Databr
 
 ```python
 import prometheux_chain as px
-from prometheux_chain.model.database import Database
+from prometheux_chain.data.database import Database
 
 # Define the Databricks database with a specific schema
 db = Database(
@@ -118,7 +118,7 @@ This example demonstrates how to use the `all_pairs_join` function with a Postgr
 
 ```python
 import prometheux_chain as px
-from prometheux_chain.model.database import Database
+from prometheux_chain.data.database import Database
 
 # Define the PostgreSQL database
 db = Database(

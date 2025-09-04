@@ -49,7 +49,7 @@ TOKEN="eyJhbGci••••••••••••bz2U39Yc" # API Key generated
 os.environ["PMTX_TOKEN"] = TOKEN
 
 import prometheux_chain as px
-from prometheux_chain.model.database import Database
+from prometheux_chain.data.database import Database
 
 # Create a Database object for Neo4j
 db = Database(
@@ -83,7 +83,7 @@ TOKEN="eyJhbGci••••••••••••bz2U39Yc" # API Key generated
 os.environ["PMTX_TOKEN"] = TOKEN
 
 import prometheux_chain as px
-from prometheux_chain.model.database import Database
+from prometheux_chain.data.database import Database
 
 # Create a Database object for CSV in S3
 db = Database(
@@ -122,7 +122,7 @@ TOKEN="eyJhbGci••••••••••••bz2U39Yc" # API Key generated
 os.environ["PMTX_TOKEN"] = TOKEN
 
 import prometheux_chain as px
-from prometheux_chain.model.database import Database
+from prometheux_chain.data.database import Database
 
 # Create a Database object for PostgreSQL
 db = Database(
@@ -155,7 +155,7 @@ TOKEN="eyJhbGci••••••••••••bz2U39Yc" # API Key generated
 os.environ["PMTX_TOKEN"] = TOKEN
 
 import prometheux_chain as px
-from prometheux_chain.model.database import Database
+from prometheux_chain.data.database import Database
 
 # Create a Database object for Databricks
 db = Database(
@@ -188,7 +188,7 @@ TOKEN="eyJhbGci••••••••••••bz2U39Yc" # API Key generated
 os.environ["PMTX_TOKEN"] = TOKEN
 
 import prometheux_chain as px
-from prometheux_chain.model.database import Database
+from prometheux_chain.data.database import Database
 
 # Create a Database object for Databricks with a specific table
 db = Database(
@@ -220,7 +220,7 @@ TOKEN="eyJhbGci••••••••••••bz2U39Yc" # API Key generated
 os.environ["PMTX_TOKEN"] = TOKEN
 
 import prometheux_chain as px
-from prometheux_chain.model.database import Database
+from prometheux_chain.data.database import Database
 
 # Infer Vadalog rules from a Databricks cluster with a specific schema
 inferred_rules = px.infer_schema(
@@ -256,7 +256,7 @@ TOKEN="eyJhbGci••••••••••••bz2U39Yc" # API Key generated
 os.environ["PMTX_TOKEN"] = TOKEN
 
 import prometheux_chain as px
-from prometheux_chain.model.database import Database
+from prometheux_chain.data.database import Database
 
 # Create a Database object for Excel
 db = Database(
@@ -289,7 +289,7 @@ TOKEN="eyJhbGci••••••••••••bz2U39Yc" # API Key generated
 os.environ["PMTX_TOKEN"] = TOKEN
 
 import prometheux_chain as px
-from prometheux_chain.model.database import Database
+from prometheux_chain.data.database import Database
 
 # Create a Database object for Excel with a specific sheet
 db = Database(
@@ -321,7 +321,7 @@ TOKEN="eyJhbGci••••••••••••bz2U39Yc" # API Key generated
 os.environ["PMTX_TOKEN"] = TOKEN
 
 import prometheux_chain as px
-from prometheux_chain.model.database import Database
+from prometheux_chain.data.database import Database
 
 #"jdbc:snowflake://A778858265xxxx-IV3xxxx.snowflakecomputing.com/?user=my_username&warehouse=my_warehouse&db=my_database&schema=my_schema&password=my_password"
 
@@ -358,7 +358,7 @@ TOKEN="eyJhbGci••••••••••••bz2U39Yc" # API Key generated
 os.environ["PMTX_TOKEN"] = TOKEN
 
 import prometheux_chain as px
-from prometheux_chain.model.database import Database
+from prometheux_chain.data.database import Database
 
 # Create a Database object for Snowflake with a specific table
 db = Database(
@@ -392,7 +392,7 @@ os.environ["PMTX_TOKEN"] = TOKEN
 gcpAccessToken = os.environ["GCP_ACCESS_TOKEN"]
 
 import prometheux_chain as px
-from prometheux_chain.model.database import Database
+from prometheux_chain.data.database import Database
 
 # Create a Database object for BigQuery
 db = Database(
@@ -433,7 +433,7 @@ TOKEN="eyJhbGci••••••••••••bz2U39Yc" # API Key generated
 os.environ["PMTX_TOKEN"] = TOKEN
 
 import prometheux_chain as px
-from prometheux_chain.model.database import Database
+from prometheux_chain.data.database import Database
 
 # Create a Database object for text file
 db = Database(
@@ -466,7 +466,7 @@ TOKEN="eyJhbGci••••••••••••bz2U39Yc" # API Key generated
 os.environ["PMTX_TOKEN"] = TOKEN
 
 import prometheux_chain as px
-from prometheux_chain.model.database import Database
+from prometheux_chain.data.database import Database
 
 # Create a Database object for binary file
 db = Database(
@@ -508,7 +508,7 @@ TOKEN="eyJhbGci••••••••••••bz2U39Yc" # API Key generated
 os.environ["PMTX_TOKEN"] = TOKEN
 
 import prometheux_chain as px
-from prometheux_chain.model.database import Database
+from prometheux_chain.data.database import Database
 
 # Create a Database object for structured binary file
 db = Database(
@@ -544,7 +544,7 @@ TOKEN="eyJhbGci••••••••••••bz2U39Yc" # API Key generated
 os.environ["PMTX_TOKEN"] = TOKEN
 
 import prometheux_chain as pmtx
-from prometheux_chain.model.database import Database
+from prometheux_chain.data.database import Database
 
 # Create a Database object for DynamoDB (region as option)
 db = Database(
@@ -583,7 +583,7 @@ TOKEN="eyJhbGci••••••••••••bz2U39Yc" # API Key generated
 os.environ["PMTX_TOKEN"] = TOKEN
 
 import prometheux_chain as pmtx
-from prometheux_chain.model.database import Database
+from prometheux_chain.data.database import Database
 
 # Create a Database object for DynamoDB (region as database_name)
 db = Database(
@@ -621,7 +621,7 @@ TOKEN="eyJhbGci••••••••••••bz2U39Yc" # API Key generated
 os.environ["PMTX_TOKEN"] = TOKEN
 
 import prometheux_chain as pmtx
-from prometheux_chain.model.database import Database
+from prometheux_chain.data.database import Database
 
 # Create a Database object for DynamoDB Local with specific tables
 db = Database(
@@ -659,7 +659,7 @@ TOKEN="eyJhbGci••••••••••••bz2U39Yc" # API Key generated
 os.environ["PMTX_TOKEN"] = TOKEN
 
 import prometheux_chain as pmtx
-from prometheux_chain.model.database import Database
+from prometheux_chain.data.database import Database
 
 # Create a Database object for DynamoDB with advanced options
 db = Database(

@@ -19,7 +19,7 @@ os.environ['PMTX_TOKEN'] = 'my_pmtx_token'
 
 ### Configure the backend connection using your Prometheux account
 ```python
-px.config.set('JARVISPY_URL', "https://platform.prometheux.ai/jarvispy/'my_organization'/'my_username'")
+px.config.set('JARVISPY_URL', "https://platform.prometheux.ai/jarvispy/[my_organization]/[my_username]")
 ```
 
 ### Create a new project

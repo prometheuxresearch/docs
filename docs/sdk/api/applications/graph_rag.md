@@ -152,7 +152,7 @@ import os
 
 # Set up authentication and configuration
 os.environ['PMTX_TOKEN'] = 'my_pmtx_token'
-px.config.set('JARVISPY_URL', "https://platform.prometheux.ai/jarvispy/'my_organization'/'my_username'")
+px.config.set('JARVISPY_URL', "https://platform.prometheux.ai/jarvispy/[my_organization]/[my_username]")
 
 # Create a project
 project_id = px.save_project(project_name="graphrag_demo")
@@ -172,12 +172,6 @@ px.save_concept(project_id=project_id, concept_logic=concept_logic)
 
 # Run the concept
 px.run_concept(project_id=project_id, concept_name="location")
-
-# Save the virtual knowledge graph with the concepts of interest
-px.save_kg(
-    project_id=project_id,
-    concepts=["location"]
-)
 
 # Perform GraphRAG query
 rag_result = px.graph_rag(

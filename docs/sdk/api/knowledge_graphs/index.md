@@ -99,7 +99,7 @@ import os
 
 # Set up authentication and configuration
 os.environ['PMTX_TOKEN'] = 'my_pmtx_token'
-px.config.set('JARVISPY_URL', "https://platform.prometheux.ai/jarvispy/'my_organization'/'my_username'")
+px.config.set('JARVISPY_URL', "https://platform.prometheux.ai/jarvispy/[my_organization]/[my_username]")
 
 # Create a project
 project_id = px.save_project(project_name="kg_demo")

@@ -146,6 +146,8 @@ result = px.graph_rag(
 
 ## Complete Workflow Example
 
+**Use Case**: Employee recommendation system that finds the most suitable employees for new projects by combining semantic search of project topics with graph analysis of team-employee-project relationships.
+
 ```python
 import prometheux_chain as px
 import os

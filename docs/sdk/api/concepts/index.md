@@ -55,12 +55,29 @@ result = px.save_concept(
 )
 ```
 
+**Example with Python Script Integration**
+```python
+import prometheux_chain as px
+
+# Define concept logic that uses Python script execution
+concept_logic = """
+@output("test_python").
+test_python(Result) :- Result = python:run("python_script").
+"""
+
+# Save the concept
+result = px.save_concept(
+    project_id="my_project_id",
+    concept_logic=concept_logic
+)
+```
+
 ### run_concept
 
 Runs a concept for a specific project.
 
 ```python
-def run_concept(workspace_id="workspace_id", project_id=None, concept_name=None, params=None, project_scope="user", step_by_step=False, materialize_intermediate_concepts=False, force_rerun=True, persist_outputs=False)
+def run_concept(workspace_id="workspace_id", project_id=None, concept_name=None, params=None, project_scope="user", step_by_step=False, materialize_intermediate_concepts=False, force_rerun=True, persist_outputs=False, python_scripts=None)
 ```
 
 **Parameters**
@@ -91,6 +108,9 @@ def run_concept(workspace_id="workspace_id", project_id=None, concept_name=None,
 - `persist_outputs` _(bool, optional)_:
   Whether to persist the outputs. Defaults to False.
 
+- `python_scripts` _(dict, optional)_:
+  Dictionary of Python scripts to inject into the concept execution. Keys are script names and values are the script content as strings. Defaults to None.
+
 **Returns**
 - The execution results data.
 
@@ -108,6 +128,53 @@ results = px.run_concept(
     params={"filter_city": "CA"},
     step_by_step=True,
     persist_outputs=True
+)
+```
+
+**Example with Python Script Injection**
+```python
+import prometheux_chain as px
+
+# Define a Python script for calculations
+python_script = """
+import json
+
+# Simple calculations
+numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+
+# Calculate basic statistics
+total = sum(numbers)
+average = total / len(numbers)
+maximum = max(numbers)
+minimum = min(numbers)
+
+# Create results
+results = {
+    "numbers": numbers,
+    "total": total,
+    "average": round(average, 2),
+    "maximum": maximum,
+    "minimum": minimum,
+    "count": len(numbers)
+}
+
+# Output as JSON
+print(json.dumps(results))
+"""
+
+# Save a concept that uses the Python script
+px.save_concept(
+    project_id="my_project_id", 
+    concept_logic="@output(\"test_python\").\ntest_python(Result) :- Result = python:run(\"python_script\")."
+)
+
+# Run the concept with the injected Python script
+results = px.run_concept(
+    project_id="my_project_id", 
+    concept_name="test_python", 
+    python_scripts={
+        "python_script": python_script
+    }
 )
 ```
 

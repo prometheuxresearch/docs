@@ -1,4 +1,4 @@
-# LLM Validation
+<!-- # LLM Validation
 
 The **LLM Validation** use case enables validating outputs from Large Language Models against predefined guardrail programs. This ensures generated content aligns with domain-specific rules and constraints.
 
@@ -66,4 +66,4 @@ A possible set of `Vadalog` rules in the `policies` file is as follows:
 %   Filters refunds that occurred within the last 14 days.
 % - `Value < 1000`
 ?- refund(ProductName, Category, ElapsedDays, Value), Contains = collections:contains({"Electronics","Home Appliances"}, Category), Contains == #T, ElapsedDays <= 14, Value < 1000.
-```
+``` -->

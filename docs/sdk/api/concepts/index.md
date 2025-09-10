@@ -11,7 +11,7 @@ The `concepts` module provides functions for managing concepts in the Prometheux
 Saves concept logic for a specific project.
 
 ```python
-def save_concept(workspace_id="workspace_id", project_id=None, concept_logic=None, scope="user")
+def save_concept(workspace_id="workspace_id", project_id=None, concept_logic=None, scope="user", python_scripts=None)
 ```
 
 **Parameters**
@@ -26,6 +26,9 @@ def save_concept(workspace_id="workspace_id", project_id=None, concept_logic=Non
 
 - `scope` _(str, optional)_:
   The scope of the concept. Defaults to "user".
+
+- `python_scripts` _(dict, optional)_:
+  Dictionary of Python scripts to inject into the concept. Keys are script names and values are the script content as strings. Defaults to None.
 
 **Returns**
 - The response data from saving the concept.
@@ -55,20 +58,134 @@ result = px.save_concept(
 )
 ```
 
-**Example with Python Script Integration**
+**Example with Python Script Ingestion**
 ```python
 import prometheux_chain as px
+
+# Define a Python script with proper structure
+python_script = """
+import json
+
+def main():
+    # Simple calculations
+    numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+    
+    # Calculate basic statistics
+    total = sum(numbers)
+    average = total / len(numbers)
+    maximum = max(numbers)
+    minimum = min(numbers)
+    
+    # Create results as a list of dictionaries (tabular format)
+    results = [
+        {
+            "Numbers": numbers,
+            "Total": total,
+            "Average": round(average, 2),
+            "Maximum": maximum,
+            "Minimum": minimum,
+            "Count": len(numbers)
+        }
+    ]
+    
+    return results
+"""
 
 # Define concept logic that uses Python script execution
 concept_logic = """
 @output("test_python").
-test_python(Result) :- Result = python:run("python_script").
+test_python(Numbers,Total,Average,Maximum,Minimum,Count) :- python:run("python_script").
 """
 
-# Save the concept
+# Save the concept with Python script injection
 result = px.save_concept(
     project_id="my_project_id",
-    concept_logic=concept_logic
+    concept_logic=concept_logic,
+    python_scripts={
+        "python_script": python_script
+    }
+)
+```
+
+---
+
+## Python Script Injection Requirements
+
+When using Python script injection with `save_concept`, there are specific requirements that must be followed:
+
+### 1. Main Function Requirement
+Every Python script **must** contain a `main()` function that serves as the entry point:
+
+```python
+def main():
+    # Your script logic here
+    return results
+```
+
+### 2. Tabular Output Format
+The `main()` function must return results in a tabular format, for example as a list of dictionaries. Each dictionary represents a row, and the keys represent column names:
+
+```python
+def main():
+    # Calculate results
+    results = [
+        {
+            "Column1": value1,
+            "Column2": value2,
+            "Column3": value3
+        }
+    ]
+    return results
+```
+
+### 3. Concept Head Alignment
+The output column names in your Python script must match the parameters in the concept head of your Vadalog rule:
+
+```python
+# Python script returns:
+results = [
+    {
+        "Numbers": [1, 2, 3],
+        "Total": 6,
+        "Average": 2.0
+    }
+]
+
+# Vadalog concept head must match:
+test_python(Numbers, Total, Average) :- python:run("python_script").
+```
+
+### 4. Standalone Concept Rule
+Python script concepts must be **standalone** - you cannot combine Python script execution with other logic in the same rule. The rule should only contain the `python:run()` call:
+
+```python
+# ✅ Correct - standalone Python script concept
+@output("my_python_concept").
+my_python_concept(Col1, Col2) :- python:run("my_script").
+
+# ❌ Incorrect - cannot combine with other logic
+@output("mixed_concept").
+mixed_concept(Col1, Col2) :- python:run("my_script"), other_predicate(Col1).
+```
+
+### 5. Using Python Concepts as Input
+Once created, Python script concepts can be used as input to other concepts just like any regular concept:
+
+```python
+# Create a Python script concept
+px.save_concept(
+    project_id=project_id,
+    concept_logic="@output(\"python_data\").\npython_data(Value) :- python:run(\"data_script\").",
+    python_scripts={"data_script": python_script}
+)
+
+# Use it in another concept
+px.save_concept(
+    project_id=project_id,
+    concept_logic="""
+    @output("processed_data").
+    processed_data(ProcessedValue) :- python_data(Value), ProcessedValue = Value * 2.
+    """
 )
 ```
 
@@ -77,7 +194,7 @@ result = px.save_concept(
 Runs a concept for a specific project.
 
 ```python
-def run_concept(workspace_id="workspace_id", project_id=None, concept_name=None, params=None, project_scope="user", step_by_step=False, materialize_intermediate_concepts=False, force_rerun=True, persist_outputs=False, python_scripts=None)
+def run_concept(workspace_id="workspace_id", project_id=None, concept_name=None, params=None, project_scope="user", step_by_step=False, materialize_intermediate_concepts=False, force_rerun=True, persist_outputs=False)
 ```
 
 **Parameters**
@@ -108,9 +225,6 @@ def run_concept(workspace_id="workspace_id", project_id=None, concept_name=None,
 - `persist_outputs` _(bool, optional)_:
   Whether to persist the outputs. Defaults to False.
 
-- `python_scripts` _(dict, optional)_:
-  Dictionary of Python scripts to inject into the concept execution. Keys are script names and values are the script content as strings. Defaults to None.
-
 **Returns**
 - The execution results data.
 
@@ -128,53 +242,6 @@ results = px.run_concept(
     params={"filter_city": "CA"},
     step_by_step=True,
     persist_outputs=True
-)
-```
-
-**Example with Python Script Injection**
-```python
-import prometheux_chain as px
-
-# Define a Python script for calculations
-python_script = """
-import json
-
-# Simple calculations
-numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-
-# Calculate basic statistics
-total = sum(numbers)
-average = total / len(numbers)
-maximum = max(numbers)
-minimum = min(numbers)
-
-# Create results
-results = {
-    "numbers": numbers,
-    "total": total,
-    "average": round(average, 2),
-    "maximum": maximum,
-    "minimum": minimum,
-    "count": len(numbers)
-}
-
-# Output as JSON
-print(json.dumps(results))
-"""
-
-# Save a concept that uses the Python script
-px.save_concept(
-    project_id="my_project_id", 
-    concept_logic="@output(\"test_python\").\ntest_python(Result) :- Result = python:run(\"python_script\")."
-)
-
-# Run the concept with the injected Python script
-results = px.run_concept(
-    project_id="my_project_id", 
-    concept_name="test_python", 
-    python_scripts={
-        "python_script": python_script
-    }
 )
 ```
 
@@ -263,7 +330,7 @@ px.config.set('JARVISPY_URL', "https://platform.prometheux.ai/jarvispy/[my_organ
 # Create a project
 project_id = px.save_project(project_name="concept_demo")
 
-# Define and save a concept
+# Define and save a traditional concept
 concept_logic = """
 company("Apple", "Redwood City, CA").
 company("Google", "Mountain View, CA").
@@ -276,12 +343,52 @@ location(Location) :- company(_,Location).
 
 px.save_concept(project_id=project_id, concept_logic=concept_logic)
 
+# Define and save a Python script concept
+python_script = """
+import json
+
+def main():
+    # Simple calculations
+    numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+    
+    # Calculate basic statistics
+    total = sum(numbers)
+    average = total / len(numbers)
+    maximum = max(numbers)
+    minimum = min(numbers)
+    
+    # Create results as a list of dictionaries (tabular format)
+    results = [
+        {
+            "Numbers": numbers,
+            "Total": total,
+            "Average": round(average, 2),
+            "Maximum": maximum,
+            "Minimum": minimum,
+            "Count": len(numbers)
+        }
+    ]
+    
+    return results
+"""
+
+px.save_concept(
+    project_id=project_id, 
+    concept_logic="@output(\"test_python\").\ntest_python(Numbers,Total,Average,Maximum,Minimum,Count) :- python:run(\"python_script\").",
+    python_scripts={
+        "python_script": python_script
+    }
+)
+
 # List all concepts
 concepts = px.list_concepts(project_id=project_id)
 print(f"Available concepts: {concepts}")
 
-# Run the concept
+# Run the traditional concept
 results = px.run_concept(project_id=project_id, concept_name="location")
+
+# Run the Python script concept
+python_results = px.run_concept(project_id=project_id, concept_name="test_python")
 
 # Clean up when done
 px.cleanup_concepts(project_id=project_id)

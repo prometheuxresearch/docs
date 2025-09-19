@@ -974,7 +974,7 @@ bigquery_table(X,Y,Z) :- table(X,Y,Z).
 ```prolog
 % Bind the BigQuery table with token
 @bind("table",
-      "bigquery authMode=gcpAccessToken, token='my-gcp-access-token'",
+      "bigquery authMode=gcpAccessToken, gcpAccessToken='my-gcp-access-token'",
       "project-example-358816",
       "bigquery-public-data.thelook_ecommerce.order_items").
 

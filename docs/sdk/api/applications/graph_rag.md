@@ -146,44 +146,179 @@ result = px.graph_rag(
 
 ## Complete Workflow Example
 
+**Use Case**: Employee recommendation system that finds the most suitable employees for new projects by combining semantic search of project topics with graph analysis of team-employee-project relationships.
+
 ```python
 import prometheux_chain as px
 import os
 
 # Set up authentication and configuration
 os.environ['PMTX_TOKEN'] = 'my_pmtx_token'
-px.config.set('JARVISPY_URL', "https://platform.prometheux.ai/jarvispy/'my_organization'/'my_username'")
+px.config.set('JARVISPY_URL', "https://platform.prometheux.ai/jarvispy/[my_organization]/[my_username]")
+
 
 # Create a project
 project_id = px.save_project(project_name="graphrag_demo")
 
+
 # Define and save concepts
 concept_logic = """
-company("Apple", "Redwood City, CA").
-company("Google", "Mountain View, CA").
-company("Microsoft", "Redmond, WA").
+contributions_input("Phoenix","graph RAG for internal knowledge discovery; knowledge graphs; explainable retrieval; provenance",1001).
+contributions_input("Phoenix","graph RAG for internal knowledge discovery; knowledge graphs; explainable retrieval; provenance",1002).
+contributions_input("Phoenix","graph RAG for internal knowledge discovery; knowledge graphs; explainable retrieval; provenance",1004).
+contributions_input("Phoenix","graph RAG for internal knowledge discovery; knowledge graphs; explainable retrieval; provenance",1015).
+contributions_input("Atlas","hybrid retrieval; vector search; BM25 + dense ranking; semantic search platform",1002).
+contributions_input("Atlas","hybrid retrieval; vector search; BM25 + dense ranking; semantic search platform",1005).
+contributions_input("Atlas","hybrid retrieval; vector search; BM25 + dense ranking; semantic search platform",1009).
+contributions_input("Beacon","chatbot assistants; retrieval-augmented QA; tool use; RAG workflows; grounding",1009).
+contributions_input("Beacon","chatbot assistants; retrieval-augmented QA; tool use; RAG workflows; grounding",1001).
+contributions_input("Beacon","chatbot assistants; retrieval-augmented QA; tool use; RAG workflows; grounding",1002).
+contributions_input("Beacon","chatbot assistants; retrieval-augmented QA; tool use; RAG workflows; grounding",1004).
+contributions_input("Helios","data lineage; entity resolution; metadata graph; data catalog; governance",1006).
+contributions_input("Helios","data lineage; entity resolution; metadata graph; data catalog; governance",1011).
+contributions_input("Helios","data lineage; entity resolution; metadata graph; data catalog; governance",1001).
+contributions_input("Helios","data lineage; entity resolution; metadata graph; data catalog; governance",1014).
+contributions_input("Keystone","knowledge base consolidation; schema alignment; ontology mapping; knowledge graphs",1003).
+contributions_input("Keystone","knowledge base consolidation; schema alignment; ontology mapping; knowledge graphs",1001).
+contributions_input("Keystone","knowledge base consolidation; schema alignment; ontology mapping; knowledge graphs",1006).
+contributions_input("Quasar","real-time recommendations; low-latency ranking; event streaming; approximate nearest neighbors",1008).
+contributions_input("Quasar","real-time recommendations; low-latency ranking; event streaming; approximate nearest neighbors",1002).
+contributions_input("Quasar","real-time recommendations; low-latency ranking; event streaming; approximate nearest neighbors",1006).
+contributions_input("Triton","MLOps; model registry; deployment; feature store; ML monitoring",1012).
+contributions_input("Triton","MLOps; model registry; deployment; feature store; ML monitoring",1008).
+contributions_input("Triton","MLOps; model registry; deployment; feature store; ML monitoring",1011).
+contributions_input("Triton","MLOps; model registry; deployment; feature store; ML monitoring",1006).
+contributions_input("Meridian","time-series analytics; anomaly detection; monitoring; forecasting",1011).
+contributions_input("Meridian","time-series analytics; anomaly detection; monitoring; forecasting",1014).
+contributions_input("Meridian","time-series analytics; anomaly detection; monitoring; forecasting",1012).
+contributions_input("Nova","onboarding content; personalization; growth experiments; content targeting",1004).
+contributions_input("Nova","onboarding content; personalization; growth experiments; content targeting",1010).
+contributions_input("Nova","onboarding content; personalization; growth experiments; content targeting",1005).
+contributions_input("Sentinel","privacy risk detection; PII redaction; policy-based access control; differential privacy",1007).
+contributions_input("Sentinel","privacy risk detection; PII redaction; policy-based access control; differential privacy",1013).
+contributions_input("Sentinel","privacy risk detection; PII redaction; policy-based access control; differential privacy",1012).
+contributions_input("Orion","document classification; zero-shot NLP; content moderation; topic modeling",1003).
+contributions_input("Orion","document classification; zero-shot NLP; content moderation; topic modeling",1015).
+contributions_input("Orion","document classification; zero-shot NLP; content moderation; topic modeling",1007).
+contributions_input("Aurora","A/B testing platform; experiment analysis; causal inference; uplift modeling",1010).
+contributions_input("Aurora","A/B testing platform; experiment analysis; causal inference; uplift modeling",1004).
+contributions_input("Aurora","A/B testing platform; experiment analysis; causal inference; uplift modeling",1008).
 
-location(Location) :- company(_,Location).
+contributions(Project_name,Project_topic,Employee_id) :- 
+    contributions_input(Project_name,Project_topic,Employee_id).
 
-@output("location").
+@output("contributions").
 """
-
 px.save_concept(project_id=project_id, concept_logic=concept_logic)
 
-# Run the concept
-px.run_concept(project_id=project_id, concept_name="location")
 
-# Save the virtual knowledge graph with the concepts of interest
-px.save_kg(
-    project_id=project_id,
-    concepts=["location"]
-)
+concept_logic = """
+teams_employees_input("Research",1001,"Alice Nguyen").
+teams_employees_input("Research",1003,"Carol Bianchi").
+teams_employees_input("Research",1009,"Iris Leone").
+teams_employees_input("Research",1015,"Olga Sartori").
+teams_employees_input("Research",1016,"Sara Moretti").
+teams_employees_input("Engineering",1002,"Bob Rossi").
+teams_employees_input("Engineering",1005,"Eve Marino").
+teams_employees_input("Engineering",1008,"Hugo Rinaldi").
+teams_employees_input("Engineering",1012,"Lara Vitale").
+teams_employees_input("Engineering",1017,"Paolo Gatti").
+teams_employees_input("Data Platform",1006,"Franco Greco").
+teams_employees_input("Data Platform",1011,"Kai Romano").
+teams_employees_input("Data Platform",1014,"Nico Ferraro").
+teams_employees_input("Data Platform",1018,"Ugo Marchetti").
+teams_employees_input("Marketing",1004,"Davide Conti").
+teams_employees_input("Marketing",1010,"Jamal Ricci").
+teams_employees_input("Marketing",1019,"Valentina Russo").
+teams_employees_input("Privacy",1007,"Gina Esposito").
+teams_employees_input("Privacy",1013,"Mina De Luca").
+teams_employees_input("Privacy",1020,"Tara Bellini").
+
+teams_employees(Team_name,Employee_id,Employee_name) :- 
+    teams_employees_input(Team_name,Employee_id,Employee_name).
+
+@output("teams_employees").
+"""
+px.save_concept(project_id=project_id, concept_logic=concept_logic)
+
+
+concept_logic = """
+projects(Project_name,Project_topic) :- 
+    contributions(Project_name,Project_topic,Employee_id).
+
+@output("projects").
+"""
+px.save_concept(project_id=project_id, concept_logic=concept_logic)
+
+
+concept_logic = """
+node("project",Project_name,[]) :- 
+    contributions(Project_name,Project_topic,Employee_id).
+node("team",Team_name,[]) :- 
+    teams_employees(Team_name,Employee_id,Employee_name).
+node("employee",Employee_id,[Employee_name]) :- 
+    teams_employees(Team_name,Employee_id,Employee_name).
+
+@output("node").
+"""
+px.save_concept(project_id=project_id, concept_logic=concept_logic)
+
+
+concept_logic = """
+edge("contributed_to",Employee_id,Project_name) :- 
+    contributions(Project_name,Project_topic,Employee_id).
+edge("works_in",Employee_id,Team_name) :- 
+    teams_employees(Team_name,Employee_id,Employee_name).
+
+@output("edge").
+"""
+px.save_concept(project_id=project_id, concept_logic=concept_logic)
+
+
+concept_logic = """
+edge_undirected(Y,X) :- 
+    edge(Type,X,Y).
+edge_undirected(X,Y) :- 
+    edge(Type,X,Y).
+
+path(X,Y,Dist,Path) :- 
+    edge_undirected(X,Y),
+    projects(X,Project_topic),
+    Dist = 1, Path = [Y].
+
+path(X,Z,Dist,Path) :- 
+    path(X,Y,OldDist,OldPath), 
+    edge_undirected(Y,Z), 
+    OldDist <= 2, Visited = collections:contains(OldPath,Z), Visited == #F,
+    Dist = OldDist + 1, Path = concat(OldPath,[Z]).
+
+neighbor(Type,Id,Dist,Source,Path) :- 
+    path(Source,Id,Dist,Path), 
+    node(Type,Id,Attributes).
+
+@output("neighbor").
+"""
+px.save_concept(project_id=project_id, concept_logic=concept_logic)
+
+
+concept_logic = """
+closest_employee_to_project(Id,Name,Distance) :-
+    neighbor("employee",Id,Dist,Source,Path),
+    node("employee",Id,Name),
+    Distance = mmin(Dist).
+
+@output("closest_employee_to_project").
+@post("closest_employee_to_project","orderBy(3)").
+"""
+px.save_concept(project_id=project_id, concept_logic=concept_logic)
+
 
 # Perform GraphRAG query
-rag_result = px.graph_rag(
-    project_id=project_id,
-    question="Which companies are in California?",
-    graph_selected_concepts=["location"]
+rag_result = px.graph_rag(project_id=project_id,
+                question="I'm kicking off a project on knowledge graphs for data governance, which employees do you suggest?",
+                rag_concepts=[{"concept": "projects", "field_to_embed": "Project_topic"}],
+                graph_available_concepts=["closest_employee_to_project"],
+                top_k=3
 )
 ```
 

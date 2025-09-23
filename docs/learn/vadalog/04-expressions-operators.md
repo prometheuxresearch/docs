@@ -1568,7 +1568,60 @@ hotspot("Component2", 3).
 
 ## LLM Integration
 
-The `llm:generate` function uses LLMs to generate content based on a prompt template and input arguments. This function allows you to create dynamic, AI-generated responses by substituting variables in a prompt with actual values.
+The `llm:generate` function uses LLMs to generate content based on a prompt template. This function allows you to create dynamic, AI-generated responses by substituting variables in a prompt with actual values.
+
+### Direct Variable Substitution (Recommended)
+
+**Syntax:**
+```prolog
+llm:generate(prompt, outputType)
+```
+
+In this approach, variables from the rule context are directly referenced in the prompt using `${VARIABLE_NAME}` syntax.
+
+**Parameters:**
+- `prompt`: A string template containing placeholders like `${VARIABLE_NAME}` that reference variables from the rule context
+- `outputType`: The expected return type (string, int, double, float, boolean, or list variants)
+
+**Supported Output Types:**
+- `string`, `int`, `double`, `boolean`
+- `list<string>`, `list<int>`, `list<double>`, `list<float>`, `list<boolean>`
+
+**Example:**
+```prolog
+% Sample clinical records for patients
+clinincal_rec(1,"N1001","P001","Patient reports testicular mass; ultrasound suggests possible TGCT.").
+clinincal_rec(1,"N1002","P001","Oncology referral placed for suspected testicular germ cell tumor.").
+clinincal_rec(1,"N1003","P001","AFP and hCG elevated. Plan: orchiectomy discussed.").
+clinincal_rec(2,"N2001","P002","Annual physical: normal exam. No masses or pain.").
+clinincal_rec(2,"N2002","P002","Sports injury (ankle). Denies lumps.").
+clinincal_rec(3,"N3001","P003","History of TGCT; right orchiectomy in 2020.").
+clinincal_rec(3,"N3002","P003","CT scan shows no recurrence; continue surveillance.").
+clinincal_rec(4,"N4001","P004","Abdominal pain; likely appendicitis. No oncologic concerns.").
+clinincal_rec(4,"N4002","P004","Appendectomy performed; recovery uneventful.").
+clinincal_rec(5,"N5001","P005","Family history of TGCT; patient to be screened. No diagnosis yet.").
+
+% Analyze clinical notes to determine TGCT diagnosis status for each patient
+patient_clinical_notes(PATIENT_ID, NOTE_COUNT, NOTES) :- 
+    clinincal_rec(PROVIDER_NPI, CLINICAL_NOTE_ID, PATIENT_ID, NOTE_TEXT), 
+    NOTE_COUNT = mcount(1), 
+    NOTES = munion([NOTE_TEXT]).
+
+% Use LLM to analyze notes and determine TGCT diagnosis status
+patient_TGCT(PATIENT_ID, Diagnosis) :- 
+    patient_clinical_notes(PATIENT_ID, NOTE_COUNT, NOTES), 
+    Diagnosis = llm:generate("Analyze the clinical notes for patient ${PATIENT_ID}: ${NOTES}. Indicate whether the documentation confirms a specific TGCT diagnosis event, and provide a concise rationale for your decision.", "string").
+
+
+@output("patient_TGCT").
+% Order results by patient ID ascending
+@post("patient_TGCT","orderby(1)").
+
+```
+
+In this example, `${PATIENT_ID}` and `${NOTES}` are automatically substituted with the values of the `PATIENT_ID` and `NOTES` variables from the rule context.
+
+### Explicit Argument Substitution (Alternative)
 
 **Syntax:**
 ```prolog
@@ -1578,11 +1631,7 @@ llm:generate(prompt, outputType, arg1, arg2, ..., argN)
 **Parameters:**
 - `prompt`: A string template containing placeholders like `${arg_1}`, `${arg_2}`, etc.
 - `outputType`: The expected return type (string, int, double, float, boolean, or list variants)
-- `arg1, arg2, ..., argN`: Arguments that will substitute the placeholders in the prompt
-
-**Supported Output Types:**
-- `string`, `int`, `double`, `boolean`
-- `list<string>`, `list<int>`, `list<double>`, `list<float>`, `list<boolean>`
+- `arg1, arg2, ..., argN`: Optional arguments that will substitute the placeholders in the prompt
 
 **Example:**
 ```prolog

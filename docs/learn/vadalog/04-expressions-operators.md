@@ -721,6 +721,7 @@ collections, such as lists and sets..
   contain elements from the collection `Y`.
 - `transform(Arr,StringLambdaF)`: Returns an array of elements after applying a transformation to each element in the input array.
 - `filter(Arr,StringLambdaF)`: Returns an array of elements for which a predicate holds in a given array.
+- `explode(Arr)`: Row-expanding function that returns individual elements from an array, creating separate facts for each element.
 
 To use any of these, add the library prefix `collections:`. For example:
 

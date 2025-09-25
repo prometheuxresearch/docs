@@ -1,202 +1,180 @@
 # Prometheux on Databricks
 
-Prometheux integrates seamlessly with Databricks to leverage its powerful lakehouse platform for large-scale data processing and analytics. This integration allows you to execute Vadalog rules directly on Databricks compute while maintaining all data within the Databricks environment.
+Prometheux integrates with Databricks through JDBC connectivity, allowing you to execute Vadalog rules against Unity Catalog tables and SQL warehouses. This integration provides secure, governed access to your lakehouse data while maintaining performance and scalability.
 
-## Spark Submit Integration
+## JDBC Configuration
 
-The Spark Submit integration model packages Prometheux as a JAR file and submits it as a Databricks job. This approach is ideal for production-scale deployments where you need reliable, scheduled execution of Vadalog workflows.
+Prometheux connects to Databricks using the OSS JDBC driver with OAuth 2.0 Machine-to-Machine (M2M) authentication. This approach provides secure, token-managed connectivity without manual token handling.
 
-### Packaging and Deployment
+### Authentication Options
 
-To deploy Prometheux using Spark Submit:
+#### Option 1: OAuth 2.0 M2M (Recommended)
 
-1. **Package your Vadalog rules** and dependencies into a JAR file
-2. **Upload the JAR** to Databricks File System (DBFS) or Unity Catalog Volumes
-3. **Submit the job** using the Databricks Jobs API
+Configure OAuth authentication using client credentials provided by your Databricks administrator:
 
-### Sample Jobs API Payload
+```properties
+# Databricks JDBC OAuth Configuration
+databricks.host=<workspace-hostname>
+databricks.httpPath=/sql/1.0/warehouses/<warehouse-id>
+databricks.oauth2.clientId=<client-id>
+databricks.oauth2.clientSecret=<client-secret>
 
-Here's an example JSON payload for submitting a Prometheux job via the Databricks Jobs API:
+# Connection string automatically constructed:
+# jdbc:databricks://<host>:443;<http-path>;AuthMech=11;Auth_Flow=1;OAuth2ClientId=<client-id>;OAuth2Secret=<client-secret>
+```
 
+#### Option 2: Personal Access Token
+
+For development environments, you can use personal access tokens:
+
+```properties
+# Databricks JDBC Token Configuration
+databricks.host=<workspace-hostname>
+databricks.httpPath=/sql/1.0/warehouses/<warehouse-id>
+databricks.token=<personal-access-token>
+databricks.authMode=PAT
+```
+
+### UI-Based Configuration
+
+Prometheux provides a user-friendly configuration interface for setting up Databricks connectivity. The data source connection dialog supports both OAuth and Personal Access Token authentication methods:
+
+![Databricks Connection UI](databricks_db_oauth.png)
+
+**Configuration Fields:**
+
+1. **Database Type**: Select "Databricks" from the dropdown
+2. **Client ID**: 
+   - For OAuth: Enter your OAuth client ID (e.g., `e5f1e15e-xxxx-xxxx-xxxx-2ed89291cc1c`)
+   - For PAT: Leave this field empty
+3. **Secret/PAT**: Enter your OAuth client secret or Personal Access Token (automatically masked for security)
+4. **Host**: Enter your Databricks workspace hostname (e.g., `dbc-xxxxxxxx-xxxx.cloud.databricks.com`)
+5. **Port**: Default is 443 for HTTPS connections
+6. **Warehouse**: Enter the SQL warehouse HTTP path (e.g., `/sql/1.0/warehouses/f66xxxxxxxxxxxxx`)
+7. **Additional Options (JSON)**: Provide additional JDBC parameters as needed
+
+**Optional Authentication Configuration:**
+
+**For OAuth (Default):**
 ```json
 {
-  "run_name": "prometheux-vadalog-analysis",
-  "tasks": [
-    {
-      "task_key": "vadalog_processing",
-      "spark_jar_task": {
-        "main_class_name": "ai.prometheux.engine.VadalogSparkRunner",
-        "jar_uri": "dbfs:/jars/prometheux-engine-1.0.jar",
-        "parameters": [
-          "--vadalog-file", "/Volumes/catalog/schema/volume/rules/analysis.vada",
-          "--output-table", "catalog.schema.results",
-          "--mode", "production"
-        ]
-      },
-      "new_cluster": {
-        "spark_version": "13.3.x-scala2.12",
-        "node_type_id": "i3.xlarge",
-        "num_workers": 4,
-        "spark_conf": {
-          "spark.sql.adaptive.enabled": "true",
-          "spark.sql.adaptive.coalescePartitions.enabled": "true"
-        }
-      },
-      "libraries": [
-        {
-          "jar": "dbfs:/jars/prometheux-dependencies.jar"
-        }
-      ]
-    }
-  ]
+  "region": "us-east-1",
+  "ConnTimeout": "10000",
+  "SocketTimeout": "10000"
 }
 ```
 
-### Delta Lake and Unity Catalog Integration
-
-Results are automatically written back to **Delta Lake tables** governed by **Unity Catalog**:
-
-- **Schema Evolution**: Prometheux automatically handles schema changes in Delta tables
-- **ACID Transactions**: All writes benefit from Delta Lake's transactional guarantees  
-- **Governance**: Unity Catalog provides lineage tracking, access control, and data discovery
-- **Optimization**: Delta Lake's optimization features (Z-ordering, liquid clustering) improve query performance
-
-```sql
--- Results are written to governed Delta tables
-SELECT * FROM catalog.schema.analysis_results 
-WHERE processing_date >= '2024-01-01'
+**For Personal Access Token:**
+```json
+{
+  "authMode": "PAT",
+  "region": "us-east-1",
+  "ConnTimeout": "10000",
+  "SocketTimeout": "10000"
+}
 ```
 
-### Production Benefits
+**Security Features:**
+- **Credential Masking**: Secrets and PATs are automatically redacted in the UI
+- **Dual Authentication**: Supports both OAuth and PAT authentication methods
+- **Vault Integration**: Supports pulling credentials from external secret managers
+- **Connection Testing**: Built-in connectivity validation before saving
 
-- **Scalability**: Leverages Databricks auto-scaling for large datasets
-- **Reliability**: Built-in retry mechanisms and error handling
-- **Monitoring**: Integration with Databricks job monitoring and alerting
-- **Cost Optimization**: Automatic cluster termination after job completion
+### JDBC Driver Setup
 
-## Spark Connect Integration
+Prometheux uses the open-source Databricks JDBC driver for optimal performance and compatibility:
 
-Spark Connect integration allows Prometheux to connect remotely to a Databricks all-purpose cluster, enabling interactive development and real-time rule execution.
-
-### Configuration
-
-Configure Prometheux to connect via Spark Connect by setting up your `spark-defaults.conf`:
-
-```properties
-# Spark Connect Configuration
-spark.sql.catalog.spark_catalog=com.databricks.sql.cloud.DatabricksSparkSessionCatalog
-spark.sql.catalog.spark_catalog.url=sc://adb-<workspace-id>.<region>.databricks.com
-spark.sql.catalog.spark_catalog.token=<databricks-token>
-spark.sql.catalog.spark_catalog.clusterId=<cluster-id>
-
-# Prometheux-specific properties
-prometheux.databricks.workspace.url=sc://adb-<workspace-id>.<region>.databricks.com
-prometheux.databricks.token=<databricks-token>
-prometheux.databricks.cluster.id=<cluster-id>
-prometheux.execution.mode=spark-connect
+```xml
+<!-- Maven dependency for OSS JDBC driver -->
+<dependency>
+    <groupId>com.databricks</groupId>
+    <artifactId>databricks-jdbc</artifactId>
+    <version>2.6.25</version>
+</dependency>
 ```
 
-### Example: Join Rule Execution
+## Data Operations
 
-Here's how Prometheux compiles a Vadalog join rule into Spark DataFrame operations:
+### Reading from Unity Catalog
 
-**Vadalog Rule:**
+Configure input tables using Unity Catalog three-level namespace:
+
 ```prolog
-% Input tables from Unity Catalog
-@input("customers").
-@bind("customers", "databricks", "catalog.sales", "customers").
+% Input configuration for Unity Catalog tables
+@bind("customers", "databricks", "sales_catalog.crm_schema", "customers").
 
-@input("orders").  
-@bind("orders", "databricks", "catalog.sales", "orders").
+@bind("orders", "databricks", "sales_catalog.transactions_schema", "orders").
 
-% Join rule: Find customer orders with their details
+% Vadalog rule using Unity Catalog data
 customer_orders(CustomerName, OrderId, OrderDate, Amount) :- 
     customers(CustomerId, CustomerName, Email),
     orders(OrderId, CustomerId, OrderDate, Amount).
 
-% Output to Unity Catalog
 @output("customer_orders").
-@bind("customer_orders", "databricks", "catalog.analytics", "customer_orders").
+@bind("customer_orders", "databricks", "analytics_catalog.reports_schema", "customer_orders").
 ```
 
-**Generated Spark Operations:**
-```python
-# Prometheux automatically generates equivalent Spark DataFrame operations
-customers_df = spark.table("catalog.sales.customers")
-orders_df = spark.table("catalog.sales.orders")
+## Security and Governance
 
-# Compiled join operation
-result_df = customers_df.alias("c") \
-    .join(orders_df.alias("o"), col("c.CustomerId") == col("o.CustomerId")) \
-    .select(
-        col("c.CustomerName"),
-        col("o.OrderId"), 
-        col("o.OrderDate"),
-        col("o.Amount")
-    )
+### Unity Catalog Integration
 
-# Write back to Unity Catalog
-result_df.write \
-    .mode("overwrite") \
-    .option("mergeSchema", "true") \
-    .saveAsTable("catalog.analytics.customer_orders")
+Prometheux fully respects Unity Catalog governance policies:
+
+- **Access Control**: User permissions are enforced through JDBC connections
+- **Data Lineage**: Query execution is tracked in Unity Catalog
+- **Audit Logging**: All data access is logged for compliance
+- **Schema Evolution**: Automatic handling of table schema changes
+
+### Credential Management
+
+**Production Deployment:**
+- Store client secrets in external vault systems (Azure Key Vault, AWS Secrets Manager, HashiCorp Vault)
+- Reference secrets through environment variables or vault integrations
+- Rotate credentials regularly through automated processes
+
+**Development Environment:**
+- Use personal access tokens with limited scopes
+- Configure token expiration policies
+- Enable IP allowlisting for additional security
+
+## Performance Optimization
+
+### Query Optimization
+
+Prometheux optimizes JDBC queries for Databricks SQL warehouses:
+
+```sql
+-- Automatic query optimization
+-- Original Vadalog rule generates optimized SQL
+SELECT c.CustomerName, o.OrderId, o.OrderDate, o.Amount
+FROM sales_catalog.crm_schema.customers c
+JOIN sales_catalog.transactions_schema.orders o 
+  ON c.CustomerId = o.CustomerId
+WHERE o.OrderDate >= current_date() - interval '30' day
 ```
 
-### Development Benefits
+### Best Practices
 
-- **Interactive Development**: Real-time feedback during rule development
-- **Jupyter Integration**: Use Prometheux directly in Databricks notebooks
-- **Live Data Access**: Query live Unity Catalog tables without data movement
-- **Rapid Prototyping**: Test rules immediately against production-scale data
+- **Use SQL Warehouses**: Leverage serverless SQL warehouses for optimal performance
+- **Partition Awareness**: Prometheux respects table partitioning for efficient queries  
+- **Result Caching**: Automatic caching of intermediate query results
+- **Batch Processing**: Optimal batch sizes for JDBC operations
 
-## General Notes
+## Troubleshooting
 
-### Lakehouse-Native Processing
+### Common Connection Issues
 
-- **No Data Movement**: All processing happens within the Databricks Lakehouse
-- **Unity Catalog Integration**: Full governance, lineage, and access control
-- **Delta Lake Optimization**: Leverages Delta's performance optimizations
-- **Compute Efficiency**: Uses Databricks' optimized Spark runtime
+1. **Authentication Failures**
+   - Verify client ID and secret are correct
+   - Check OAuth scope permissions
+   - Ensure workspace access is granted
 
-### Data Processing Philosophy
+2. **Network Connectivity**
+   - Validate hostname and HTTP path
+   - Check firewall rules and IP allowlists
+   - Test JDBC connection independently
 
-Prometheux follows a **compute-to-data** approach:
-
-- **Data Remains in Place**: No duplication or unnecessary data movement
-- **Leverages Databricks Compute**: Uses Databricks' optimized Spark clusters
-- **Native Integration**: Works with existing Databricks workflows and tools
-- **Governance Preservation**: Maintains all Unity Catalog governance policies
-
-### AI Services Integration
-
-Prometheux can optionally integrate with Databricks AI services for data enrichment:
-
-```prolog
-% Example: Using Databricks LLMs for data enrichment
-@input("customer_feedback").
-@bind("customer_feedback", "databricks", "catalog.raw", "feedback").
-
-% Generate sentiment analysis using Databricks AI
-enriched_feedback(FeedbackId, Text, Sentiment) :-
-    customer_feedback(FeedbackId, Text),
-    Sentiment = llm:generate(
-        "Analyze the sentiment of this feedback: ${arg_1}. Return only: positive, negative, or neutral",
-        "string",
-        Text
-    ).
-
-@output("enriched_feedback").
-@bind("enriched_feedback", "databricks", "catalog.analytics", "sentiment_analysis").
-```
-
-### Choosing the Right Integration Model
-
-| Use Case | Recommended Model | Benefits |
-|----------|-------------------|----------|
-| Production ETL/ELT | Spark Submit | Reliability, scaling, scheduling |
-| Interactive Development | Spark Connect | Real-time feedback, notebooks |
-| Scheduled Analytics | Spark Submit | Cost optimization, monitoring |
-| Data Exploration | Spark Connect | Flexibility, rapid iteration |
-| ML Pipeline Integration | Spark Submit | Automation, MLOps integration |
-
-Both integration models ensure that your Vadalog rules execute efficiently on Databricks while maintaining full integration with the platform's governance, security, and optimization features. 
+3. **Permission Errors**
+   - Verify Unity Catalog table permissions
+   - Check schema and catalog access rights
+   - Review service principal assignments

@@ -1,10 +1,20 @@
 # Prometheux on Databricks
 
-Prometheux integrates with Databricks through JDBC connectivity, allowing you to execute Vadalog rules against Unity Catalog tables and SQL warehouses. This integration provides secure, governed access to your lakehouse data while maintaining performance and scalability.
+Prometheux integrates with Databricks through JDBC connectivity across all major cloud platforms (AWS, Azure, and Google Cloud), allowing you to execute Vadalog rules against Unity Catalog tables and SQL warehouses. This integration provides secure, governed access to your lakehouse data while maintaining performance and scalability regardless of your cloud provider.
 
 ## JDBC Configuration
 
-Prometheux connects to Databricks using the OSS JDBC driver with OAuth 2.0 Machine-to-Machine (M2M) authentication. This approach provides secure, token-managed connectivity without manual token handling.
+Prometheux connects to Databricks using the OSS JDBC driver with OAuth 2.0 Machine-to-Machine (M2M) authentication. This approach provides secure, token-managed connectivity without manual token handling across all supported cloud platforms.
+
+### Multi-Cloud Platform Support
+
+Prometheux supports Databricks deployments on all major cloud platforms:
+
+- **AWS (Amazon Web Services)**: `dbc-xxxxxxxx-xxxx.cloud.databricks.com`
+- **Microsoft Azure**: `adb-xxxxxxxx-xx.x.azuredatabricks.net`
+- **Google Cloud Platform**: `xxxxxxxx-xxxx.x.gcp.databricks.com`
+
+The connection configuration remains consistent across all platforms, with only the hostname format varying by cloud provider.
 
 ### Authentication Options
 
@@ -48,7 +58,10 @@ Prometheux provides a user-friendly configuration interface for setting up Datab
    - For OAuth: Enter your OAuth client ID (e.g., `e5f1e15e-xxxx-xxxx-xxxx-2ed89291cc1c`)
    - For PAT: Leave this field empty
 3. **Secret/PAT**: Enter your OAuth client secret or Personal Access Token (automatically masked for security)
-4. **Host**: Enter your Databricks workspace hostname (e.g., `dbc-xxxxxxxx-xxxx.cloud.databricks.com`)
+4. **Host**: Enter your Databricks workspace hostname based on your cloud platform:
+   - **AWS**: `dbc-xxxxxxxx-xxxx.cloud.databricks.com`
+   - **Azure**: `adb-xxxxxxxx-xx.x.azuredatabricks.net`
+   - **GCP**: `xxxxxxxx-xxxx.x.gcp.databricks.com`
 5. **Port**: Default is 443 for HTTPS connections
 6. **Warehouse**: Enter the SQL warehouse HTTP path (e.g., `/sql/1.0/warehouses/f66xxxxxxxxxxxxx`)
 7. **Additional Options (JSON)**: Provide additional JDBC parameters as needed
@@ -73,6 +86,11 @@ Prometheux provides a user-friendly configuration interface for setting up Datab
   "SocketTimeout": "10000"
 }
 ```
+
+**Cloud-Specific Examples:**
+- **AWS**: `{"region": "us-east-1"}`
+- **Azure**: `{"region": "eastus"}`
+- **GCP**: `{"region": "us-central1"}`
 
 **Security Features:**
 - **Credential Masking**: Secrets and PATs are automatically redacted in the UI

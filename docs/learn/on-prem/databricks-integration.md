@@ -107,7 +107,7 @@ Prometheux uses the open-source Databricks JDBC driver for optimal performance a
 <dependency>
     <groupId>com.databricks</groupId>
     <artifactId>databricks-jdbc</artifactId>
-    <version>2.6.25</version>
+    <version>1.0.10-oss</version>
 </dependency>
 ```
 

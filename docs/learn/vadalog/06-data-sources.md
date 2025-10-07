@@ -1072,7 +1072,7 @@ sales_databricks(SaleId, ProductId, SaleAmount) :-
 @model("sales_databricks", "['sale_id:int', 'productId:int', 'sale_amount:int']").
 
 % Bind the 'sales_databricks' concept to the Databricks cluster using the JDBC connection details
-@bind("sales_databricks","databricks batchSize=5, password='dapixxxx', host='dbc-xxxx-02fe.cloud.databricks.com'",
+@bind("sales_databricks","databricks batchSize=5, OAuth2ClientId='your_client_id', OAuth2Secret='dosexxxx', host='dbc-xxxx-02fe.cloud.databricks.com'",
       "/sql/1.0/warehouses/3283xxxx", "sales").
 ```
 
@@ -1083,7 +1083,7 @@ This example demonstrates reading data from a Databricks table.
 @input("sales_databricks").
 
 % Bind the 'sales_databricks' concept to the Databricks cluster using the JDBC connection details
-@qbind("sales_databricks","databricks fetchSize=5, password='dapixxxx', host='dbc-xxxx-02fe.cloud.databricks.com'",
+@qbind("sales_databricks","databricks fetchSize=5, authMode='PAT', token='dapixxxx', host='dbc-xxxx-02fe.cloud.databricks.com'",
       "/sql/1.0/warehouses/3283xxxx", "select sale_id, productId from sales").
 
 % Define a rule to extract ProductId from the 'sales' table in Databricks
@@ -1093,4 +1093,3 @@ sales(Product) :-
 % Declare the output concept 'sales' to return the processed data
 @output("sales").
 ```
-

@@ -55,6 +55,7 @@ degree_centrality(N,DC) :-
     Nodes = Num-1,
     DC = Degree/Nodes.
 
+@output("degree_centrality").
 @post("degree_centrality", "orderby(-2)").
 ```
 

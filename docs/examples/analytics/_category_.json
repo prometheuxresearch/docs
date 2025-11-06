@@ -1,0 +1,13 @@
+{
+  "position": 3,
+  "label": "Graph Analytics",
+  "collapsible": true,
+  "collapsed": false,
+  "link": {
+    "type": "generated-index",
+    "slug": "/examples/analytics",
+    "title": "Graph Analytics",
+    "description": "Examples demonstrating graph analytics capabilities with Prometheux."
+  }
+}
+

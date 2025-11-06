@@ -4,11 +4,12 @@ slug: /examples
 import DocCardList from '@theme/DocCardList';
 import finance from './finance/_category_.json';
 import patterns from './patterns/_category_.json';
+import analytics from './analytics/_category_.json';
 
 # Overview
 
 
-<DocCardList items={[patterns, finance].map(cat => ({
+<DocCardList items={[patterns, analytics, finance].map(cat => ({
   type: 'link',
   href: cat.link.slug,
   label: cat.link.title,

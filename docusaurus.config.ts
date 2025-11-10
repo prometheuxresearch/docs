@@ -118,6 +118,12 @@ const config: Config = {
           label: "Python SDK",
         },
         {
+          type: "docSidebar",
+          sidebarId: "api",
+          position: "left",
+          label: "REST API",
+        },
+        {
           href: "https://www.prometheux.ai",
           label: "Back to homepage",
           position: "right",
@@ -141,6 +147,10 @@ const config: Config = {
             {
               label: "SDK",
               to: "/sdk",
+            },
+            {
+              label: "REST API",
+              to: "/api",
             },
           ],
         },
@@ -174,7 +184,7 @@ const config: Config = {
   } satisfies Preset.ThemeConfig,
   customFields: {
     docsChatUrl: process.env.NODE_ENV === 'production' 
-      ? "https://platform.prometheux.ai/docs/api/docsChat"  // Use platform.prometheux.ai in production
+      ? "https://chat-docs.prometheux.ai/api/docsChat"  // EC2 deployment with chat API
       : "/api/docsChat",  // Use local API in development
     // Azure OpenAI configuration (safe to commit - endpoint is public, key is handled server-side)
     azureOpenAIEndpoint: process.env.AZURE_OPENAI_ENDPOINT || "https://davbe-mdg4jzfa-eastus2.cognitiveservices.azure.com/",

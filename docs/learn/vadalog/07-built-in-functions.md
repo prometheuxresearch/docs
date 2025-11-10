@@ -304,7 +304,7 @@ embeddings:cosine_sim(left: array<double>, right: array<double>) → double
 ### LLM Generation
 
 ```prolog
-llm:generate(prompt: string, outputType: string, args…: string) → typed
+llm:generate(prompt: string, outputType: string) → typed
 ```
 
 **Supported output types**: `string`, `int`, `double`, `boolean`, `list<string>`, `list<int>`, `list<double>`, `list<boolean>`
@@ -323,9 +323,8 @@ customer_similarity(Name1, Name2, Similarity) :-
 product_description(Product, Description) :- 
     product(Product, Features, Price), 
     Description = llm:generate(
-        "Create a marketing description for ${arg_1} with features ${arg_2} priced at ${arg_3}", 
-        "string", 
-        Product, Features, Price
+        "Create a marketing description for ${Product} with features ${Features} priced at ${Price}", 
+        "string"
     ).
 ```
 

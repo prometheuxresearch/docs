@@ -1,11 +1,25 @@
-FROM node:lts-alpine
+FROM node:18-alpine
 
-COPY . /docs
+# Install pnpm
+RUN npm install -g pnpm
 
-WORKDIR /docs
+# Set working directory
+WORKDIR /app
 
-RUN npm run build
+# Copy package files
+COPY package.json pnpm-lock.yaml ./
 
-EXPOSE 80
+# Install dependencies
+RUN pnpm install --frozen-lockfile
 
-CMD ["npm", "run", "serve", "--", "--port", "80"]
+# Copy application code
+COPY . .
+
+# Create production environment file if not exists
+RUN if [ ! -f .env.local ]; then cp env.local.example .env.local; fi
+
+# Expose port
+EXPOSE 3000
+
+# Start the application in production mode with the API server
+CMD ["pnpm", "start", "--host", "0.0.0.0", "--port", "3000"]

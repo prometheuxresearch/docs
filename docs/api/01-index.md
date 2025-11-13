@@ -11,7 +11,7 @@ The Prometheux platform provides a comprehensive REST API that allows you to int
 All API endpoints are relative to your Prometheux platform instance:
 
 ```
-https://platform.prometheux.ai/jarvispy/{organization}/{username}/api/v1/
+https://api.prometheux.ai/jarvispy/{organization}/{username}/api/v1/
 ```
 
 Where:

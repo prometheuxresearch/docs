@@ -36,7 +36,7 @@ Each source object should contain:
 ### cURL Example
 
 ```bash
-curl -X POST "https://platform.prometheux.ai/jarvispy/my-org/my-user/api/v1/data/workspace_id/connect" \
+curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/data/workspace_id/connect" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
   -d '{
@@ -131,7 +131,7 @@ GET /api/v1/data/{workspace_id}/list?scope=user
 ### cURL Example
 
 ```bash
-curl -X GET "https://platform.prometheux.ai/jarvispy/my-org/my-user/api/v1/data/workspace_id/list?scope=user" \
+curl -X GET "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/data/workspace_id/list?scope=user" \
   -H "Authorization: Bearer YOUR_JWT_TOKEN"
 ```
 
@@ -175,7 +175,7 @@ POST /api/v1/data/{workspace_id}/sync
 ### cURL Example
 
 ```bash
-curl -X POST "https://platform.prometheux.ai/jarvispy/my-org/my-user/api/v1/data/workspace_id/sync" \
+curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/data/workspace_id/sync" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
   -d '{
@@ -242,7 +242,7 @@ POST /api/v1/data/{workspace_id}/cleanup
 ### cURL Example
 
 ```bash
-curl -X POST "https://platform.prometheux.ai/jarvispy/my-org/my-user/api/v1/data/workspace_id/cleanup" \
+curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/data/workspace_id/cleanup" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
   -d '{
@@ -299,7 +299,7 @@ POST /api/v1/data/{workspace_id}/test-connection
 ### cURL Example
 
 ```bash
-curl -X POST "https://platform.prometheux.ai/jarvispy/my-org/my-user/api/v1/data/workspace_id/test-connection" \
+curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/data/workspace_id/test-connection" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
   -d '{
@@ -372,7 +372,7 @@ GET /api/v1/data/{workspace_id}/schema?source_id={source_id}
 ### cURL Example
 
 ```bash
-curl -X GET "https://platform.prometheux.ai/jarvispy/my-org/my-user/api/v1/data/workspace_id/schema?source_id=source_123&scope=user" \
+curl -X GET "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/data/workspace_id/schema?source_id=source_123&scope=user" \
   -H "Authorization: Bearer YOUR_JWT_TOKEN"
 ```
 

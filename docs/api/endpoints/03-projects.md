@@ -35,7 +35,7 @@ The project object should contain:
 ### cURL Example
 
 ```bash
-curl -X POST "https://platform.prometheux.ai/jarvispy/my-org/my-user/api/v1/projects/workspace_id/save" \
+curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/projects/workspace_id/save" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
   -d '{
@@ -102,7 +102,7 @@ GET /api/v1/projects/{workspace_id}/list?scopes=user
 ### cURL Example
 
 ```bash
-curl -X GET "https://platform.prometheux.ai/jarvispy/my-org/my-user/api/v1/projects/workspace_id/list?scopes=user,organization" \
+curl -X GET "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/projects/workspace_id/list?scopes=user,organization" \
   -H "Authorization: Bearer YOUR_JWT_TOKEN"
 ```
 
@@ -145,7 +145,7 @@ GET /api/v1/projects/{workspace_id}/load?project_id={project_id}&scope=user
 ### cURL Example
 
 ```bash
-curl -X GET "https://platform.prometheux.ai/jarvispy/my-org/my-user/api/v1/projects/workspace_id/load?project_id=proj_12345&scope=user" \
+curl -X GET "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/projects/workspace_id/load?project_id=proj_12345&scope=user" \
   -H "Authorization: Bearer YOUR_JWT_TOKEN"
 ```
 
@@ -185,7 +185,7 @@ GET /api/v1/projects/{workspace_id}/list-templates
 ### cURL Example
 
 ```bash
-curl -X GET "https://platform.prometheux.ai/jarvispy/my-org/my-user/api/v1/projects/workspace_id/list-templates" \
+curl -X GET "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/projects/workspace_id/list-templates" \
   -H "Authorization: Bearer YOUR_JWT_TOKEN"
 ```
 
@@ -251,7 +251,7 @@ POST /api/v1/projects/{workspace_id}/import-template
 ### cURL Example
 
 ```bash
-curl -X POST "https://platform.prometheux.ai/jarvispy/my-org/my-user/api/v1/projects/workspace_id/import-template" \
+curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/projects/workspace_id/import-template" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
   -d '{
@@ -327,7 +327,7 @@ POST /api/v1/projects/{workspace_id}/create-from-context
 ### cURL Example
 
 ```bash
-curl -X POST "https://platform.prometheux.ai/jarvispy/my-org/my-user/api/v1/projects/workspace_id/create-from-context" \
+curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/projects/workspace_id/create-from-context" \
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
   -F "context=Analyze customer purchase patterns and identify high-value segments for targeted marketing campaigns" \
   -F "scope=user" \
@@ -396,7 +396,7 @@ POST /api/v1/projects/{workspace_id}/export-project
 ### cURL Example
 
 ```bash
-curl -X POST "https://platform.prometheux.ai/jarvispy/my-org/my-user/api/v1/projects/workspace_id/export-project" \
+curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/projects/workspace_id/export-project" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
   -d '{
@@ -455,7 +455,7 @@ POST /api/v1/projects/{workspace_id}/import-project
 ### cURL Example
 
 ```bash
-curl -X POST "https://platform.prometheux.ai/jarvispy/my-org/my-user/api/v1/projects/workspace_id/import-project" \
+curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/projects/workspace_id/import-project" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
   -d '{
@@ -516,7 +516,7 @@ POST /api/v1/projects/{workspace_id}/copy
 ### cURL Example
 
 ```bash
-curl -X POST "https://platform.prometheux.ai/jarvispy/my-org/my-user/api/v1/projects/target_workspace/copy" \
+curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/projects/target_workspace/copy" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
   -d '{
@@ -584,7 +584,7 @@ The project object can contain:
 ### cURL Example
 
 ```bash
-curl -X POST "https://platform.prometheux.ai/jarvispy/my-org/my-user/api/v1/projects/workspace_id/cleanup" \
+curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/projects/workspace_id/cleanup" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
   -d '{

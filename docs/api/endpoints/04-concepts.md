@@ -29,7 +29,7 @@ POST /api/v1/concepts/{workspace_id}/{project_id}/save
 ### cURL Example
 
 ```bash
-curl -X POST "https://platform.prometheux.ai/jarvispy/my-org/my-user/api/v1/concepts/workspace_id/1921d58a6g2/save" \
+curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/concepts/workspace_id/1921d58a6g2/save" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
   -d '{
@@ -105,7 +105,7 @@ POST /api/v1/concepts/{workspace_id}/{project_id}/run
 ### cURL Example
 
 ```bash
-curl -X POST "https://platform.prometheux.ai/jarvispy/my-org/my-user/api/v1/concepts/workspace_id/1921d58a6g2/run" \
+curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/concepts/workspace_id/1921d58a6g2/run" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer eyJhbGciOiJIUzI1NiJ9uMmVIoNF4TNx25UeSKF0ewTo7KtnufYyZSX9OaKsyu0" \
   -d '{
@@ -191,7 +191,7 @@ GET /api/v1/concepts/{workspace_id}/{project_id}/list?scope=user
 ### cURL Example
 
 ```bash
-curl -X GET "https://platform.prometheux.ai/jarvispy/my-org/my-user/api/v1/concepts/workspace_id/1921d58a6g2/list?scope=user" \
+curl -X GET "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/concepts/workspace_id/1921d58a6g2/list?scope=user" \
   -H "Authorization: Bearer YOUR_JWT_TOKEN"
 ```
 
@@ -235,7 +235,7 @@ POST /api/v1/concepts/{workspace_id}/{project_id}/cleanup
 ### cURL Example
 
 ```bash
-curl -X POST "https://platform.prometheux.ai/jarvispy/my-org/my-user/api/v1/concepts/workspace_id/1921d58a6g2/cleanup" \
+curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/concepts/workspace_id/1921d58a6g2/cleanup" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
   -d '{
@@ -296,7 +296,7 @@ POST /api/v1/concepts/{workspace_id}/{project_id}/rename
 ### cURL Example
 
 ```bash
-curl -X POST "https://platform.prometheux.ai/jarvispy/my-org/my-user/api/v1/concepts/workspace_id/1921d58a6g2/rename" \
+curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/concepts/workspace_id/1921d58a6g2/rename" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
   -d '{

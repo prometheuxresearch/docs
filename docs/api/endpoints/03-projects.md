@@ -1,3 +1,7 @@
+---
+slug: /api/endpoints/projects
+---
+
 # Projects API
 
 The Projects API allows you to manage projects within workspaces, including creation, import/export, and template management.
@@ -31,7 +35,7 @@ The project object should contain:
 ### cURL Example
 
 ```bash
-curl -X POST "https://platform.prometheux.ai/jarvispy/my-org/my-user/api/v1/projects/workspace_id/save" \
+curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/projects/workspace_id/save" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
   -d '{
@@ -98,7 +102,7 @@ GET /api/v1/projects/{workspace_id}/list?scopes=user
 ### cURL Example
 
 ```bash
-curl -X GET "https://platform.prometheux.ai/jarvispy/my-org/my-user/api/v1/projects/workspace_id/list?scopes=user,organization" \
+curl -X GET "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/projects/workspace_id/list?scopes=user,organization" \
   -H "Authorization: Bearer YOUR_JWT_TOKEN"
 ```
 
@@ -141,7 +145,7 @@ GET /api/v1/projects/{workspace_id}/load?project_id={project_id}&scope=user
 ### cURL Example
 
 ```bash
-curl -X GET "https://platform.prometheux.ai/jarvispy/my-org/my-user/api/v1/projects/workspace_id/load?project_id=proj_12345&scope=user" \
+curl -X GET "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/projects/workspace_id/load?project_id=proj_12345&scope=user" \
   -H "Authorization: Bearer YOUR_JWT_TOKEN"
 ```
 
@@ -160,6 +164,145 @@ def load_project(base_url, token, workspace_id, project_id, scope="user"):
 # Usage
 project = load_project(base_url, token, "workspace_id", "proj_12345")
 print(f"Loaded project: {project['data']['name']}")
+```
+
+## List Templates
+
+List all available project templates from the marketplace.
+
+### HTTP Request
+
+```bash
+GET /api/v1/projects/{workspace_id}/list-templates
+```
+
+### Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| workspace_id | string | Yes | The workspace ID (in URL path) |
+
+### cURL Example
+
+```bash
+curl -X GET "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/projects/workspace_id/list-templates" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN"
+```
+
+### Python Example
+
+```python
+def list_templates(base_url, token, workspace_id):
+    """List all available project templates."""
+    headers = {"Authorization": f"Bearer {token}"}
+    
+    url = f"{base_url}/projects/{workspace_id}/list-templates"
+    response = requests.get(url, headers=headers)
+    return response.json()
+
+# Usage
+templates = list_templates(base_url, token, "workspace_id")
+for template in templates['data']:
+    print(f"Template: {template['name']} (ID: {template['id']})")
+```
+
+### Response
+
+```json
+{
+  "data": [
+    {
+      "id": "template_001",
+      "name": "Financial Analysis Template",
+      "description": "Template for financial data analysis",
+      "category": "finance"
+    },
+    {
+      "id": "template_002",
+      "name": "Customer Analytics Template",
+      "description": "Template for customer behavior analysis",
+      "category": "marketing"
+    }
+  ],
+  "message": "Templates retrieved successfully",
+  "status": "success"
+}
+```
+
+## Import Template
+
+Import a project from a marketplace template.
+
+### HTTP Request
+
+```bash
+POST /api/v1/projects/{workspace_id}/import-template
+```
+
+### Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| workspace_id | string | Yes | The workspace ID (in URL path) |
+| template_id | string | Yes | The template ID to import |
+| new_project_name | string | No | Custom name for the new project |
+| project_scope | string | No | Project scope (default: "user") |
+
+### cURL Example
+
+```bash
+curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/projects/workspace_id/import-template" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -d '{
+    "template_id": "template_001",
+    "new_project_name": "My Financial Analysis",
+    "project_scope": "user"
+  }'
+```
+
+### Python Example
+
+```python
+def import_template(base_url, token, workspace_id, template_id, 
+                   new_project_name=None, project_scope="user"):
+    """Import a project from a template."""
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Content-Type": "application/json"
+    }
+    
+    data = {
+        "template_id": template_id,
+        "project_scope": project_scope
+    }
+    
+    if new_project_name:
+        data["new_project_name"] = new_project_name
+    
+    url = f"{base_url}/projects/{workspace_id}/import-template"
+    response = requests.post(url, headers=headers, json=data)
+    return response.json()
+
+# Usage
+result = import_template(base_url, token, "workspace_id", "template_001", 
+                        "My Financial Analysis")
+print(f"Template imported as project: {result['data']['name']}")
+```
+
+### Response
+
+```json
+{
+  "data": {
+    "id": "proj_67890",
+    "name": "My Financial Analysis",
+    "description": "Project created from Financial Analysis Template",
+    "scope": "user"
+  },
+  "message": "Template imported successfully as project 'My Financial Analysis'",
+  "status": "success"
+}
 ```
 
 ## Create Project from Context
@@ -184,7 +327,7 @@ POST /api/v1/projects/{workspace_id}/create-from-context
 ### cURL Example
 
 ```bash
-curl -X POST "https://platform.prometheux.ai/jarvispy/my-org/my-user/api/v1/projects/workspace_id/create-from-context" \
+curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/projects/workspace_id/create-from-context" \
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
   -F "context=Analyze customer purchase patterns and identify high-value segments for targeted marketing campaigns" \
   -F "scope=user" \
@@ -253,7 +396,7 @@ POST /api/v1/projects/{workspace_id}/export-project
 ### cURL Example
 
 ```bash
-curl -X POST "https://platform.prometheux.ai/jarvispy/my-org/my-user/api/v1/projects/workspace_id/export-project" \
+curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/projects/workspace_id/export-project" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
   -d '{
@@ -312,7 +455,7 @@ POST /api/v1/projects/{workspace_id}/import-project
 ### cURL Example
 
 ```bash
-curl -X POST "https://platform.prometheux.ai/jarvispy/my-org/my-user/api/v1/projects/workspace_id/import-project" \
+curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/projects/workspace_id/import-project" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
   -d '{
@@ -373,7 +516,7 @@ POST /api/v1/projects/{workspace_id}/copy
 ### cURL Example
 
 ```bash
-curl -X POST "https://platform.prometheux.ai/jarvispy/my-org/my-user/api/v1/projects/target_workspace/copy" \
+curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/projects/target_workspace/copy" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
   -d '{
@@ -441,7 +584,7 @@ The project object can contain:
 ### cURL Example
 
 ```bash
-curl -X POST "https://platform.prometheux.ai/jarvispy/my-org/my-user/api/v1/projects/workspace_id/cleanup" \
+curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/projects/workspace_id/cleanup" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
   -d '{

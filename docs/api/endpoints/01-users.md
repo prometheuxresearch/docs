@@ -1,3 +1,7 @@
+---
+slug: /api/endpoints/users
+---
+
 # Users API
 
 The Users API allows you to manage user settings, configurations, and monitor API usage.
@@ -15,7 +19,7 @@ GET /api/v1/users/get-role
 ### cURL Example
 
 ```bash
-curl -X GET "https://platform.prometheux.ai/jarvispy/my-org/my-user/api/v1/users/get-role" \
+curl -X GET "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/users/get-role" \
   -H "Authorization: Bearer YOUR_JWT_TOKEN"
 ```
 
@@ -32,7 +36,7 @@ def get_user_role(base_url, token):
     return response.json()
 
 # Usage
-base_url = "https://platform.prometheux.ai/jarvispy/my-org/my-user/api/v1"
+base_url = "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1"
 token = "YOUR_JWT_TOKEN"
 result = get_user_role(base_url, token)
 print(f"User role: {result['data']['role']}")
@@ -70,7 +74,7 @@ POST /api/v1/users/save-config
 ### cURL Example
 
 ```bash
-curl -X POST "https://platform.prometheux.ai/jarvispy/my-org/my-user/api/v1/users/save-config" \
+curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/users/save-config" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
   -d '{
@@ -133,7 +137,7 @@ GET /api/v1/users/load-config?scope=user
 ### cURL Example
 
 ```bash
-curl -X GET "https://platform.prometheux.ai/jarvispy/my-org/my-user/api/v1/users/load-config?scope=user" \
+curl -X GET "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/users/load-config?scope=user" \
   -H "Authorization: Bearer YOUR_JWT_TOKEN"
 ```
 
@@ -167,7 +171,7 @@ GET /api/v1/users/usage-status
 ### cURL Example
 
 ```bash
-curl -X GET "https://platform.prometheux.ai/jarvispy/my-org/my-user/api/v1/users/usage-status" \
+curl -X GET "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/users/usage-status" \
   -H "Authorization: Bearer YOUR_JWT_TOKEN"
 ```
 

@@ -1,3 +1,7 @@
+---
+slug: /api/endpoints/vadalog
+---
+
 # Vadalog API
 
 The Vadalog API provides direct access to the Vadalog reasoning engine for evaluating logic programs and managing execution.
@@ -33,7 +37,7 @@ The execution_options object can contain:
 ### cURL Example
 
 ```bash
-curl -X POST "https://platform.prometheux.ai/jarvispy/my-org/my-user/api/v1/vadalog/evaluate" \
+curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/vadalog/evaluate" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
   -d '{
@@ -134,7 +138,7 @@ POST /api/v1/vadalog/stop
 ### cURL Example
 
 ```bash
-curl -X POST "https://platform.prometheux.ai/jarvispy/my-org/my-user/api/v1/vadalog/stop" \
+curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/vadalog/stop" \
   -H "Authorization: Bearer YOUR_JWT_TOKEN"
 ```
 
@@ -174,7 +178,7 @@ POST /api/v1/vadalog/validate
 ### cURL Example
 
 ```bash
-curl -X POST "https://platform.prometheux.ai/jarvispy/my-org/my-user/api/v1/vadalog/validate" \
+curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/vadalog/validate" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
   -d '{
@@ -236,7 +240,7 @@ GET /api/v1/vadalog/status?execution_id={execution_id}
 ### cURL Example
 
 ```bash
-curl -X GET "https://platform.prometheux.ai/jarvispy/my-org/my-user/api/v1/vadalog/status?execution_id=exec_12345" \
+curl -X GET "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/vadalog/status?execution_id=exec_12345" \
   -H "Authorization: Bearer YOUR_JWT_TOKEN"
 ```
 
@@ -279,7 +283,7 @@ GET /api/v1/vadalog/functions?category=all
 ### cURL Example
 
 ```bash
-curl -X GET "https://platform.prometheux.ai/jarvispy/my-org/my-user/api/v1/vadalog/functions?category=math" \
+curl -X GET "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/vadalog/functions?category=math" \
   -H "Authorization: Bearer YOUR_JWT_TOKEN"
 ```
 
@@ -325,7 +329,7 @@ POST /api/v1/vadalog/explain
 ### cURL Example
 
 ```bash
-curl -X POST "https://platform.prometheux.ai/jarvispy/my-org/my-user/api/v1/vadalog/explain" \
+curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/vadalog/explain" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
   -d '{

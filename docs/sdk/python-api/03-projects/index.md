@@ -1,3 +1,7 @@
+---
+slug: /sdk/python-api/projects
+---
+
 # Projects
 
 The `projects` module provides functions for managing projects in the Prometheux platform. It allows you to create, load, list, and clean up projects.

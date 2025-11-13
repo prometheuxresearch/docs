@@ -1,3 +1,7 @@
+---
+slug: /sdk/python-api/config
+---
+
 # config
 
 The `config` module provides an interface for reading and writing configuration values from a YAML file. It includes functions to load, retrieve, and update configuration values.

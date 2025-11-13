@@ -1,3 +1,7 @@
+---
+slug: /sdk/python-api/concepts
+---
+
 # Concepts
 
 The `concepts` module provides functions for managing concepts in the Prometheux platform. It allows you to create, run, list, and clean up concepts, as well as perform GraphRAG operations.

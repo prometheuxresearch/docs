@@ -1,3 +1,7 @@
+---
+slug: /sdk/python-api/data
+---
+
 # Data
 
 The `data` module provides functions for managing data sources in the Prometheux platform. It allows you to connect to databases, list sources, and clean up data resources.

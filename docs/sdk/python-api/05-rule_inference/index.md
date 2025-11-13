@@ -1,3 +1,7 @@
+---
+slug: /sdk/python-api/rule_inference
+---
+
 # Rule Inference API
 
 The `rule_inference` API provides functions to infer Vadalog rules from a database or data source schema. It generates a linear Vadalog rule for each table or file and a join rule for each table having foreign keys.

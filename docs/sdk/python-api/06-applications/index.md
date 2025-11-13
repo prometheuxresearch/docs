@@ -1,3 +1,7 @@
+---
+slug: /sdk/python-api/applications
+---
+
 # Applications
 
 Prometheux chain offers powerful tools for working with reasoning and knowledge graphs.

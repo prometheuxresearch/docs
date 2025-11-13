@@ -1,3 +1,7 @@
+---
+slug: /api/endpoints/vadalog
+---
+
 # Vadalog API
 
 The Vadalog API provides direct access to the Vadalog reasoning engine for evaluating logic programs and managing execution.

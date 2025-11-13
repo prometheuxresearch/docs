@@ -1,3 +1,7 @@
+---
+slug: /api/endpoints/data
+---
+
 # Data Sources API
 
 The Data Sources API allows you to connect, manage, and synchronize external data sources within your workspaces.

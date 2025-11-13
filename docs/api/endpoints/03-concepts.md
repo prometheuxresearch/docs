@@ -1,3 +1,7 @@
+---
+slug: /api/endpoints/concepts
+---
+
 # Concepts API
 
 The Concepts API allows you to manage and execute Vadalog concepts within projects. This is one of the core APIs for working with logical reasoning and data analysis.

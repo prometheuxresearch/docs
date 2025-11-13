@@ -1,3 +1,7 @@
+---
+slug: /api/endpoints/users
+---
+
 # Users API
 
 The Users API allows you to manage user settings, configurations, and monitor API usage.

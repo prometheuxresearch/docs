@@ -1,3 +1,7 @@
+---
+slug: /api/endpoints/projects
+---
+
 # Projects API
 
 The Projects API allows you to manage projects within workspaces, including creation, import/export, and template management.

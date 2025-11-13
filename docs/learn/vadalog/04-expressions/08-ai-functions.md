@@ -37,18 +37,61 @@ Generate dynamic content using large language models:
 
 ```prolog
 llm:generate(prompt: string, outputType: string) → typed
+llm:generate(prompt: string, outputType: string, arg1: any, arg2: any, ...) → typed
 ```
 
 **Supported output types**: `string`, `int`, `double`, `boolean`, `list<string>`, `list<int>`, `list<double>`, `list<boolean>`
 
-**Example:**
+**Prompt Templating**: Use `${Variable}` for direct variable interpolation or `${arg_1}`, `${arg_2}`, etc. for positional arguments.
+
+**Examples:**
+
+**Direct variable interpolation:**
 ```prolog
-% Generate dynamic content
+% Generate boolean classification
+diagnose_patient(PatientID, HasDiagnosis) :- 
+    clinical_notes(PatientID, Notes), 
+    HasDiagnosis = llm:generate(
+        "Review the clinical notes for patient ${PatientID}: ${Notes}. Determine if there is a specific diagnosis.",
+        "boolean"
+    ).
+```
+
+**Using positional arguments:**
+```prolog
+% Generate with arg_1, arg_2 placeholders
+diagnose_with_args(PatientID, HasDiagnosis, Explanation) :- 
+    clinical_notes(PatientID, Notes), 
+    HasDiagnosis = llm:generate(
+        "Review the clinical notes for patient ${arg_1}: ${arg_2}. Determine if there is a diagnosis.",
+        "boolean",
+        PatientID,
+        Notes
+    ),
+    Explanation = llm:generate(
+        "Analyze the notes for patient ${arg_1}: ${arg_2}. Provide a brief rationale.",
+        "string",
+        PatientID,
+        Notes
+    ).
+```
+
+**Multiple output types:**
+```prolog
+% String output for descriptions
 product_description(Product, Description) :- 
     product(Product, Features, Price), 
     Description = llm:generate(
         "Create a marketing description for ${Product} with features ${Features} priced at ${Price}", 
         "string"
+    ).
+
+% Boolean output for classification
+is_positive_feedback(FeedbackID, IsPositive) :- 
+    feedback(FeedbackID, Text), 
+    IsPositive = llm:generate(
+        "Is this feedback positive? ${Text}",
+        "boolean"
     ).
 ```
 

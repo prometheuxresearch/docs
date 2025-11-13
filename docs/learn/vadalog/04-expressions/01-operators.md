@@ -17,11 +17,10 @@ _multi-facts operators_ (called **aggregation operators**).
 | Data type     | Operators                                                                                               |
 | ------------- | ------------------------------------------------------------------------------------------------------- |
 | all           | `==`, `>`, `<`, `>=`, `<=`, `<>`, `!=`                                                                  |
-| string        | `substring`, `contains`, `starts_with`, `ends_with`, `concat`, `index_of`, `string_length`, `to_lower`, `to_upper`, `split` |
-| list          | `concat`, `contains`                                                                              |
 | integer       | (monadic) `-`, `*`, `/`, `+`, `-`, `( )`                                                                |
 | double        | (monadic) `-`, `*`, `/`, `+`, `-`, `( )`                                                                |
-| Boolean       | `&&` and([args], `\|\|`, or(args), `not`, `( )` for associativity                                                    |
+| boolean       | `&&`, `\|\|`, `!`, `not`, `( )` for associativity                                                    |
+| string        | `substring`, `contains`, `starts_with`, `ends_with`, `concat`, `concat_ws`, `replace`, `join`, `index_of`, `string_length`, `to_lower`, `to_upper`, `split`, `is_empty` |
 | set           | `\|` (union), `&` (intersection), `( )` for associativity                                                  |
 
 
@@ -604,4 +603,206 @@ Expected output:
 ```prolog
 q("prometheux", "theux", 4).
 ```
+
+### `substring` (single parameter)
+You can also use `substring` with a single parameter to get the substring from a starting position to the end:
+
+```prolog
+q(K1, K2, Kn, J) :- body, J = substring(string, start).
+```
+
+Example:
+
+```prolog showLineNumbers {2}
+a("Elizabeth").
+b(Name, Substring) :- a(Name), Substring = substring(Name, 6).
+@output("b").
+```
+
+Expected output:
+
+```prolog
+b("Elizabeth", "beth").
+```
+
+### `concat_ws`
+A rule with `concat_ws` concatenates strings with a specified separator:
+
+```prolog
+q(K1, K2, Kn, J) :- body, J = concat_ws(separator, string1, string2, ...).
+```
+
+Example:
+
+```prolog showLineNumbers {2}
+a("Laura", "Wilson").
+b(FirstName, LastName, FullName) :- a(FirstName, LastName), FullName = concat_ws(" ", FirstName, LastName).
+@output("b").
+```
+
+Expected output:
+
+```prolog
+b("Laura", "Wilson", "Laura Wilson").
+```
+
+### `replace`
+A rule with `replace` replaces occurrences of a substring with another string:
+
+```prolog
+q(K1, K2, Kn, J) :- body, J = replace(string, search, replacement).
+```
+
+Example:
+
+```prolog showLineNumbers {2}
+a("The quick brown fox").
+b(Result) :- a(Input), Result = replace(Input, "fox", "dog").
+@output("b").
+```
+
+Expected output:
+
+```prolog
+b("The quick brown dog").
+```
+
+### `join`
+A rule with `join` joins array elements into a string with a specified delimiter:
+
+```prolog
+q(K1, K2, Kn, J) :- body, J = join(array, delimiter).
+```
+
+Example:
+
+```prolog showLineNumbers {2}
+a(["apple", "banana", "cherry"]).
+b(JoinedString) :- a(Array), JoinedString = join(Array, ";").
+@output("b").
+```
+
+Expected output:
+
+```prolog
+b("apple;banana;cherry").
+```
+
+### `is_empty`
+A rule with `is_empty` checks if a string is empty or contains only whitespace:
+
+```prolog
+q(K1, K2, Kn, J) :- body, J = is_empty(string).
+```
+
+Example:
+
+```prolog showLineNumbers {4}
+a("").
+a("NonEmpty").
+a(" ").
+b(El, IsEmpty) :- a(El), IsEmpty = is_empty(El).
+@output("b").
+```
+
+Expected output:
+
+```prolog
+b("", #T).
+b("NonEmpty", #F).
+b(" ", #T).
+```
+
+## Set operators
+
+Vadalog supports set operations on arrays using the union (`|`) and intersection (`&`) operators.
+
+### Union (`|`)
+The union operator combines two arrays, removing duplicates:
+
+```prolog showLineNumbers {2}
+a([1, 2, 3], 4).
+b(Result) :- a(Set1, Value), Result = Set1 | Value.
+@output("b").
+```
+
+Expected output:
+
+```prolog
+b([4, 1, 2, 3]).
+```
+
+### Intersection (`&`)
+The intersection operator finds common elements between two arrays:
+
+```prolog showLineNumbers {2}
+a([1, 2, 3], [2, 3, 4]).
+b(Result) :- a(Set1, Set2), Result = Set1 & Set2.
+@output("b").
+```
+
+Expected output:
+
+```prolog
+b([2, 3]).
+```
+
+## Implicit Boolean Conditions
+
+Boolean-returning functions can be used directly as conditions in rule bodies without explicit comparison to `#T`. This provides a more natural syntax for filtering.
+
+### Direct Boolean Functions as Conditions
+
+```prolog showLineNumbers {3}
+a(1, "Alice").
+a(2, "Bob").
+out(X) :- a(X, Y), contains(Y, "Alice").
+@output("out").
+```
+
+Expected output:
+
+```prolog
+out(1).
+```
+
+### Negated Boolean Conditions with `!`
+
+Use `!` to negate boolean expressions directly in conditions:
+
+```prolog showLineNumbers {4}
+a(1, "Alice").
+a(2, "Bob").
+out(X) :- a(X, Y), !contains(Y, "Alice").
+@output("out").
+```
+
+Expected output:
+
+```prolog
+out(2).
+```
+
+### Distinction: `not` vs `!`
+
+- **`not`**: Used for negating atoms (checking if a predicate doesn't exist)
+- **`!`**: Used for negating boolean expressions
+
+```prolog showLineNumbers {5-6}
+person(1, "Alice").
+person(2, "Bob").
+blocked(2).
+activeAlice(ID, Name) :- person(ID, Name), not blocked(ID), starts_with(Name, "Ali").
+activeNonAlice(ID, Name) :- person(ID, Name), not blocked(ID), !starts_with(Name, "Ali").
+@output("activeAlice").
+@output("activeNonAlice").
+```
+
+Expected output:
+
+```prolog
+activeAlice(1, "Alice").
+```
+
+Note: Bob is blocked, so doesn't appear in either output.
 

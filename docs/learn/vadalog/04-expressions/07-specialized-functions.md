@@ -100,10 +100,25 @@ record_hash(Name, Hash) :-
     person(Name, Age, Email), 
     Hash = hash:hash(Name, Age, Email).
 
-% Generate secure password hashes
-secure_user(Username, PasswordHash) :- 
+% Generate secure password hashes with SHA-1
+secure_user_sha1(Username, PasswordHash) :- 
+    user(Username, Password), 
+    PasswordHash = hash:sha1(Password).
+
+% Generate secure password hashes with MD5
+secure_user_md5(Username, PasswordHash) :- 
+    user(Username, Password), 
+    PasswordHash = hash:md5(Password).
+
+% Generate secure password hashes with SHA-2 (256-bit)
+secure_user_sha256(Username, PasswordHash) :- 
     user(Username, Password), 
     PasswordHash = hash:sha2(Password, 256).
+
+% SHA-2 with multiple values (e.g., for composite keys)
+composite_hash(User, Pass, Hash) :- 
+    credentials(User, Pass), 
+    Hash = hash:sha2(User, Pass, 256).
 ```
 
 ---
@@ -150,6 +165,18 @@ employee_tenure(Name, Years) :-
 formatted_report(Name, FormattedDate) :- 
     event(Name, EventDate), 
     FormattedDate = date:format(EventDate, "yyyy-MM-dd").
+
+% Parse timestamp with custom format
+parse_custom_date(Raw, Formatted) :- 
+    myDates(Raw), 
+    Ts = date:to_timestamp(Raw, "yy-M-dd HH:mm:ss,SSS Z"), 
+    Formatted = date:format(Ts, "yyyy-MM-dd'T'HH:mm:ssZ").
+
+% Convert date formats using to_timestamp and format
+date_conversion(Original, ConvertedDate) :- 
+    raw_date(Original), 
+    Timestamp = date:to_timestamp(Original, "dd/MM/yyyy"), 
+    ConvertedDate = dataTypes:as_date(Timestamp).
 ```
 
 ---
@@ -229,5 +256,98 @@ adult_customers(Name, Age) :-
     customer(Name, Age), 
     IsAdult = _between_(Age, 18, 65), 
     IsAdult == #T.
+```
+
+---
+
+## Utility Functions
+
+General-purpose utility functions for common operations.
+
+### `struct()`
+Create structured data by pairing keys with values:
+
+```prolog
+struct(key1: string, value1: any, key2: string, value2: any, ...) → struct
+```
+
+**Example:**
+```prolog
+% Create structured record
+record_with_metadata(X, S) :- 
+    data(X), 
+    S = struct(X, "originalValue", X + 1, "incrementedValue").
+```
+
+### `uuid()`
+Generate universally unique identifiers (UUIDs). Can be used with or without parameters:
+
+```prolog
+uuid() → string                                             % Random UUID
+uuid(arg1: any, arg2: any, ...) → string                   % Deterministic UUID from args
+```
+
+**Examples:**
+```prolog
+% Generate random UUIDs
+random_id(A, U) :- 
+    input(A), 
+    U = uuid().
+
+% Generate deterministic UUIDs for consistent identification
+patient_id(Clinic, Patient, UniqueID) :- 
+    patient_data(Clinic, Patient), 
+    UniqueID = uuid(Clinic, Patient).
+```
+
+### `monotonically_increasing_id()`
+Generate monotonically increasing IDs (useful for assigning unique identifiers):
+
+```prolog
+monotonically_increasing_id() → long
+```
+
+**Example:**
+```prolog
+% Assign unique IDs to records
+numbered_records(Name, ID) :- 
+    records(Name), 
+    ID = monotonically_increasing_id().
+```
+
+### `is_not_null()`
+Check if a value is not null (opposite of `nullManagement:isnull`):
+
+```prolog
+is_not_null(value: any) → boolean
+```
+
+**Example:**
+```prolog
+% Filter non-null values
+valid_records(El, State) :- 
+    data(El), 
+    State = if(is_not_null(El), "valid", "invalid").
+```
+
+### `utils:phone_number()`
+Format phone numbers with optional regional context:
+
+```prolog
+utils:phone_number(phone: string) → string                 % Default formatting
+utils:phone_number(phone: string, region: string) → string % Region-specific formatting
+```
+
+**Examples:**
+```prolog
+% Format phone number with default region
+formatted_phone(Ph, Fmt) :- 
+    phone_data(Ph), 
+    Fmt = utils:phone_number(Ph).
+
+% Format with specific region
+formatted_phone_uk(Ph, Fmt) :- 
+    phone_data(Ph), 
+    Fmt = utils:phone_number(Ph, "GB").
 ```
 

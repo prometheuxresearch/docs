@@ -8,53 +8,14 @@ Manipulate arrays and maps efficiently in Vadalog programs.
 
 ## Array Operations
 
-```prolog
-collections:size(arr: array<any>) → int                     % Get array size
-collections:contains(arr: array<any>, value: any) → boolean % Check if contains
-collections:contains_all(arr: array<any>, subset: array<any>) → boolean % Check subset
-collections:add(arr: array<T>, elem: T) → array<T>          % Add element
-collections:remove(arr: array<T>, elem: T) → array<T>       % Remove element
-collections:get(arr: array<T>, index: int) → T              % Get by index (1-based)
-```
-
-## Set Operations on Arrays
+### `collections:size()`
+Get the number of elements in an array:
 
 ```prolog
-collections:union(a: array<T>, b: array<T>) → array<T>      % Union
-collections:difference(a: array<T>, b: array<T>) → array<T> % Difference
-collections:intersection(a: array<T>, b: array<T>) → array<T> % Intersection
+collections:size(arr: array<any>) → int
 ```
 
-## Array Transformations
-
-```prolog
-collections:sort(arr: array<T>) → array<T>                  % Sort array
-collections:distinct(arr: array<T>) → array<T>              % Remove duplicates
-collections:remove_nulls(arr: array<T>) → array<T>          % Remove null values
-collections:shuffle(arr: array<T>) → array<T>               % Shuffle randomly
-```
-
-## Advanced Array Operations
-
-```prolog
-collections:explode(arr: array<T>) → T                      % Row-expanding
-collections:slice(arr: array<T>, start: int, length: int) → array<T> % Extract slice
-collections:sub_array(arr: array<T>, length: int) → array<T>         % First N elements
-collections:transform(arr: array<T>, lambdaSql: string) → array<any> % Transform
-collections:filter(arr: array<T>, lambdaSql: string) → array<T>      % Filter
-```
-
-**Note:** `transform` and `filter` can also be used without the `collections:` prefix.
-
-## Map Operations
-
-```prolog
-collections:map(k1: K, v1: V, k2: K, v2: V, …) → map<K,V>   % Create map
-```
-
-## Examples
-
-**Process employee skills arrays:**
+**Example:**
 ```prolog
 skilled_employees(Name, SkillCount) :- 
     employee(Name, Skills), 
@@ -62,7 +23,14 @@ skilled_employees(Name, SkillCount) :-
     SkillCount > 3.
 ```
 
-**Find employees with specific skills:**
+### `collections:contains()`
+Check if an array contains a specific value:
+
+```prolog
+collections:contains(arr: array<any>, value: any) → boolean
+```
+
+**Example:**
 ```prolog
 java_developers(Name) :- 
     employee(Name, Skills), 
@@ -70,7 +38,77 @@ java_developers(Name) :-
     HasJava == #T.
 ```
 
-**Merge department skill sets:**
+### `collections:contains_all()`
+Check if an array contains all elements from another array:
+
+```prolog
+collections:contains_all(arr: array<any>, subset: array<any>) → boolean
+```
+
+**Example:**
+```prolog
+qualified_candidates(Name) :- 
+    candidate(Name, Skills), 
+    RequiredSkills = ["Java", "Python"], 
+    HasAll = collections:contains_all(Skills, RequiredSkills), 
+    HasAll == #T.
+```
+
+### `collections:add()`
+Add an element to an array:
+
+```prolog
+collections:add(arr: array<T>, elem: T) → array<T>
+```
+
+**Example:**
+```prolog
+add_skill(Name, Skills, UpdatedSkills) :- 
+    employee(Name, Skills), 
+    UpdatedSkills = collections:add(Skills, "Leadership").
+```
+
+### `collections:remove()`
+Remove all occurrences of a value from an array:
+
+```prolog
+collections:remove(arr: array<T>, elem: T) → array<T>
+```
+
+**Example:**
+```prolog
+cleaned(Result) :- 
+    data([1, 2, 3, 2, 4]), 
+    Result = collections:remove([1, 2, 3, 2, 4], 2).
+% Result: [1, 3, 4]
+```
+
+### `collections:get()`
+Get an element at a specific index (1-based):
+
+```prolog
+collections:get(arr: array<T>, index: int) → T
+```
+
+**Example:**
+```prolog
+first_skill(Name, FirstSkill) :- 
+    employee(Name, Skills), 
+    FirstSkill = collections:get(Skills, 1).
+```
+
+---
+
+## Set Operations on Arrays
+
+### `collections:union()`
+Combine two arrays, removing duplicates:
+
+```prolog
+collections:union(a: array<T>, b: array<T>) → array<T>
+```
+
+**Example:**
 ```prolog
 combined_skills(Dept, AllSkills) :- 
     dept_skills(Dept, Skills1), 
@@ -78,24 +116,152 @@ combined_skills(Dept, AllSkills) :-
     AllSkills = collections:union(Skills1, Skills2).
 ```
 
-**Extract array slice:**
+### `collections:difference()`
+Get elements in first array but not in second:
+
 ```prolog
-% Get elements from position 1 to 3 (inclusive)
+collections:difference(a: array<T>, b: array<T>) → array<T>
+```
+
+**Example:**
+```prolog
+unique_skills(Name, UniqueSkills) :- 
+    employee(Name, Skills), 
+    common_skills(CommonSkills), 
+    UniqueSkills = collections:difference(Skills, CommonSkills).
+```
+
+### `collections:intersection()`
+Get common elements between two arrays:
+
+```prolog
+collections:intersection(a: array<T>, b: array<T>) → array<T>
+```
+
+**Example:**
+```prolog
+shared_skills(Name1, Name2, SharedSkills) :- 
+    employee(Name1, Skills1), 
+    employee(Name2, Skills2), 
+    SharedSkills = collections:intersection(Skills1, Skills2).
+```
+
+---
+
+## Array Transformations
+
+### `collections:sort()`
+Sort array elements in ascending order:
+
+```prolog
+collections:sort(arr: array<T>) → array<T>
+```
+
+**Example:**
+```prolog
+sorted_scores(Name, SortedScores) :- 
+    test_scores(Name, Scores), 
+    SortedScores = collections:sort(Scores).
+```
+
+### `collections:distinct()`
+Remove duplicate elements from array:
+
+```prolog
+collections:distinct(arr: array<T>) → array<T>
+```
+
+**Example:**
+```prolog
+unique_categories(Product, UniqueCategories) :- 
+    product_tags(Product, Tags), 
+    UniqueCategories = collections:distinct(Tags).
+```
+
+### `collections:remove_nulls()`
+Remove all null values from array:
+
+```prolog
+collections:remove_nulls(arr: array<T>) → array<T>
+```
+
+**Example:**
+```prolog
+clean_data(Name, CleanedValues) :- 
+    data_with_nulls(Name, Values), 
+    CleanedValues = collections:remove_nulls(Values).
+```
+
+### `collections:shuffle()`
+Randomly shuffle array elements:
+
+```prolog
+collections:shuffle(arr: array<T>) → array<T>
+```
+
+**Example:**
+```prolog
+randomized_questions(Quiz, RandomOrder) :- 
+    quiz_questions(Quiz, Questions), 
+    RandomOrder = collections:shuffle(Questions).
+```
+
+---
+
+## Advanced Array Operations
+
+### `collections:explode()`
+Expand array into multiple rows (one per element):
+
+```prolog
+collections:explode(arr: array<T>) → T
+```
+
+**Example:**
+```prolog
+exploded(Element) :- 
+    fruits(["apple", "banana", "cherry"]), 
+    Element = collections:explode(["apple", "banana", "cherry"]).
+% Results in 3 rows: "apple", "banana", "cherry"
+```
+
+### `collections:slice()`
+Extract a slice of an array:
+
+```prolog
+collections:slice(arr: array<T>, start: int, length: int) → array<T>
+```
+
+**Example:**
+```prolog
 slice_example(Result) :- 
     data([1, 2, 3, 4, 5]), 
     Result = collections:slice([1, 2, 3, 4, 5], 1, 3).
 % Result: [1, 2, 3]
 ```
 
-**Get sub-array (first N elements):**
+### `collections:sub_array()`
+Get first N elements from array:
+
 ```prolog
-% Get first 3 elements
+collections:sub_array(arr: array<T>, length: int) → array<T>
+```
+
+**Example:**
+```prolog
 top_three(List, TopThree) :- 
     ranked_items(List), 
     TopThree = collections:sub_array(List, 3).
 ```
 
-**Transform array elements:**
+### `collections:transform()`
+Apply a transformation function to each element:
+
+```prolog
+collections:transform(arr: array<T>, lambdaSql: string) → array<any>
+```
+
+**Examples:**
 ```prolog
 % Add 1 to each element
 increment_all(Transformed) :- 
@@ -106,16 +272,23 @@ increment_all(Transformed) :-
 % Transform with index (element + index)
 with_index(Transformed) :- 
     input([1, 2, 3]), 
-    Transformed = transform([1, 2, 3], "(x, i) -> x + i").
+    Transformed = collections:transform([1, 2, 3], "(x, i) -> x + i").
 % Result: [1, 3, 5]
 ```
 
-**Filter array elements:**
+### `collections:filter()`
+Filter array elements based on a condition:
+
+```prolog
+collections:filter(arr: array<T>, lambdaSql: string) → array<T>
+```
+
+**Examples:**
 ```prolog
 % Filter elements greater than 2
 filter_large(Filtered) :- 
     input([1, 2, 3, 4]), 
-    Filtered = filter([1, 2, 3, 4], "x -> x > 2").
+    Filtered = collections:filter([1, 2, 3, 4], "x -> x > 2").
 % Result: [3, 4]
 
 % Filter with index (keep elements at odd indices)
@@ -125,12 +298,20 @@ filter_odd_indices(Filtered) :-
 % Result: [20, 40]
 ```
 
-**Explode array (create one row per element):**
+---
+
+## Map Operations
+
+### `collections:map()`
+Create a map from key-value pairs:
+
 ```prolog
-% Expand array into multiple rows
-exploded(Element) :- 
-    fruits(["apple", "banana", "cherry"]), 
-    Element = collections:explode(["apple", "banana", "cherry"]).
-% Results in 3 rows: "apple", "banana", "cherry"
+collections:map(k1: K, v1: V, k2: K, v2: V, …) → map<K,V>
 ```
 
+**Example:**
+```prolog
+user_metadata(UserID, Metadata) :- 
+    user(UserID, Name, Age), 
+    Metadata = collections:map("name", Name, "age", Age, "id", UserID).
+```

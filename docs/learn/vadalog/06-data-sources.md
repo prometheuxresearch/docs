@@ -76,7 +76,7 @@ Prometheux supports CSV files as data source, both for reading and writing.
 
 The default CSV binding (`"csv"`) is thus suitable for processing big CSV files.
 It does not make a guess about the input schema. Therefore, if no schema
-([@mapping](./annotations#mapping)) is provided, all fields are treated as
+([@mapping](./05-annotations#mapping)) is provided, all fields are treated as
 strings. Values `\N` are treated as `null` values and interpreted as [Labelled
 Nulls](./language-primitives#labelled-nulls) while reading the CSV file.
 

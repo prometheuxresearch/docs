@@ -489,7 +489,7 @@ You can also use multiple parameters within a parametric `@qbind`:
 
 where `${1}` and `${2}` are the first and second parameters of all `t` results.
 
-## Post-processing with @post
+## Post-processing with @post {#post-processing-with-post}
 
 This category of annotations include a set of post-processing operations that
 can be applied to facts of atoms annotated with @output before exporting the

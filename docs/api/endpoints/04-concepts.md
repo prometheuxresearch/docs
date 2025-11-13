@@ -6,6 +6,78 @@ slug: /api/endpoints/concepts
 
 The Concepts API allows you to manage and execute Vadalog concepts within projects. This is one of the core APIs for working with logical reasoning and data analysis.
 
+## Save Concept
+
+Save or update a concept with Vadalog logic and optional Python scripts.
+
+### HTTP Request
+
+```bash
+POST /api/v1/concepts/{workspace_id}/{project_id}/save
+```
+
+### Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| workspace_id | string | Yes | The workspace ID (in URL path) |
+| project_id | string | Yes | The project ID (in URL path) |
+| concept_logic | string | Yes | Vadalog program/annotations |
+| scope | string | No | Concept scope (default: "user") |
+| python_scripts | object | No | Python scripts as name->code pairs |
+
+### cURL Example
+
+```bash
+curl -X POST "https://platform.prometheux.ai/jarvispy/my-org/my-user/api/v1/concepts/workspace_id/1921d58a6g2/save" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -d '{
+    "concept_logic": "@input(\"products\").\n@output(\"ordered_products\").\nordered_products(Product, Price) :- products(Product, Price), Price > 100.",
+    "scope": "user",
+    "python_scripts": {
+      "data_processor": "def process_data(df):\n    return df.sort_values(\"price\")"
+    }
+  }'
+```
+
+### Python Example
+
+```python
+def save_concept(base_url, token, workspace_id, project_id, concept_logic, 
+                scope="user", python_scripts=None):
+    """Save a concept with Vadalog logic."""
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Content-Type": "application/json"
+    }
+    
+    data = {
+        "concept_logic": concept_logic,
+        "scope": scope,
+        "python_scripts": python_scripts or {}
+    }
+    
+    url = f"{base_url}/concepts/{workspace_id}/{project_id}/save"
+    response = requests.post(url, headers=headers, json=data)
+    return response.json()
+
+# Usage
+vadalog_code = """
+@input("products").
+@output("ordered_products").
+ordered_products(Product, Price) :- products(Product, Price), Price > 100.
+"""
+
+python_scripts = {
+    "data_processor": "def process_data(df):\n    return df.sort_values('price')"
+}
+
+result = save_concept(base_url, token, "workspace_id", "1921d58a6g2", 
+                     vadalog_code, python_scripts=python_scripts)
+print(result['message'])
+```
+
 ## Run Concept
 
 Execute a concept with specified parameters. This is the main endpoint for running Vadalog logic.
@@ -96,78 +168,6 @@ print(f"Results: {result['data']}")
   "message": "Concept executed successfully",
   "status": "success"
 }
-```
-
-## Save Concept
-
-Save or update a concept with Vadalog logic and optional Python scripts.
-
-### HTTP Request
-
-```bash
-POST /api/v1/concepts/{workspace_id}/{project_id}/save
-```
-
-### Parameters
-
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| workspace_id | string | Yes | The workspace ID (in URL path) |
-| project_id | string | Yes | The project ID (in URL path) |
-| concept_logic | string | Yes | Vadalog program/annotations |
-| scope | string | No | Concept scope (default: "user") |
-| python_scripts | object | No | Python scripts as name->code pairs |
-
-### cURL Example
-
-```bash
-curl -X POST "https://platform.prometheux.ai/jarvispy/my-org/my-user/api/v1/concepts/workspace_id/1921d58a6g2/save" \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
-  -d '{
-    "concept_logic": "@input(\"products\").\n@output(\"ordered_products\").\nordered_products(Product, Price) :- products(Product, Price), Price > 100.",
-    "scope": "user",
-    "python_scripts": {
-      "data_processor": "def process_data(df):\n    return df.sort_values(\"price\")"
-    }
-  }'
-```
-
-### Python Example
-
-```python
-def save_concept(base_url, token, workspace_id, project_id, concept_logic, 
-                scope="user", python_scripts=None):
-    """Save a concept with Vadalog logic."""
-    headers = {
-        "Authorization": f"Bearer {token}",
-        "Content-Type": "application/json"
-    }
-    
-    data = {
-        "concept_logic": concept_logic,
-        "scope": scope,
-        "python_scripts": python_scripts or {}
-    }
-    
-    url = f"{base_url}/concepts/{workspace_id}/{project_id}/save"
-    response = requests.post(url, headers=headers, json=data)
-    return response.json()
-
-# Usage
-vadalog_code = """
-@input("products").
-@output("ordered_products").
-ordered_products(Product, Price) :- products(Product, Price), Price > 100.
-"""
-
-python_scripts = {
-    "data_processor": "def process_data(df):\n    return df.sort_values('price')"
-}
-
-result = save_concept(base_url, token, "workspace_id", "1921d58a6g2", 
-                     vadalog_code, python_scripts=python_scripts)
-print(result['message'])
 ```
 
 ## List Concepts

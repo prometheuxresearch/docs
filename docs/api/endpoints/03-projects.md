@@ -166,6 +166,145 @@ project = load_project(base_url, token, "workspace_id", "proj_12345")
 print(f"Loaded project: {project['data']['name']}")
 ```
 
+## List Templates
+
+List all available project templates from the marketplace.
+
+### HTTP Request
+
+```bash
+GET /api/v1/projects/{workspace_id}/list-templates
+```
+
+### Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| workspace_id | string | Yes | The workspace ID (in URL path) |
+
+### cURL Example
+
+```bash
+curl -X GET "https://platform.prometheux.ai/jarvispy/my-org/my-user/api/v1/projects/workspace_id/list-templates" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN"
+```
+
+### Python Example
+
+```python
+def list_templates(base_url, token, workspace_id):
+    """List all available project templates."""
+    headers = {"Authorization": f"Bearer {token}"}
+    
+    url = f"{base_url}/projects/{workspace_id}/list-templates"
+    response = requests.get(url, headers=headers)
+    return response.json()
+
+# Usage
+templates = list_templates(base_url, token, "workspace_id")
+for template in templates['data']:
+    print(f"Template: {template['name']} (ID: {template['id']})")
+```
+
+### Response
+
+```json
+{
+  "data": [
+    {
+      "id": "template_001",
+      "name": "Financial Analysis Template",
+      "description": "Template for financial data analysis",
+      "category": "finance"
+    },
+    {
+      "id": "template_002",
+      "name": "Customer Analytics Template",
+      "description": "Template for customer behavior analysis",
+      "category": "marketing"
+    }
+  ],
+  "message": "Templates retrieved successfully",
+  "status": "success"
+}
+```
+
+## Import Template
+
+Import a project from a marketplace template.
+
+### HTTP Request
+
+```bash
+POST /api/v1/projects/{workspace_id}/import-template
+```
+
+### Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| workspace_id | string | Yes | The workspace ID (in URL path) |
+| template_id | string | Yes | The template ID to import |
+| new_project_name | string | No | Custom name for the new project |
+| project_scope | string | No | Project scope (default: "user") |
+
+### cURL Example
+
+```bash
+curl -X POST "https://platform.prometheux.ai/jarvispy/my-org/my-user/api/v1/projects/workspace_id/import-template" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -d '{
+    "template_id": "template_001",
+    "new_project_name": "My Financial Analysis",
+    "project_scope": "user"
+  }'
+```
+
+### Python Example
+
+```python
+def import_template(base_url, token, workspace_id, template_id, 
+                   new_project_name=None, project_scope="user"):
+    """Import a project from a template."""
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Content-Type": "application/json"
+    }
+    
+    data = {
+        "template_id": template_id,
+        "project_scope": project_scope
+    }
+    
+    if new_project_name:
+        data["new_project_name"] = new_project_name
+    
+    url = f"{base_url}/projects/{workspace_id}/import-template"
+    response = requests.post(url, headers=headers, json=data)
+    return response.json()
+
+# Usage
+result = import_template(base_url, token, "workspace_id", "template_001", 
+                        "My Financial Analysis")
+print(f"Template imported as project: {result['data']['name']}")
+```
+
+### Response
+
+```json
+{
+  "data": {
+    "id": "proj_67890",
+    "name": "My Financial Analysis",
+    "description": "Project created from Financial Analysis Template",
+    "scope": "user"
+  },
+  "message": "Template imported successfully as project 'My Financial Analysis'",
+  "status": "success"
+}
+```
+
 ## Create Project from Context
 
 Create a new project by analyzing text context and optional file attachments using AI.

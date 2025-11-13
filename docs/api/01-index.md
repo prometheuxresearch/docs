@@ -43,9 +43,9 @@ All API responses follow a consistent format:
 The API is organized into the following categories:
 
 - **[Users](/api/endpoints/users)** - User management and configuration
+- **[Data Sources](/api/endpoints/data)** - Data connection and management
 - **[Projects](/api/endpoints/projects)** - Project management
 - **[Concepts](/api/endpoints/concepts)** - Concept execution and management
-- **[Data Sources](/api/endpoints/data)** - Data connection and management
 - **[Vadalog](/api/endpoints/vadalog)** - Vadalog program evaluation
 
 ## Getting Started

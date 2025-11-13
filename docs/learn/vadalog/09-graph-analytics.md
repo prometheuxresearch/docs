@@ -1,3 +1,7 @@
+---
+slug: /learn/vadalog/graph-analytics
+---
+
 # Graph Analytics and Pre‑Defined Functions in Vadalog
 
 ## Why graph analytics inside a reasoning language?

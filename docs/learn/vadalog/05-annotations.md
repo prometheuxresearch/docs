@@ -1,3 +1,7 @@
+---
+slug: /learn/vadalog/annotations
+---
+
 # Annotations
 
 Annotations are special facts that allow to inject specific behaviors into
@@ -364,7 +368,7 @@ sources for the `@input` annotation or the targets for the `@output` annotation.
 
 ### @bind
 
-`@bind` binds an input or output atom to a [source](./data-sources). The syntax for `@bind` is the
+`@bind` binds an input or output atom to a [source](/learn/vadalog/data-sources). The syntax for `@bind` is the
 follows:
 
 ```

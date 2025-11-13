@@ -1,3 +1,7 @@
+---
+slug: /learn/vadalog/explanations
+---
+
 # Explanations
 
 The `@explain` annotation enables generating detailed explanations for derived facts, helping to understand their provenance and the rules applied. Explanations can be presented in structured JSON format, natural language, or refined reports via LLM, enhancing transparency and aiding debugging.

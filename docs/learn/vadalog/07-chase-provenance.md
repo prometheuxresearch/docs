@@ -1,3 +1,7 @@
+---
+slug: /learn/vadalog/chase-provenance
+---
+
 # Chase and Provenance
 
 Prometheux natively supports full explanations of logical processes for output

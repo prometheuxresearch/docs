@@ -1,3 +1,7 @@
+---
+slug: /learn/vadalog/grammar
+---
+
 # Vadalog Grammar Reference
 
 This document provides a comprehensive reference for the Vadalog grammar, covering all syntax rules, operators, and language constructs.

@@ -1,3 +1,7 @@
+---
+slug: /learn/vadalog/language-primitives
+---
+
 # Concepts
 
 At the core of your ontology is a set of rules.
@@ -59,7 +63,7 @@ b(Y,X) :- a(X), c(X,Y).
 ```
 
 `a(1)` is a fact, `b(Y,X) :- a(X),c(X,Y)` is a rule. Observe that `@output("b")`
-is an annotation and specifies that the facts for `b` are in the output. We will take a look at [annotations](./05-annotations) later.
+is an annotation and specifies that the facts for `b` are in the output. We will take a look at [annotations](/learn/vadalog/annotations) later.
 
 When a rule's head predicate can be successfully derived by all variables of the body, we say that it has been **activated**.
 
@@ -139,10 +143,10 @@ It follows, naturally, that variables cannot occur in facts.
 
 A variable such as `X` is just a _placeholder_. In order to use it in a
 computation, we must instantiate it, i.e., replace it with a concrete value. The
-value is called the _instantiation_ or [**binding**](./05-annotations#bind).
+value is called the _instantiation_ or [**binding**](/learn/vadalog/annotations#bind).
 
 In general, a bound variable should be **positively bound**, i.e., it should
-have a binding occurrence that is not in the scope of a [negation](./04-expressions/02-negation).
+have a binding occurrence that is not in the scope of a [negation](/learn/vadalog/expressions/negation).
 
 :::note
 Variables in vadalog need to be capitalized, and can contain

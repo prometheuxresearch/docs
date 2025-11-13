@@ -1,3 +1,7 @@
+---
+slug: /learn/vadalog/data-sources
+---
+
 # Connecting to Databases and External Datasources
 
 With connectors available for databases and support for data sources, Prometheux can be used to seamlessly integrate and migrate data across various platforms. Moreover, it supports cloud and distributed file systems like **S3** and **HDFS**, providing the flexibility needed for modern data lake and data migration scenarios.
@@ -76,9 +80,9 @@ Prometheux supports CSV files as data source, both for reading and writing.
 
 The default CSV binding (`"csv"`) is thus suitable for processing big CSV files.
 It does not make a guess about the input schema. Therefore, if no schema
-([@mapping](./05-annotations#mapping)) is provided, all fields are treated as
+([@mapping](/learn/vadalog/annotations#mapping)) is provided, all fields are treated as
 strings. Values `\N` are treated as `null` values and interpreted as [Labelled
-Nulls](./language-primitives#labelled-nulls) while reading the CSV file.
+Nulls](/learn/vadalog/language-primitives#labelled-nulls) while reading the CSV file.
 
 ### @bind options
 

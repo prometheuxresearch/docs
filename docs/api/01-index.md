@@ -1,6 +1,10 @@
-# REST API Overview
+---
+slug: /api
+---
 
-The Prometheux platform provides a comprehensive REST API that allows you to interact with all platform features programmatically. This API enables you to manage workspaces, projects, concepts, data sources, knowledge graphs, and more.
+# Overview
+
+The Prometheux platform provides a comprehensive REST API that allows you to interact with all platform features programmatically. This API enables you to manage projects, concepts, data sources, execute Vadalog programs, and more.
 
 ## Base URL
 
@@ -38,22 +42,17 @@ All API responses follow a consistent format:
 
 The API is organized into the following categories:
 
-- **[Users](/api/users)** - User management and configuration
-- **[Workspaces](/api/workspaces)** - Workspace operations
-- **[Projects](/api/projects)** - Project management
-- **[Concepts](/api/concepts)** - Concept execution and management
-- **[Data Sources](/api/data)** - Data connection and management
-- **[Knowledge Graphs](/api/knowledge-graphs)** - Virtual knowledge graph operations
-- **[Notebooks](/api/notebooks)** - Notebook and cell management
-- **[Vadalog](/api/vadalog)** - Vadalog program evaluation
-- **[Python SDK](/api/python-sdk)** - Python SDK for easier integration
+- **[Users](/api/endpoints/users)** - User management and configuration
+- **[Projects](/api/endpoints/projects)** - Project management
+- **[Concepts](/api/endpoints/concepts)** - Concept execution and management
+- **[Data Sources](/api/endpoints/data)** - Data connection and management
+- **[Vadalog](/api/endpoints/vadalog)** - Vadalog program evaluation
 
 ## Getting Started
 
 1. **Obtain your JWT token** from the Prometheux platform
 2. **Choose an endpoint** from the categories above
 3. **Make your first API call** using curl or your preferred HTTP client
-4. **Use our Python SDK** for easier integration (see Python examples in each section)
 
 ## Rate Limits
 

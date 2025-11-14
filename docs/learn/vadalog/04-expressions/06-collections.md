@@ -253,9 +253,9 @@ collections:slice(arr: array<T>, start: int, length: int) → array<T>
 **Example:**
 ```prolog
 slice_example(Result) :- 
-    data([1, 2, 3, 4, 5]), 
-    Result = collections:slice([1, 2, 3, 4, 5], 1, 3).
-% Result: [1, 2, 3]
+    fruits(["apple", "banana", "cherry", "date", "elderberry"]), 
+    Result = collections:slice(["apple", "banana", "cherry", "date", "elderberry"], 2, 3).
+% Result: ["banana", "cherry", "date"]
 ```
 
 ### `collections:sub_array()`

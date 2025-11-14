@@ -151,17 +151,35 @@ shared_skills(Name1, Name2, SharedSkills) :-
 ## Array Transformations
 
 ### `collections:sort()`
-Sort array elements in ascending order:
+Sort array elements in ascending or descending order:
 
 ```prolog
 collections:sort(arr: array<T>) → array<T>
+collections:sort(arr: array<T>, order: string) → array<T>
 ```
 
-**Example:**
+The optional second parameter specifies the sort order:
+- `"asc"` - Sort in ascending order (default)
+- `"desc"` - Sort in descending order
+
+**Examples:**
 ```prolog
+% Sort in ascending order (default)
 sorted_scores(Name, SortedScores) :- 
     test_scores(Name, Scores), 
     SortedScores = collections:sort(Scores).
+
+% Sort numbers in descending order
+sorted_desc(Result) :- 
+    data([3, 1, 4, 2]), 
+    Result = collections:sort([3, 1, 4, 2], "desc").
+% Result: [4, 3, 2, 1]
+
+% Sort strings in descending order
+sorted_strings(Result) :- 
+    fruits(["zebra", "apple", "mango", "banana"]), 
+    Result = collections:sort(["zebra", "apple", "mango", "banana"], "desc").
+% Result: ["zebra", "mango", "banana", "apple"]
 ```
 
 ### `collections:distinct()`

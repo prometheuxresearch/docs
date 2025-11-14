@@ -54,3 +54,17 @@
   overflow-y: auto !important;
   max-height: calc(70vh - 80px) !important;
 }
+
+/* Fix chat input text visibility in dark mode */
+[data-theme="dark"] [role="dialog"] textarea,
+[data-theme="dark"] [role="dialog"] input {
+  color: var(--ifm-font-color-base) !important;
+  background-color: var(--ifm-background-surface-color) !important;
+}
+
+/* Ensure placeholder text is visible in dark mode */
+[data-theme="dark"] [role="dialog"] textarea::placeholder,
+[data-theme="dark"] [role="dialog"] input::placeholder {
+  color: var(--ifm-color-emphasis-600) !important;
+  opacity: 0.6;
+}

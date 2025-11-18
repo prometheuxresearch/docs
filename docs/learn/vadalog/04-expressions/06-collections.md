@@ -165,20 +165,22 @@ The optional second parameter specifies the sort order:
 **Examples:**
 ```prolog
 % Sort in ascending order (default)
-sorted_scores(Name, SortedScores) :- 
+sorted_asc(Name, SortedScores) :- 
     test_scores(Name, Scores), 
     SortedScores = collections:sort(Scores).
 
-% Sort numbers in descending order
+% Sort numbers in ascending order
+data([3, 1, 4, 2]).
 sorted_desc(Result) :- 
-    data([3, 1, 4, 2]), 
-    Result = collections:sort([3, 1, 4, 2], "desc").
-% Result: [4, 3, 2, 1]
+    data(List), 
+    Result = collections:sort(List, "asc").
+% Result: [1, 2, 3, 4]
 
 % Sort strings in descending order
+fruits(["mango", "apple", "zebra", "banana"]).
 sorted_strings(Result) :- 
-    fruits(["zebra", "apple", "mango", "banana"]), 
-    Result = collections:sort(["zebra", "apple", "mango", "banana"], "desc").
+    fruits(List), 
+    Result = collections:sort(List, "desc").
 % Result: ["zebra", "mango", "banana", "apple"]
 ```
 

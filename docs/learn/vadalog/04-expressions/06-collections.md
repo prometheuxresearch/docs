@@ -23,6 +23,21 @@ skilled_employees(Name, SkillCount) :-
     SkillCount > 3.
 ```
 
+### `collections:is_empty()`
+Check if an array is empty:
+
+```prolog
+collections:is_empty(arr: array<any>) → boolean
+```
+
+**Example:**
+```prolog
+% Find all records with empty lists using implicit boolean condition
+emptyList(ID) :- 
+    data(ID, List), 
+    collections:is_empty(List).
+```
+
 ### `collections:contains()`
 Check if an array contains a specific value:
 

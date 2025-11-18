@@ -1035,8 +1035,92 @@ From this string, you can extract the following values for your bind configurati
 - `warehouse = 'COMPUTE_WH'`
 - `database = 'TEST'` (note: database names are usually uppercase)
 
+### Using Programmatic Access Tokens (PAT)
 
-This example demonstrates reading data from a Snowflake table.
+Snowflake supports Programmatic Access Tokens (PAT) as an alternative to password authentication. This is particularly useful for:
+- Avoiding MFA prompts during automated workflows
+- Enhanced security with token rotation
+- Integration with CI/CD pipelines
+
+To use PAT instead of password authentication, simply replace the `password` parameter with the PAT token value in your bind configuration.
+
+#### Setting Up PAT in Snowflake
+
+First, identify your Snowflake user:
+
+```sql
+-- Show list of users
+SHOW USERS;
+```
+
+Then execute the following script to set up PAT authentication:
+
+```sql
+-- ==================================================
+-- Snowflake PAT Setup - Complete Script
+-- ==================================================
+
+-- Step 1: Switch to ACCOUNTADMIN OR SECURITYADMIN role
+USE ROLE ACCOUNTADMIN;
+
+-- Step 2: Set database context
+USE DATABASE MY_DB;
+USE WAREHOUSE MY_WH;
+
+-- Step 3: Create authentication policy
+CREATE AUTHENTICATION POLICY IF NOT EXISTS allow_pat_auth
+  AUTHENTICATION_METHODS = ('PASSWORD', 'PROGRAMMATIC_ACCESS_TOKEN')
+  PAT_POLICY = (
+    DEFAULT_EXPIRY_IN_DAYS = 90,
+    MAX_EXPIRY_IN_DAYS = 365,
+    NETWORK_POLICY_EVALUATION = ENFORCED_NOT_REQUIRED
+  );
+
+-- Step 4: Apply policy to user (replace 'prometheux' with your username)
+ALTER USER prometheux SET AUTHENTICATION POLICY allow_pat_auth;
+
+-- Step 5: Generate PAT token
+ALTER USER prometheux 
+  ADD PROGRAMMATIC ACCESS TOKEN jdbc_access_token
+  DAYS_TO_EXPIRY = 90
+  COMMENT = 'Token for JDBC authentication';
+
+-- ⚠️ COPY THE TOKEN VALUE FROM OUTPUT IMMEDIATELY!
+-- The token will only be displayed once and cannot be retrieved later.
+
+-- Step 6: Verify setup
+SHOW USER PROGRAMMATIC ACCESS TOKENS FOR USER prometheux;
+
+-- ==================================================
+-- Setup Complete!
+-- ==================================================
+```
+
+#### PAT Token Management Commands
+
+```sql
+-- Generate a new token
+ALTER USER username ADD PROGRAMMATIC ACCESS TOKEN token_name DAYS_TO_EXPIRY = 90;
+
+-- View all tokens for a user
+SHOW USER PROGRAMMATIC ACCESS TOKENS FOR USER username;
+
+-- Disable a token temporarily
+ALTER USER username MODIFY PROGRAMMATIC ACCESS TOKEN token_name SET DISABLED = TRUE;
+
+-- Re-enable a disabled token
+ALTER USER username MODIFY PROGRAMMATIC ACCESS TOKEN token_name SET DISABLED = FALSE;
+
+-- Rotate a token (create new and expire old)
+ALTER USER username ROTATE PROGRAMMATIC ACCESS TOKEN token_name EXPIRE_ROTATED_TOKEN_AFTER_HOURS = 0;
+
+-- Delete a token permanently
+ALTER USER username REMOVE PROGRAMMATIC ACCESS TOKEN token_name;
+```
+
+### Example: Reading from Snowflake with Password
+
+This example demonstrates reading data from a Snowflake table using password authentication.
 
 ```prolog
 % Declare the input concept 'transactions_snowflake' to read data from the 'transactions' table in Snowflake
@@ -1053,6 +1137,29 @@ transactions_snowflake_test(TransactionId, CustomerId, Amount) :-
 % Declare the output concept 'transactions_snowflake_test' for making the processed data available
 @output("transactions_snowflake_test").
 ```
+
+### Example: Reading from Snowflake with PAT
+
+This example demonstrates reading data from a Snowflake table using Programmatic Access Token (PAT) authentication instead of password. This method avoids MFA prompts during execution.
+
+```prolog
+% Declare the input concept 'transactions_snowflake' to read data from the 'transactions' table in Snowflake
+@input("transactions_snowflake").
+
+% Bind the 'transactions_snowflake' concept to the Snowflake database using PAT authentication
+% Replace 'password' with your PAT token value obtained from the ALTER USER ADD PROGRAMMATIC ACCESS TOKEN command
+@bind("transactions_snowflake", "snowflake url='A778xxx-IVxxxx.snowflakecomputing.com', username='PROMETHEUX', password='your_pat_token_here', warehouse='COMPUTE_WH'", 
+      "TEST", "transaction_data").
+
+% Define a rule to extract TransactionId, CustomerId, and Amount from the 'transactions' table in Snowflake
+transactions_snowflake_test(TransactionId, CustomerId, Amount) :- 
+        transactions_snowflake(TransactionId, CustomerId, Amount).
+
+% Declare the output concept 'transactions_snowflake_test' for making the processed data available
+@output("transactions_snowflake_test").
+```
+
+**Note:** When using PAT, the syntax remains identical to password authentication - simply replace the `password` value with your PAT token. The token can be stored securely in `px.properties` configuration file or environment variables for better security practices.
 
 ## Databricks
 Databricks is a cloud-based platform for data engineering and data science.

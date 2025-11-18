@@ -319,6 +319,8 @@ with open(vada_file, 'w') as file:
 
 This example connects to a **Snowflake** database and infers Vadalog rules.
 
+**Note:** Instead of using a password, you can use a **Programmatic Access Token (PAT)** for authentication. This avoids MFA prompts during automated workflows. See the [Snowflake data source documentation](/learn/vadalog/data-sources#using-programmatic-access-tokens-pat) for details on how to generate and use PAT tokens.
+
 ```python
 import os
 TOKEN="eyJhbGci••••••••••••bz2U39Yc" # API Key generated in the Prometheux Platform
@@ -330,10 +332,11 @@ from prometheux_chain.data.database import Database
 #"jdbc:snowflake://A778858265xxxx-IV3xxxx.snowflakecomputing.com/?user=my_username&warehouse=my_warehouse&db=my_database&schema=my_schema&password=my_password"
 
 # Create a Database object for Snowflake
+# Note: You can replace 'my_password' with your PAT token for enhanced security
 db = Database(
     database_type="snowflake",
     username="my_username",
-    password="my_password",
+    password="my_password",  # Or use your PAT token here instead
     host="jdbc:snowflake://A77885826xxxx-IV3xxxx.snowflakecomputing.com",
     port=443,
     database_name="my_database",

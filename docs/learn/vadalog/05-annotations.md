@@ -201,7 +201,7 @@ enclosed in square brackets `[]` in the description.
 #### Automatic Generation of natural language description
 
 If a model annotation does not include a natural language description for the
-predicate and if an [LLM is available](../../sdk/python-api/config#configuring-llms),
+predicate and if an [LLM is available](/api/config#configuring-llms),
 the description will be **automatically generated** during the compilation
 phase.
 

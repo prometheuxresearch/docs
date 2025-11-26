@@ -115,13 +115,7 @@ const config: Config = {
           type: "docSidebar",
           sidebarId: "api",
           position: "left",
-          label: "REST API",
-        },
-        {
-          type: "docSidebar",
-          sidebarId: "sdk",
-          position: "left",
-          label: "Python SDK",
+          label: "API Reference",
         },
         {
           href: "https://www.prometheux.ai",
@@ -145,12 +139,8 @@ const config: Config = {
               to: "/examples",
             },
             {
-              label: "REST API",
+              label: "API Reference",
               to: "/api",
-            },
-            {
-              label: "Python SDK",
-              to: "/sdk",
             },
           ],
         },

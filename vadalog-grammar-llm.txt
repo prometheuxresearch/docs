@@ -1,0 +1,409 @@
+A Vadalog program is a set of:
+  - (Optional) Facts
+  - Rules
+  - (Optional) Annotations
+
+--------------------------------------------------------------------------------
+# Facts
+--------------------------------------------------------------------------------
+
+A fact is a single ground atom (with constants) followed by a period ('.').
+
+Syntax:
+  predicateName(constant1, constant2, ...).
+
+Example:
+  employee("Mark").
+  department("Sales").
+
+--------------------------------------------------------------------------------
+# Rules
+--------------------------------------------------------------------------------
+
+Rules derive new facts from existing ones. A rule has a head and a body separated by ':-'.
+
+Syntax:
+  head :- body.
+
+- head: A single atom.
+- body: A list of atoms plus optional conditions/assignments, separated by commas.
+- Ends with a period ('.').
+
+Example:
+  senior(X) :- employee(X), age(X, Y), Y > 60.
+
+--------------------------------------------------------------------------------
+# Atoms & Terms
+--------------------------------------------------------------------------------
+
+Atoms are the basic building blocks in Vadalog and have the form predicate(term1, term2, ..., termN).  
+Terms within atoms may be constants, variables, or expressions.
+
+Syntax:
+  predicate(term1, term2, ..., termN)
+
+Term can be:
+  - constant (e.g., "abc", 3, #T, {1,2}, etc.)
+  - variable (uppercase, e.g., X, PersonID)
+  - expression (using operators or aggregations)
+
+Supported Constant Data Types:
+  string       e.g., "string literal", "a string", ""
+  integer      e.g., 1, 3, 5, -2, 0
+  double       e.g., 1.22, 1.0, -2.3, 0.0
+  date         e.g., 2012-10-20, 2013-09-19 11:10:00
+  boolean      e.g., #T, #F
+  set          e.g., {1}, {1,2}, {}, {"a"}, {2.0,30}
+  list         e.g., [1], [1,2], [], ["a"], [2.0,30]
+
+Example:
+  employee("Alice").
+  salary("Alice", 5000).
+  hasTags("ProductA", {"tag1","tag2"}).
+
+--------------------------------------------------------------------------------
+# Variables
+--------------------------------------------------------------------------------
+
+Variables are uppercase names that represent unknown values. They do not appear in facts (facts use constants).
+
+Syntax:
+  UppercaseName (e.g., X, Y, Person, PersonID)
+
+- If a variable is only in the head (and not in the body), it becomes an existential variable (like a null placeholder).
+
+Example:
+  manager(M, E) :- employee(E).
+  % Here, M is introduced in the head but not in the body.
+
+--------------------------------------------------------------------------------
+# Operators & Functions
+--------------------------------------------------------------------------------
+
+Vadalog supports various operators and functions for different data types.  
+Some require a **library prefix** when used in assignments (e.g., math:, collections:, hash:, date:).
+
+## Comparison Operators
+
+  - ==, >, <, >=, <=, <>, !=
+  - Compare values of the same type and return #T/#F.
+
+## Arithmetic Operators (for integers and doubles)
+
+  - *, /, +, -
+  - Parentheses () override left-to-right precedence.
+
+## Boolean/Logical Operators
+
+  - && (and), || (or), ! (negation for boolean expressions)
+  - and(args)   : true if all conditions are true
+  - or(args)    : true if any condition is true
+  - not(expr)   : negates boolean value
+  - xor(a, b)   : exclusive or (true if exactly one is true)
+  - nand(a, b)  : not and (true if at least one is false)
+  - nor(a, b)   : not or (true only if both are false)
+  - xnor(a, b)  : exclusive nor (true if both have same value)
+  - implies(a, b): logical implication
+  - iff(a, b)   : if and only if (true if both have same value)
+  - if(condition, true_value, false_value) : conditional expression
+  - Parentheses () for associativity.
+
+## String Operators/Functions
+
+  - substring(string, start, end) or substring(string, start)
+  - contains(string, substring) : returns #T/#F
+  - starts_with(string, prefix) : returns #T/#F
+  - ends_with(string, suffix) : returns #T/#F
+  - concat(string1, string2) or use '+' for concatenation
+  - concat_ws(separator, string1, string2, ...) : concat with separator
+  - replace(string, search, replacement) : replace occurrences
+  - join(array, delimiter) : join array elements into string
+  - index_of(string, substring) : find index (-1 if not found)
+  - string_length(string) : returns integer length
+  - to_lower(string) : convert to lowercase
+  - to_upper(string) : convert to uppercase
+  - split(string, delimiter) : returns array of substrings
+  - is_empty(string) : checks if empty or whitespace only
+
+## Set Operators (on arrays)
+
+  - | (union) : combine arrays, remove duplicates
+  - & (intersection) : find common elements
+  - Parentheses () for associativity.
+
+## Collection Functions (prefix: collections:)
+
+Array Operations:
+  - collections:size(arr) : number of elements
+  - collections:is_empty(arr) : check if empty
+  - collections:contains(arr, value) : check if value exists
+  - collections:contains_all(arr, subset) : check if all elements exist
+  - collections:add(arr, elem) : add element
+  - collections:remove(arr, elem) : remove all occurrences
+  - collections:get(arr, index) : get element at index (1-based)
+
+Set Operations on Arrays:
+  - collections:union(a, b) : combine, remove duplicates
+  - collections:difference(a, b) : elements in a but not in b
+  - collections:intersection(a, b) : common elements
+
+Array Transformations:
+  - collections:sort(arr) or collections:sort(arr, "asc"|"desc")
+  - collections:distinct(arr) : remove duplicates
+  - collections:remove_nulls(arr) : remove null values
+  - collections:shuffle(arr) : randomly shuffle
+
+Advanced Array Operations:
+  - collections:explode(arr) : expand array into multiple rows
+  - collections:slice(arr, start, length) : extract slice
+  - collections:sub_array(arr, length) : get first N elements
+  - collections:transform(arr, "x -> expression") : apply transformation
+  - collections:filter(arr, "x -> condition") : filter by condition
+
+Map Operations:
+  - collections:map(k1, v1, k2, v2, ...) : create map from key-value pairs
+
+## Mathematical Functions (prefix: math:)
+
+Basic Math:
+  - math:mod(dividend, divisor) : modulo
+  - math:sqrt(x) : square root
+  - math:abs(x) : absolute value
+  - math:round(x) or math:round(x, scale)
+  - math:bround(x) or math:bround(x, scale) : banker's rounding
+  - math:min(v1, v2, ...) : minimum value
+  - math:max(v1, v2, ...) : maximum value
+
+Logarithmic & Exponential:
+  - math:log(x) : natural logarithm
+  - math:log10(x) : base-10 logarithm
+  - math:pow(base, exponent) : power
+  - math:exp(x) : exponential (e^x)
+
+Ceiling & Floor:
+  - math:ceil(x) : round up
+  - math:floor(x) : round down
+
+Trigonometric:
+  - math:sin(x), math:cos(x), math:tan(x)
+
+Random & Constants:
+  - math:uniform(upperBound) : random integer [0, upperBound)
+  - math:rand() : random double [0, 1)
+  - math:PI() : pi constant
+  - math:E() : e constant
+
+## Hash Functions (prefix: hash:)
+
+  - hash:hash(v1, v2, ...) : 32-bit Spark hash
+  - hash:sha1(value) : SHA-1 hash string
+  - hash:md5(value) : MD5 hash string
+  - hash:sha2(value, bitLength) or hash:sha2(v1, v2, ..., bitLength) : SHA-2 hash
+
+## Date & Time Functions (prefix: date:)
+
+Current Date/Time:
+  - date:current_date() : get current date
+  - date:current_timestamp() : get current timestamp
+
+Date Arithmetic:
+  - date:next_day(date) : add one day
+  - date:prev_day(date) : subtract one day
+  - date:add(date, days) : add days
+  - date:sub(date, days) : subtract days
+  - date:diff(end, start) : difference in days
+
+Date Formatting & Parsing:
+  - date:spec_day(text) : parse date with "MMM-yyyy" format
+  - date:to_timestamp(text, format) : parse string to timestamp
+  - date:format(dateOrTs, pattern) : format to string
+
+## Type Casting Functions
+
+Basic Types:
+  - as_string(value) : cast to string
+  - as_int(value) : cast to integer
+  - as_long(value) : cast to long
+  - as_double(value) : cast to double
+  - as_float(value) : cast to float
+  - as_boolean(value) : cast to boolean
+  - as_date(value) : cast to date
+  - as_timestamp(value) : cast to timestamp
+  - as_json(value) : cast to JSON string
+
+Collection Types:
+  - as_list(value, elementType) : cast to list
+  - as_set(value, elementType) : cast to set
+  - as_map(keys, values, types) : cast to map
+
+## Interval Functions
+
+Check if value falls within range:
+  - between(value, lower, upper) : exclusive on both ends
+  - _between(value, lower, upper) : inclusive left, exclusive right
+  - between_(value, lower, upper) : exclusive left, inclusive right
+  - _between_(value, lower, upper) : inclusive on both ends
+
+## Utility Functions
+
+  - struct(key1, value1, key2, value2, ...) : create structured data
+  - uuid() : generate random UUID
+  - uuid(arg1, arg2, ...) : generate deterministic UUID
+  - monotonically_increasing_id() : generate increasing ID
+  - utils:phone_number(phone) or utils:phone_number(phone, region) : format phone
+  - is_not_null(value) : check if value is not null
+
+## Anonymization Functions (prefix: anonymization:)
+
+  - anonymization:risk(sampleFrequency, weights, nIterations) : privacy risk score
+  - anonymization:msu(attributes, m, k) : MSU score
+
+## Kalman Filter Functions (prefix: kalmanFilter:)
+
+  - kalmanFilter:fault(A, B, C, R, Q, X, U, nu) : fault detection
+  - kalmanFilter:extractor(input1, input2, inputNumber) : extract values
+
+## AI Functions
+
+Vector Embeddings (prefix: embeddings:):
+  - embeddings:vectorize(arg1, arg2, ...) : generate vector embeddings
+  - embeddings:cosine_sim(left, right) : cosine similarity
+  - embeddings:cosine_sim_udf(left, right) : cosine similarity (UDF)
+
+LLM Generation (prefix: llm:):
+  - llm:generate(prompt, outputType) : generate content with LLM
+  - llm:generate(prompt, outputType, arg1, arg2, ...) : with positional args
+  - Output types: "string", "int", "double", "boolean", "list<string>", etc.
+  - Use ${Variable} or ${arg_1}, ${arg_2}, ... in prompts
+
+--------------------------------------------------------------------------------
+# Negation
+--------------------------------------------------------------------------------
+
+Negation uses 'not' before an atom to exclude matches where that atom would hold.
+
+Syntax:
+  not predicateName(...)
+
+Important: 
+  - 'not' is for negating atoms (checking if predicate doesn't exist)
+  - '!' is for negating boolean expressions
+
+Example:
+  safeProject(P) :- project(P), not contractor(P).
+  nonAlice(ID, Name) :- person(ID, Name), !starts_with(Name, "Ali").
+
+--------------------------------------------------------------------------------
+# Conditions
+--------------------------------------------------------------------------------
+
+Conditions let you compare or filter variables with expressions in the body.
+
+Syntax:
+  variable operator expression
+where operator can be >, <, >=, <=, =, !=, ==, <>.
+
+Implicit Boolean Conditions:
+Boolean-returning functions can be used directly as conditions without explicit comparison to #T.
+
+Example:
+  rich(X) :- contract(X, Amount), Amount >= 200.
+  javaDev(Name) :- employee(Name, Skills), collections:contains(Skills, "Java").
+
+--------------------------------------------------------------------------------
+# Assignments (Expressions)
+--------------------------------------------------------------------------------
+
+Assignments allow you to define new variables from an expression in the rule body.
+
+Syntax:
+  new_variable = expression
+
+- `new_variable` must be a fresh variable that does **not** appear elsewhere in the body.
+
+Example:
+  finalPay(X, Net) :- salary(X, Base), taxRate(X, R), Net = Base - Base * R.
+  topSkills(Name, First) :- employee(Name, Skills), First = collections:get(Skills, 1).
+
+--------------------------------------------------------------------------------
+# Aggregations
+--------------------------------------------------------------------------------
+
+Aggregations are functions for incremental computation of aggregate values.
+
+Syntax:
+  new_variable = aggregation(aggregated_variable)
+
+- `new_variable` **must always** appear in the head of the rule and **never** in the body.
+- `aggregated_variable` **must always** appear in the body of the rule.
+- **group-by variables**: aggregation is computed separately for each unique combination of **variables that appear in both the body and the head**.
+
+Available Aggregations:
+  - msum(X)   : incrementally sums X
+  - mprod(X)  : incrementally multiplies X
+  - mcount(X) : counts distinct occurrences of X
+  - mmin(X)   : tracks smallest X encountered
+  - mmax(X)   : tracks largest X encountered
+  - munion(X) : collects values of X into an array
+
+Example:
+
+1. This aggregation computes a **single total** across all records (no group-by variables).
+  totalRevenue(Sum) :- order(_, Price), Sum = msum(Price).
+
+2. This aggregation computes a **count** of all control relations between companies.
+  countControls(Count) :- controls(X,Y), Count = mcount(1).
+
+--------------------------------------------------------------------------------
+# Annotations
+--------------------------------------------------------------------------------
+
+Annotations add special directives for predicates.
+Multiple annotations can be about the same predicate
+Each annotation ends with a period ('.').
+
+Syntax (examples):
+  @annotation_name("predicateName").
+
+Available Annotations:
+
+## @output("atomName")
+- Declares an output atom for the program.
+
+--------------------------------------------------------------------------------
+# Comments
+--------------------------------------------------------------------------------
+
+Introductory Statement:
+Comments begin with '%' and last until the end of the line.
+
+Syntax:
+  % This is a comment
+
+Example:
+  % Alice is a person
+  person("Alice").
+
+--------------------------------------------------------------------------------
+# Important things to remember
+--------------------------------------------------------------------------------
+
+Below is a list of examples of rules that need to be remembered when writing in Vadalog
+
+- Vadalog operates with stratified negation. This means that we cannot have a rule like
+  "maxFraudulentCountry(Country) :- fraudulentTransactionByCountry(Country, Count), not fraudulentTransactionByCountry(_, OtherCount), OtherCount > Count."
+  to find for example the country with the maximum number of fraudulent transactions, because it uses a comparison inside a negated atom, which violates stratification.
+
+  Instead, use a safe and valid version using aggregations:
+
+  % Step 1: Find the maximum fraud count
+  maxFraudCount(Max) :-
+      fraudulentTransactionByCountry(_, Count),
+      Max = mmax(Count).
+
+  % Step 2: Select country (or countries) with that maximum count
+  maxFraudulentCountry(Country) :-
+      fraudulentTransactionByCountry(Country, Count),
+      maxFraudCount(Count).
+
+

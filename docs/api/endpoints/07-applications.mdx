@@ -1,0 +1,513 @@
+---
+slug: /api/endpoints/applications
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# Applications API
+
+Prometheux Chain offers powerful tools for working with reasoning and knowledge graphs.
+
+---
+
+## Graph RAG
+
+The Graph RAG API performs GraphRAG (Graph Retrieval-Augmented Generation) operations, combining graph reasoning with retrieval-augmented generation to answer questions using both structured data and language models.
+
+### Query Endpoint
+
+<Tabs>
+  <TabItem value="sdk" label="Python SDK" default>
+
+```python
+import prometheux_chain as px
+
+result = px.graph_rag(
+    project_id="my_project_id",
+    question="What companies are located in California?",
+    rag_concepts=[
+        {"concept": "company", "field_to_embed": "name"},
+        {"concept": "location", "field_to_embed": "city"}
+    ],
+    graph_selected_concepts=["company", "location"],
+    top_k=5
+)
+```
+
+**Function Signature**
+
+```python
+def graph_rag(
+    workspace_id="workspace_id", 
+    project_id, 
+    question, 
+    graph_selected_concepts=None, 
+    graph_available_concepts=None, 
+    rag_concepts=None, 
+    rag_records=None, 
+    project_scope="user", 
+    llm=None, 
+    top_k=5
+)
+```
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `workspace_id` | str | No | The workspace identifier. Defaults to "workspace_id" |
+| `project_id` | str | Yes | The project identifier |
+| `question` | str | Yes | The question to answer |
+| `graph_selected_concepts` | list | No | Concept names to directly execute for graph operations |
+| `graph_available_concepts` | list | No | Concept names available to the LLM orchestrator for automatic selection |
+| `rag_concepts` | list | No | List of dicts with concept and field info for RAG operations |
+| `rag_records` | list | No | List of retrieved records for RAG operations (external embeddings) |
+| `project_scope` | str | No | The scope of the project. Defaults to "user" |
+| `llm` | dict | No | LLM configuration dictionary |
+| `top_k` | int | No | Number of top results to retrieve. Defaults to 5 |
+
+  </TabItem>
+  <TabItem value="rest" label="REST API">
+
+### HTTP Request
+
+```bash
+POST /api/v1/graphrag/{project_id}/query
+```
+
+### Request Body
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| question | string | Yes | The question to answer |
+| graph | object | No | Graph execution configuration |
+| rag | object | No | RAG configuration (enables RAG when present) |
+| llm | object | No | LLM configuration (enables LLM response when present) |
+| project_scope | string | No | Project scope (default: "user") |
+
+**Graph Configuration**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| selected_concepts | array | Concept names to execute directly (bypasses orchestrator) |
+| available_concepts | array | Concept names available to LLM orchestrator for selection |
+
+**RAG Configuration (Internal Embeddings)**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| embedding_to_retrieve | array | List of concept specifications: `[{"concept": "name", "field_to_embed": "field"}]` |
+| embedding_config | object | Configuration for embedding manager |
+| top_k | integer | Number of top similar items to retrieve |
+| threshold | float | Alternative to top_k: similarity threshold |
+| force_recreate | boolean | Delete and recreate embeddings (default: false) |
+
+**RAG Configuration (External Embeddings)**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| embedding_retrieved | object | Pre-retrieved results: `{"concept_name": [["id", "field1", "field2", ...]]}` |
+
+**LLM Configuration**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| prompt_tuning | string | Additional instructions to personalize the prompt |
+
+### cURL Example
+
+```bash
+curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/graphrag/my_project_id/query" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -d '{
+    "question": "What companies are located in California?",
+    "graph": {
+      "selected_concepts": ["company", "location"]
+    },
+    "rag": {
+      "embedding_to_retrieve": [
+        {"concept": "company", "field_to_embed": "name"},
+        {"concept": "location", "field_to_embed": "city"}
+      ],
+      "top_k": 5
+    },
+    "llm": {
+      "prompt_tuning": "Focus on tech companies"
+    },
+    "project_scope": "user"
+  }'
+```
+
+### Response
+
+```json
+{
+  "data": {
+    "similarity_results": {...},
+    "graph_rag_results": {...},
+    "llm_response": "Based on the data...",
+    "workflow_summary": {
+      "embedding_mode": "internal",
+      "concepts_executed": 2,
+      "is_rag_enabled": true,
+      "is_llm_enabled_generated": true
+    }
+  },
+  "message": "GraphRAG query completed successfully",
+  "status": "success"
+}
+```
+
+  </TabItem>
+</Tabs>
+
+---
+
+### GraphRAG Modes
+
+GraphRAG supports different modes for both embeddings and graph concepts:
+
+#### Embedding Modes
+
+1. **Internal Embeddings**: The system performs embedding-based retrieval internally by specifying which concept and field to embed using `rag_concepts` (SDK) or `rag.embedding_to_retrieve` (REST).
+
+2. **External Embeddings**: You provide the results of embedding-based retrieval directly using `rag_records` (SDK) or `rag.embedding_retrieved` (REST).
+
+3. **No RAG**: Omit the `rag` section entirely to disable RAG and only use graph concepts.
+
+#### Graph Concept Modes
+
+1. **Explicit Graph Concepts**: You explicitly specify which graph concepts to run using `graph_selected_concepts` (SDK) or `graph.selected_concepts` (REST).
+
+2. **Implicit Graph Concepts**: The LLM-based orchestrator automatically decides which concepts to run based on the question and available concepts. If no concepts are specified, the orchestrator chooses from all concepts in the project.
+
+---
+
+### Examples
+
+#### Internal Embeddings + Explicit Graph Concepts
+
+<Tabs>
+  <TabItem value="sdk" label="Python SDK" default>
+
+```python
+import prometheux_chain as px
+
+# Full control over both embedding and graph operations
+result = px.graph_rag(
+    project_id="my_project_id",
+    question="What companies are located in California?",
+    rag_concepts=[
+        {"concept": "company", "field_to_embed": "name"},
+        {"concept": "location", "field_to_embed": "city"}
+    ],
+    graph_selected_concepts=["company", "location"]
+)
+```
+
+  </TabItem>
+  <TabItem value="rest" label="REST API">
+
+```bash
+curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/graphrag/my_project_id/query" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -d '{
+    "question": "What companies are located in California?",
+    "graph": {
+      "selected_concepts": ["company", "location"]
+    },
+    "rag": {
+      "embedding_to_retrieve": [
+        {"concept": "company", "field_to_embed": "name"},
+        {"concept": "location", "field_to_embed": "city"}
+      ]
+    },
+    "llm": {}
+  }'
+```
+
+  </TabItem>
+</Tabs>
+
+---
+
+#### External Embeddings + Implicit Graph Concepts
+
+<Tabs>
+  <TabItem value="sdk" label="Python SDK" default>
+
+```python
+import prometheux_chain as px
+
+# Provide your own embeddings, let orchestrator choose graph concepts
+rag_records = {
+    "company": [["Apple", "Google", "Microsoft"]],
+    "location": [["Redwood City, CA", "Mountain View, CA", "Redmond, WA"]]
+}
+
+result = px.graph_rag(
+    project_id="my_project_id",
+    question="Which companies are in California?",
+    rag_records=rag_records
+    # No graph parameters - orchestrator will choose from all project concepts
+)
+```
+
+  </TabItem>
+  <TabItem value="rest" label="REST API">
+
+```bash
+curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/graphrag/my_project_id/query" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -d '{
+    "question": "Which companies are in California?",
+    "rag": {
+      "embedding_retrieved": {
+        "company": [["Apple", "Google", "Microsoft"]],
+        "location": [["Redwood City, CA", "Mountain View, CA", "Redmond, WA"]]
+      }
+    },
+    "llm": {}
+  }'
+```
+
+  </TabItem>
+</Tabs>
+
+---
+
+#### Internal Embeddings + Implicit Graph Concepts
+
+<Tabs>
+  <TabItem value="sdk" label="Python SDK" default>
+
+```python
+import prometheux_chain as px
+
+# Control embeddings, let orchestrator choose graph concepts
+result = px.graph_rag(
+    project_id="my_project_id",
+    question="Find companies in California",
+    rag_concepts=[
+        {"concept": "location", "field_to_embed": "city"}
+    ]
+    # No graph parameters - orchestrator will choose from all project concepts
+)
+```
+
+  </TabItem>
+  <TabItem value="rest" label="REST API">
+
+```bash
+curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/graphrag/my_project_id/query" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -d '{
+    "question": "Find companies in California",
+    "rag": {
+      "embedding_to_retrieve": [
+        {"concept": "location", "field_to_embed": "city"}
+      ]
+    },
+    "llm": {}
+  }'
+```
+
+  </TabItem>
+</Tabs>
+
+---
+
+#### Graph Only (No RAG)
+
+<Tabs>
+  <TabItem value="sdk" label="Python SDK" default>
+
+```python
+import prometheux_chain as px
+
+# Execute graph concepts without RAG
+result = px.graph_rag(
+    project_id="my_project_id",
+    question="Show me all companies",
+    graph_selected_concepts=["company"]
+    # No rag_concepts - RAG is disabled
+)
+```
+
+  </TabItem>
+  <TabItem value="rest" label="REST API">
+
+```bash
+curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/graphrag/my_project_id/query" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -d '{
+    "question": "Show me all companies",
+    "graph": {
+      "selected_concepts": ["company"]
+    },
+    "llm": {}
+  }'
+```
+
+  </TabItem>
+</Tabs>
+
+---
+
+### Complete Workflow Example
+
+**Use Case**: Employee recommendation system that finds the most suitable employees for new projects by combining semantic search of project topics with graph analysis of team-employee-project relationships.
+
+<Tabs>
+  <TabItem value="sdk" label="Python SDK" default>
+
+```python
+import prometheux_chain as px
+import os
+
+# Set up authentication and configuration
+os.environ['PMTX_TOKEN'] = 'my_pmtx_token'
+px.config.set('JARVISPY_URL', "https://api.prometheux.ai/jarvispy/my-org/my-user")
+
+# Create a project
+project_id = px.save_project(project_name="graphrag_demo")
+
+# Define and save concepts for contributions
+concept_logic = """
+contributions_input("Phoenix","graph RAG for internal knowledge discovery; knowledge graphs",1001).
+contributions_input("Phoenix","graph RAG for internal knowledge discovery; knowledge graphs",1002).
+contributions_input("Atlas","hybrid retrieval; vector search; semantic search platform",1002).
+contributions_input("Atlas","hybrid retrieval; vector search; semantic search platform",1005).
+
+contributions(Project_name,Project_topic,Employee_id) :- 
+    contributions_input(Project_name,Project_topic,Employee_id).
+
+@output("contributions").
+"""
+px.save_concept(project_id=project_id, concept_logic=concept_logic)
+
+# Define teams and employees
+concept_logic = """
+teams_employees_input("Research",1001,"Alice Nguyen").
+teams_employees_input("Research",1003,"Carol Bianchi").
+teams_employees_input("Engineering",1002,"Bob Rossi").
+teams_employees_input("Engineering",1005,"Eve Marino").
+
+teams_employees(Team_name,Employee_id,Employee_name) :- 
+    teams_employees_input(Team_name,Employee_id,Employee_name).
+
+@output("teams_employees").
+"""
+px.save_concept(project_id=project_id, concept_logic=concept_logic)
+
+# Define projects concept
+concept_logic = """
+projects(Project_name,Project_topic) :- 
+    contributions(Project_name,Project_topic,Employee_id).
+
+@output("projects").
+"""
+px.save_concept(project_id=project_id, concept_logic=concept_logic)
+
+# Define closest employee concept
+concept_logic = """
+node("project",Project_name,[]) :- contributions(Project_name,Project_topic,Employee_id).
+node("employee",Employee_id,[Employee_name]) :- teams_employees(Team_name,Employee_id,Employee_name).
+
+edge("contributed_to",Employee_id,Project_name) :- contributions(Project_name,Project_topic,Employee_id).
+
+edge_undirected(Y,X) :- edge(Type,X,Y).
+edge_undirected(X,Y) :- edge(Type,X,Y).
+
+path(X,Y,Dist,Path) :- edge_undirected(X,Y), projects(X,Project_topic), Dist = 1, Path = [Y].
+
+neighbor(Type,Id,Dist,Source,Path) :- path(Source,Id,Dist,Path), node(Type,Id,Attributes).
+
+closest_employee_to_project(Id,Name,Distance) :-
+    neighbor("employee",Id,Dist,Source,Path),
+    node("employee",Id,Name),
+    Distance = mmin(Dist).
+
+@output("closest_employee_to_project").
+@post("closest_employee_to_project","orderBy(3)").
+"""
+px.save_concept(project_id=project_id, concept_logic=concept_logic)
+
+# Perform GraphRAG query
+rag_result = px.graph_rag(
+    project_id=project_id,
+    question="I'm kicking off a project on knowledge graphs for data governance, which employees do you suggest?",
+    rag_concepts=[{"concept": "projects", "field_to_embed": "Project_topic"}],
+    graph_available_concepts=["closest_employee_to_project"],
+    top_k=3
+)
+
+print(f"Answer: {rag_result}")
+```
+
+  </TabItem>
+  <TabItem value="rest" label="REST API">
+
+After setting up the project and concepts (using the Projects and Concepts APIs), execute the GraphRAG query:
+
+```bash
+curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/graphrag/PROJECT_ID/query" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -d '{
+    "question": "I am kicking off a project on knowledge graphs for data governance, which employees do you suggest?",
+    "graph": {
+      "available_concepts": ["closest_employee_to_project"]
+    },
+    "rag": {
+      "embedding_to_retrieve": [
+        {"concept": "projects", "field_to_embed": "Project_topic"}
+      ],
+      "top_k": 3
+    },
+    "llm": {
+      "prompt_tuning": "Recommend employees based on their past project experience"
+    },
+    "project_scope": "user"
+  }'
+```
+
+### Response
+
+```json
+{
+  "data": {
+    "similarity_results": {
+      "projects": [
+        {"Project_name": "Phoenix", "Project_topic": "graph RAG for internal knowledge discovery", "similarity": 0.89}
+      ]
+    },
+    "graph_rag_results": {
+      "closest_employee_to_project(Id,Name,Distance)": [
+        [1001, "Alice Nguyen", 1],
+        [1002, "Bob Rossi", 1]
+      ]
+    },
+    "llm_response": "Based on the analysis, I recommend Alice Nguyen (Research) and Bob Rossi (Engineering) for your knowledge graphs project. Both have contributed to the Phoenix project which focuses on graph RAG and knowledge discovery...",
+    "workflow_summary": {
+      "embedding_mode": "internal",
+      "concepts_executed": 1,
+      "is_rag_enabled": true,
+      "is_llm_enabled_generated": true,
+      "orchestrator_used": true
+    }
+  },
+  "message": "GraphRAG query completed successfully",
+  "status": "success"
+}
+```
+
+  </TabItem>
+</Tabs>
+

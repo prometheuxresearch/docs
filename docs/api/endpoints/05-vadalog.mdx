@@ -1,0 +1,537 @@
+---
+slug: /api/endpoints/vadalog
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# Vadalog API
+
+The Vadalog API provides direct access to the Vadalog reasoning engine for evaluating logic programs and managing execution.
+
+---
+
+## Evaluate Program
+
+Execute a Vadalog program with specified parameters.
+
+<Tabs>
+  <TabItem value="sdk" label="Python SDK" default>
+
+```python
+import prometheux_chain as px
+
+program = """
+@input("products").
+@output("expensive_products").
+expensive_products(Product, Price) :- products(Product, Price), Price > ?threshold.
+"""
+
+parameters = {"threshold": 100}
+execution_options = {
+    "step_by_step": False,
+    "materialize_intermediate": True,
+    "debug_mode": False,
+    "max_iterations": 1000
+}
+
+result = px.evaluate_vadalog(
+    program=program, 
+    parameters=parameters, 
+    execution_options=execution_options
+)
+print(f"Execution completed in {result['execution_time']}s")
+print(f"Results: {result['results']}")
+```
+
+**Function Signature**
+
+```python
+def evaluate_vadalog(
+    program, 
+    parameters=None, 
+    execution_options=None, 
+    timeout=300
+)
+```
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `program` | str | Yes | Vadalog program code |
+| `parameters` | dict | No | Program parameters |
+| `execution_options` | dict | No | Execution configuration |
+| `timeout` | int | No | Execution timeout in seconds. Defaults to 300 |
+
+**Execution Options**
+
+| Option | Type | Description |
+|--------|------|-------------|
+| `step_by_step` | bool | Enable step-by-step execution |
+| `materialize_intermediate` | bool | Materialize intermediate results |
+| `debug_mode` | bool | Enable debug output |
+| `max_iterations` | int | Maximum number of iterations |
+
+**Returns**
+
+The evaluation results data.
+
+  </TabItem>
+  <TabItem value="rest" label="REST API">
+
+### HTTP Request
+
+```bash
+POST /api/v1/vadalog/evaluate
+```
+
+### Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| program | string | Yes | Vadalog program code |
+| parameters | object | No | Program parameters |
+| execution_options | object | No | Execution configuration |
+| timeout | integer | No | Execution timeout in seconds (default: 300) |
+
+The execution_options object can contain:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| step_by_step | boolean | Enable step-by-step execution |
+| materialize_intermediate | boolean | Materialize intermediate results |
+| debug_mode | boolean | Enable debug output |
+| max_iterations | integer | Maximum number of iterations |
+
+### cURL Example
+
+```bash
+curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/vadalog/evaluate" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -d '{
+    "program": "@input(\"products\").\n@output(\"expensive_products\").\nexpensive_products(Product, Price) :- products(Product, Price), Price > 100.",
+    "parameters": {
+      "price_threshold": 100
+    },
+    "execution_options": {
+      "step_by_step": false,
+      "materialize_intermediate": true,
+      "debug_mode": false,
+      "max_iterations": 1000
+    },
+    "timeout": 300
+  }'
+```
+
+  </TabItem>
+</Tabs>
+
+### Response
+
+```json
+{
+  "data": {
+    "execution_id": "exec_12345",
+    "results": {
+      "expensive_products": [
+        ["Laptop", 1200],
+        ["Smartphone", 800],
+        ["Tablet", 600]
+      ]
+    },
+    "execution_time": 0.45,
+    "iterations": 3,
+    "memory_usage": "12MB",
+    "statistics": {
+      "facts_derived": 150,
+      "rules_fired": 25
+    }
+  },
+  "message": "Program evaluated successfully",
+  "status": "success"
+}
+```
+
+---
+
+## Stop Evaluation
+
+Force stop a running Vadalog evaluation.
+
+<Tabs>
+  <TabItem value="sdk" label="Python SDK" default>
+
+```python
+import prometheux_chain as px
+
+# Stop a running Vadalog evaluation
+result = px.stop_vadalog_evaluation()
+print(result['message'])
+```
+
+  </TabItem>
+  <TabItem value="rest" label="REST API">
+
+### HTTP Request
+
+```bash
+POST /api/v1/vadalog/stop
+```
+
+### cURL Example
+
+```bash
+curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/vadalog/stop" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN"
+```
+
+  </TabItem>
+</Tabs>
+
+---
+
+## Validate Program
+
+Validate a Vadalog program syntax without executing it.
+
+<Tabs>
+  <TabItem value="sdk" label="Python SDK" default>
+
+```python
+import prometheux_chain as px
+
+program = """
+@input("products").
+@output("expensive_products").
+expensive_products(Product, Price) :- products(Product, Price), Price > 100.
+"""
+
+result = px.validate_vadalog(program=program, strict_mode=True)
+if result['status'] == 'success':
+    print("Program is valid!")
+    print(f"Analysis: {result['analysis']}")
+else:
+    print(f"Validation errors: {result['errors']}")
+```
+
+**Function Signature**
+
+```python
+def validate_vadalog(program, strict_mode=False)
+```
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `program` | str | Yes | Vadalog program code to validate |
+| `strict_mode` | bool | No | Enable strict validation. Defaults to False |
+
+  </TabItem>
+  <TabItem value="rest" label="REST API">
+
+### HTTP Request
+
+```bash
+POST /api/v1/vadalog/validate
+```
+
+### Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| program | string | Yes | Vadalog program code to validate |
+| strict_mode | boolean | No | Enable strict validation (default: false) |
+
+### cURL Example
+
+```bash
+curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/vadalog/validate" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -d '{
+    "program": "@input(\"products\").\n@output(\"expensive_products\").\nexpensive_products(Product, Price) :- products(Product, Price), Price > 100.",
+    "strict_mode": true
+  }'
+```
+
+  </TabItem>
+</Tabs>
+
+---
+
+## Get Execution Status
+
+Check the status of a running or completed evaluation.
+
+<Tabs>
+  <TabItem value="sdk" label="Python SDK" default>
+
+```python
+import prometheux_chain as px
+
+status = px.get_vadalog_status(execution_id="exec_12345")
+print(f"Execution status: {status['status']}")
+print(f"Progress: {status['progress']}%")
+if status['status'] == 'completed':
+    print(f"Results available: {len(status['results'])} facts")
+```
+
+**Function Signature**
+
+```python
+def get_vadalog_status(execution_id)
+```
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `execution_id` | str | Yes | The execution ID to check |
+
+  </TabItem>
+  <TabItem value="rest" label="REST API">
+
+### HTTP Request
+
+```bash
+GET /api/v1/vadalog/status?execution_id={execution_id}
+```
+
+### Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| execution_id | string | Yes | The execution ID to check |
+
+### cURL Example
+
+```bash
+curl -X GET "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/vadalog/status?execution_id=exec_12345" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN"
+```
+
+  </TabItem>
+</Tabs>
+
+---
+
+## List Built-in Functions
+
+Get a list of available built-in functions for Vadalog programs.
+
+<Tabs>
+  <TabItem value="sdk" label="Python SDK" default>
+
+```python
+import prometheux_chain as px
+
+functions = px.list_vadalog_functions(category="math")
+print("Available math functions:")
+for func in functions['functions']:
+    print(f"  - {func['name']}: {func['description']}")
+    print(f"    Syntax: {func['syntax']}")
+    print(f"    Example: {func['example']}")
+```
+
+**Function Signature**
+
+```python
+def list_vadalog_functions(category="all")
+```
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `category` | str | No | Function category: "all", "math", "string", "date", "aggregation". Defaults to "all" |
+
+  </TabItem>
+  <TabItem value="rest" label="REST API">
+
+### HTTP Request
+
+```bash
+GET /api/v1/vadalog/functions?category=all
+```
+
+### Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| category | string | No | Function category: "all", "math", "string", "date", "aggregation" (default: "all") |
+
+### cURL Example
+
+```bash
+curl -X GET "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/vadalog/functions?category=math" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN"
+```
+
+  </TabItem>
+</Tabs>
+
+---
+
+## Explain Program
+
+Get an explanation of how a Vadalog program works.
+
+<Tabs>
+  <TabItem value="sdk" label="Python SDK" default>
+
+```python
+import prometheux_chain as px
+
+program = """
+@input("products").
+@output("expensive_products").
+expensive_products(Product, Price) :- products(Product, Price), Price > 100.
+"""
+
+explanation = px.explain_vadalog(
+    program=program, 
+    explanation_type="detailed"
+)
+print("Program Explanation:")
+print(explanation['explanation'])
+if explanation.get('examples'):
+    print("\nExamples:")
+    for example in explanation['examples']:
+        print(f"  - {example}")
+```
+
+**Function Signature**
+
+```python
+def explain_vadalog(
+    program, 
+    explanation_type="overview", 
+    include_examples=True
+)
+```
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `program` | str | Yes | Vadalog program to explain |
+| `explanation_type` | str | No | Type: "overview", "detailed", "step_by_step". Defaults to "overview" |
+| `include_examples` | bool | No | Include usage examples. Defaults to True |
+
+  </TabItem>
+  <TabItem value="rest" label="REST API">
+
+### HTTP Request
+
+```bash
+POST /api/v1/vadalog/explain
+```
+
+### Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| program | string | Yes | Vadalog program to explain |
+| explanation_type | string | No | Type: "overview", "detailed", "step_by_step" (default: "overview") |
+| include_examples | boolean | No | Include usage examples (default: true) |
+
+### cURL Example
+
+```bash
+curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/vadalog/explain" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -d '{
+    "program": "@input(\"products\").\n@output(\"expensive_products\").\nexpensive_products(Product, Price) :- products(Product, Price), Price > 100.",
+    "explanation_type": "detailed",
+    "include_examples": true
+  }'
+```
+
+  </TabItem>
+</Tabs>
+
+---
+
+## Complete Workflow Example
+
+<Tabs>
+  <TabItem value="sdk" label="Python SDK" default>
+
+```python
+import prometheux_chain as px
+import os
+
+# Set up authentication and configuration
+os.environ['PMTX_TOKEN'] = 'my_pmtx_token'
+px.config.set('JARVISPY_URL', "https://api.prometheux.ai/jarvispy/my-org/my-user")
+
+# Define a Vadalog program
+program = """
+@input("products").
+@output("expensive_products").
+expensive_products(Product, Price) :- products(Product, Price), Price > ?threshold.
+"""
+
+# Validate the program first
+validation = px.validate_vadalog(program=program, strict_mode=True)
+if validation['status'] != 'success':
+    print(f"Validation failed: {validation['errors']}")
+    exit(1)
+
+# Get an explanation of the program
+explanation = px.explain_vadalog(program=program, explanation_type="overview")
+print(f"Program explanation: {explanation['explanation']}")
+
+# Execute the program
+result = px.evaluate_vadalog(
+    program=program,
+    parameters={"threshold": 100},
+    execution_options={
+        "materialize_intermediate": True
+    }
+)
+
+print(f"Execution completed in {result['execution_time']}s")
+print(f"Results: {result['results']}")
+```
+
+  </TabItem>
+  <TabItem value="rest" label="REST API">
+
+```bash
+# Validate the program
+curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/vadalog/validate" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -d '{
+    "program": "@input(\"products\").\n@output(\"expensive_products\").\nexpensive_products(Product, Price) :- products(Product, Price), Price > 100.",
+    "strict_mode": true
+  }'
+
+# Get program explanation
+curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/vadalog/explain" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -d '{
+    "program": "@input(\"products\").\n@output(\"expensive_products\").\nexpensive_products(Product, Price) :- products(Product, Price), Price > 100.",
+    "explanation_type": "overview"
+  }'
+
+# Execute the program
+curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/vadalog/evaluate" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -d '{
+    "program": "@input(\"products\").\n@output(\"expensive_products\").\nexpensive_products(Product, Price) :- products(Product, Price), Price > 100.",
+    "parameters": {"threshold": 100},
+    "execution_options": {"materialize_intermediate": true}
+  }'
+```
+
+  </TabItem>
+</Tabs>
+

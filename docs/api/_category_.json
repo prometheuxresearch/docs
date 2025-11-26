@@ -1,8 +1,8 @@
 {
-  "label": "REST API",
+  "label": "API Reference",
   "position": 3,
   "link": {
     "type": "generated-index",
-    "description": "Complete REST API documentation with curl examples and Python wrappers for the Prometheux platform."
+    "description": "Complete API documentation with Python SDK and REST API examples for the Prometheux platform."
   }
 }

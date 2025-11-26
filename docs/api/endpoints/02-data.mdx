@@ -1,0 +1,382 @@
+---
+slug: /api/endpoints/data
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# Data API
+
+The Data API allows you to connect, manage, and query external data sources within your workspaces.
+
+---
+
+## Connect Data Source
+
+Connect an external database to a workspace.
+
+<Tabs>
+  <TabItem value="sdk" label="Python SDK" default>
+
+```python
+import prometheux_chain as px
+
+# Create a database configuration
+database_config = {
+    'databaseType': 'postgresql',
+    'username': 'user',
+    'password': 'password',
+    'host': 'localhost',
+    'port': 5432,
+    'databaseName': 'mydb',
+    'selectedTables': ['users', 'orders']
+}
+
+# Connect the source
+source_data = px.connect_sources(
+    database_payload=database_config, 
+    compute_row_count=True
+)
+```
+
+**Function Signature**
+
+```python
+def connect_sources(
+    workspace_id="workspace_id", 
+    database_payload=None, 
+    compute_row_count=False
+)
+```
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `workspace_id` | str | No | The workspace identifier. Defaults to "workspace_id" |
+| `database_payload` | dict | Yes | The database connection configuration |
+| `compute_row_count` | bool | No | Whether to compute row counts for tables. Defaults to False |
+
+**Returns**
+
+The connection response data containing source information.
+
+  </TabItem>
+  <TabItem value="rest" label="REST API">
+
+### HTTP Request
+
+```bash
+POST /api/v1/data/{workspace_id}/connect
+```
+
+### Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| workspace_id | string | Yes | The workspace ID (in URL path) |
+| scope | string | No | Data source scope (default: "user") |
+| database | object | Yes | Database connection configuration |
+| computeRowCount | boolean | No | Compute row counts for tables (default: false) |
+
+The database object should contain:
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| databaseType | string | Yes | Database type (e.g., "postgresql", "mysql", "mongodb") |
+| host | string | Yes | Database host |
+| port | integer | Yes | Database port |
+| database | string | Yes | Database name |
+| username | string | Yes | Database username |
+| password | string | Yes | Database password |
+| name | string | No | Custom name for the connection |
+
+### cURL Example
+
+```bash
+curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/data/workspace_id/connect" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -d '{
+    "scope": "user",
+    "database": {
+      "databaseType": "postgresql",
+      "host": "db.example.com",
+      "port": 5432,
+      "database": "customers",
+      "username": "user",
+      "password": "password",
+      "name": "Customer Database"
+    },
+    "computeRowCount": true
+  }'
+```
+
+  </TabItem>
+</Tabs>
+
+### Response
+
+```json
+{
+  "data": {
+    "connectionStatus": true,
+    "sources": [
+      {
+        "id": "source_123",
+        "name": "customers",
+        "type": "table",
+        "row_count": 1500
+      }
+    ],
+    "errorMessage": null
+  },
+  "message": "Database connection successful",
+  "status": "success"
+}
+```
+
+---
+
+## List Data Sources
+
+List all connected data sources in a workspace.
+
+<Tabs>
+  <TabItem value="sdk" label="Python SDK" default>
+
+```python
+import prometheux_chain as px
+
+# List all sources in the workspace
+sources = px.list_sources()
+print(f"Available sources: {sources}")
+```
+
+**Function Signature**
+
+```python
+def list_sources(workspace_id="workspace_id")
+```
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `workspace_id` | str | No | The workspace identifier. Defaults to "workspace_id" |
+
+**Returns**
+
+A list of data source information dictionaries.
+
+  </TabItem>
+  <TabItem value="rest" label="REST API">
+
+### HTTP Request
+
+```bash
+GET /api/v1/data/{workspace_id}/list?scope=user
+```
+
+### Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| workspace_id | string | Yes | The workspace ID (in URL path) |
+| scope | string | No | Data source scope (default: "user") |
+
+### cURL Example
+
+```bash
+curl -X GET "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/data/workspace_id/list?scope=user" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN"
+```
+
+  </TabItem>
+</Tabs>
+
+---
+
+## Cleanup Data Sources
+
+Remove data sources from a workspace.
+
+<Tabs>
+  <TabItem value="sdk" label="Python SDK" default>
+
+```python
+import prometheux_chain as px
+
+# Clean up all sources
+px.cleanup_sources()
+
+# Clean up specific sources
+px.cleanup_sources(source_ids=['source1', 'source2'])
+```
+
+**Function Signature**
+
+```python
+def cleanup_sources(workspace_id="workspace_id", source_ids=None)
+```
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `workspace_id` | str | No | The workspace identifier. Defaults to "workspace_id" |
+| `source_ids` | list | No | List of specific source IDs to clean up. If None, cleans up all sources |
+
+  </TabItem>
+  <TabItem value="rest" label="REST API">
+
+### HTTP Request
+
+```bash
+POST /api/v1/data/{workspace_id}/cleanup
+```
+
+### Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| workspace_id | string | Yes | The workspace ID (in URL path) |
+| scope | string | No | Data source scope (default: "user") |
+| source_ids | array | No | Specific source IDs to delete (if not provided, deletes all) |
+
+### cURL Example
+
+```bash
+curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/data/workspace_id/cleanup" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -d '{
+    "scope": "user",
+    "source_ids": ["source_123", "source_456"]
+  }'
+```
+
+  </TabItem>
+</Tabs>
+
+---
+
+## Database Class
+
+The Python SDK provides a `Database` class for structured database configuration.
+
+```python
+from prometheux_chain.data.database import Database
+
+db = Database(
+    database_type='postgresql',
+    username='user',
+    password='password',
+    host='localhost',
+    port=5432,
+    database_name='mydb',
+    selected_tables=['users', 'orders'],
+    schema='public'
+)
+
+# Convert to dictionary for API call
+db_config = db.to_dict()
+```
+
+### Constructor Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `database_type` | str | Yes | Database type (e.g., 'postgresql', 'mysql', 'sqlserver') |
+| `username` | str | Yes | Database username |
+| `password` | str | Yes | Database password |
+| `host` | str | Yes | Database host address |
+| `port` | int | Yes | Database port number |
+| `database_name` | str | Yes | Name of the database |
+| `selected_tables` | list | No | List of specific tables to include |
+| `schema` | str | No | Database schema name |
+| `catalog` | str | No | Database catalog name |
+| `query` | str | No | Custom SQL query |
+| `options` | dict | No | Additional database-specific options |
+| `selected_columns` | list | No | Specific columns to include |
+| `ignore_columns` | list | No | Columns to exclude |
+| `ignore_tables` | list | No | Tables to exclude |
+
+### Methods
+
+- **`to_dict()`**: Converts the Database object to a dictionary format suitable for API calls
+- **`from_dict(data)`**: Class method to create a Database object from a dictionary
+
+---
+
+## Complete Workflow Example
+
+<Tabs>
+  <TabItem value="sdk" label="Python SDK" default>
+
+```python
+import prometheux_chain as px
+import os
+
+# Set up authentication and configuration
+os.environ['PMTX_TOKEN'] = 'my_pmtx_token'
+px.config.set('JARVISPY_URL', "https://api.prometheux.ai/jarvispy/my-org/my-user")
+
+# Create a database configuration using the Database class
+database = px.Database(
+    database_type='postgresql',
+    username='myuser',
+    password='mypassword',
+    host='localhost',
+    port=5432,
+    database_name='my_database',
+    selected_tables=['customers', 'orders'],
+    schema='public'
+)
+
+# Connect the database source
+source_data = px.connect_sources(database_payload=database.to_dict())
+
+# List all sources
+sources = px.list_sources()
+print(f"Connected sources: {sources}")
+
+# Clean up when done
+px.cleanup_sources()
+```
+
+  </TabItem>
+  <TabItem value="rest" label="REST API">
+
+```bash
+# Connect a database
+curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/data/workspace_id/connect" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -d '{
+    "scope": "user",
+    "database": {
+      "databaseType": "postgresql",
+      "host": "localhost",
+      "port": 5432,
+      "database": "my_database",
+      "username": "myuser",
+      "password": "mypassword"
+    },
+    "computeRowCount": true
+  }'
+
+# List data sources
+curl -X GET "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/data/workspace_id/list?scope=user" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN"
+
+# Cleanup data sources
+curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/data/workspace_id/cleanup" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -d '{"scope": "user"}'
+```
+
+  </TabItem>
+</Tabs>
+

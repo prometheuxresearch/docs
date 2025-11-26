@@ -1,0 +1,611 @@
+---
+slug: /api/endpoints/concepts
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# Concepts API
+
+The Concepts API allows you to manage and execute Vadalog concepts within projects. This is one of the core APIs for working with logical reasoning and data analysis.
+
+---
+
+## Save Concept
+
+Save or update a concept with Vadalog logic and optional Python scripts.
+
+<Tabs>
+  <TabItem value="sdk" label="Python SDK" default>
+
+```python
+import prometheux_chain as px
+
+# Define concept logic in Vadalog
+concept_logic = """
+company("Apple", "Redwood City, CA").
+company("Google", "Mountain View, CA").
+company("Microsoft", "Redmond, WA").
+
+location(Location) :- company(_,Location).
+
+@output("location").
+"""
+
+# Save the concept
+result = px.save_concept(
+    project_id="my_project_id",
+    concept_logic=concept_logic
+)
+```
+
+**Function Signature**
+
+```python
+def save_concept(
+    workspace_id="workspace_id", 
+    project_id=None, 
+    concept_logic=None, 
+    scope="user", 
+    python_scripts=None
+)
+```
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `workspace_id` | str | No | The workspace identifier. Defaults to "workspace_id" |
+| `project_id` | str | Yes | The project identifier |
+| `concept_logic` | str | Yes | The Vadalog logic defining the concept |
+| `scope` | str | No | The scope of the concept. Defaults to "user" |
+| `python_scripts` | dict | No | Dictionary of Python scripts to inject. Keys are script names, values are script content |
+
+**Returns**
+
+The response data from saving the concept.
+
+  </TabItem>
+  <TabItem value="rest" label="REST API">
+
+### HTTP Request
+
+```bash
+POST /api/v1/concepts/{workspace_id}/{project_id}/save
+```
+
+### Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| workspace_id | string | Yes | The workspace ID (in URL path) |
+| project_id | string | Yes | The project ID (in URL path) |
+| concept_logic | string | Yes | Vadalog program/annotations |
+| scope | string | No | Concept scope (default: "user") |
+| python_scripts | object | No | Python scripts as name->code pairs |
+
+### cURL Example
+
+```bash
+curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/concepts/workspace_id/1921d58a6g2/save" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -d '{
+    "concept_logic": "@input(\"products\").\n@output(\"ordered_products\").\nordered_products(Product, Price) :- products(Product, Price), Price > 100.",
+    "scope": "user",
+    "python_scripts": {
+      "data_processor": "def process_data(df):\n    return df.sort_values(\"price\")"
+    }
+  }'
+```
+
+  </TabItem>
+</Tabs>
+
+### Example with Python Script Injection
+
+<Tabs>
+  <TabItem value="sdk" label="Python SDK" default>
+
+```python
+import prometheux_chain as px
+
+# Define a Python script with proper structure
+python_script = """
+import json
+
+def main():
+    # Simple calculations
+    numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+    
+    # Calculate basic statistics
+    total = sum(numbers)
+    average = total / len(numbers)
+    maximum = max(numbers)
+    minimum = min(numbers)
+    
+    # Create results as a list of dictionaries (tabular format)
+    results = [
+        {
+            "Numbers": numbers,
+            "Total": total,
+            "Average": round(average, 2),
+            "Maximum": maximum,
+            "Minimum": minimum,
+            "Count": len(numbers)
+        }
+    ]
+    
+    return results
+"""
+
+# Define concept logic that uses Python script execution
+concept_logic = """
+@output("test_python").
+test_python(Numbers,Total,Average,Maximum,Minimum,Count) :- python:run("python_script").
+"""
+
+# Save the concept with Python script injection
+result = px.save_concept(
+    project_id="my_project_id",
+    concept_logic=concept_logic,
+    python_scripts={
+        "python_script": python_script
+    }
+)
+```
+
+  </TabItem>
+  <TabItem value="rest" label="REST API">
+
+```bash
+curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/concepts/workspace_id/project_id/save" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -d '{
+    "concept_logic": "@output(\"test_python\").\ntest_python(Numbers,Total,Average,Maximum,Minimum,Count) :- python:run(\"python_script\").",
+    "scope": "user",
+    "python_scripts": {
+      "python_script": "import json\n\ndef main():\n    numbers = [1, 2, 3, 4, 5]\n    return [{\"Numbers\": numbers, \"Total\": sum(numbers)}]"
+    }
+  }'
+```
+
+  </TabItem>
+</Tabs>
+
+---
+
+## Python Script Injection Requirements
+
+When using Python script injection with `save_concept`, there are specific requirements that must be followed:
+
+### 1. Main Function Requirement
+Every Python script **must** contain a `main()` function that serves as the entry point:
+
+```python
+def main():
+    # Your script logic here
+    return results
+```
+
+### 2. Tabular Output Format
+The `main()` function must return results in a tabular format, as a list of dictionaries:
+
+```python
+def main():
+    results = [
+        {
+            "Column1": value1,
+            "Column2": value2,
+            "Column3": value3
+        }
+    ]
+    return results
+```
+
+### 3. Concept Head Alignment
+Output column names must match the parameters in the concept head:
+
+```python
+# Python script returns:
+results = [{"Numbers": [1, 2, 3], "Total": 6, "Average": 2.0}]
+
+# Vadalog concept head must match:
+test_python(Numbers, Total, Average) :- python:run("python_script").
+```
+
+### 4. Standalone Concept Rule
+Python script concepts must be **standalone**:
+
+```python
+# ✅ Correct - standalone Python script concept
+@output("my_python_concept").
+my_python_concept(Col1, Col2) :- python:run("my_script").
+
+# ❌ Incorrect - cannot combine with other logic
+@output("mixed_concept").
+mixed_concept(Col1, Col2) :- python:run("my_script"), other_predicate(Col1).
+```
+
+---
+
+## Run Concept
+
+Execute a concept with specified parameters. This is the main endpoint for running Vadalog logic.
+
+<Tabs>
+  <TabItem value="sdk" label="Python SDK" default>
+
+```python
+import prometheux_chain as px
+
+# Run a concept with parameters
+results = px.run_concept(
+    project_id="my_project_id",
+    concept_name="location",
+    params={"filter_city": "CA"},
+    step_by_step=True,
+    persist_outputs=True
+)
+```
+
+**Function Signature**
+
+```python
+def run_concept(
+    workspace_id="workspace_id", 
+    project_id=None, 
+    concept_name=None, 
+    params=None, 
+    project_scope="user", 
+    step_by_step=False, 
+    materialize_intermediate_concepts=False, 
+    force_rerun=True, 
+    persist_outputs=False
+)
+```
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `workspace_id` | str | No | The workspace identifier. Defaults to "workspace_id" |
+| `project_id` | str | Yes | The project identifier |
+| `concept_name` | str | Yes | The name of the concept to run |
+| `params` | dict | No | Parameters to pass to the concept execution |
+| `project_scope` | str | No | The scope of the project. Defaults to "user" |
+| `step_by_step` | bool | No | Execute step by step. Defaults to False |
+| `materialize_intermediate_concepts` | bool | No | Materialize intermediate concepts. Defaults to False |
+| `force_rerun` | bool | No | Force rerun even if results exist. Defaults to True |
+| `persist_outputs` | bool | No | Persist the outputs. Defaults to False |
+
+**Returns**
+
+The execution results data.
+
+  </TabItem>
+  <TabItem value="rest" label="REST API">
+
+### HTTP Request
+
+```bash
+POST /api/v1/concepts/{workspace_id}/{project_id}/run
+```
+
+### Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| workspace_id | string | Yes | The workspace ID (in URL path) |
+| project_id | string | Yes | The project ID (in URL path) |
+| concept_name | string | Yes | Name of the concept to execute |
+| params | object | No | Parameters to pass to the concept |
+| force_rerun | boolean | No | Force re-execution (default: true) |
+| persist_outputs | boolean | No | Persist execution outputs (default: false) |
+| project_scope | string | No | Project scope (default: "user") |
+| step_by_step | boolean | No | Enable step-by-step execution (default: false) |
+| materialize_intermediate_concepts | boolean | No | Materialize intermediate results (default: false) |
+
+### cURL Example
+
+```bash
+curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/concepts/workspace_id/1921d58a6g2/run" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -d '{
+    "concept_name": "shortest_routes"
+  }'
+```
+
+  </TabItem>
+</Tabs>
+
+### Response
+
+```json
+{
+  "data": {
+    "execution_id": "exec_12345",
+    "results": [...],
+    "execution_time": 1.23,
+    "rows_processed": 1500
+  },
+  "message": "Concept executed successfully",
+  "status": "success"
+}
+```
+
+---
+
+## List Concepts
+
+List all concepts in a project.
+
+<Tabs>
+  <TabItem value="sdk" label="Python SDK" default>
+
+```python
+import prometheux_chain as px
+
+# List all concepts in a project
+concepts = px.list_concepts(project_id="my_project_id")
+print(f"Available concepts: {concepts}")
+```
+
+**Function Signature**
+
+```python
+def list_concepts(
+    workspace_id="workspace_id", 
+    project_id=None, 
+    project_scope="user"
+)
+```
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `workspace_id` | str | No | The workspace identifier. Defaults to "workspace_id" |
+| `project_id` | str | Yes | The project identifier |
+| `project_scope` | str | No | The scope of the project. Defaults to "user" |
+
+**Returns**
+
+List of concept information dictionaries.
+
+  </TabItem>
+  <TabItem value="rest" label="REST API">
+
+### HTTP Request
+
+```bash
+GET /api/v1/concepts/{workspace_id}/{project_id}/list?scope=user
+```
+
+### Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| workspace_id | string | Yes | The workspace ID (in URL path) |
+| project_id | string | Yes | The project ID (in URL path) |
+| scope | string | No | Concept scope (default: "user") |
+
+### cURL Example
+
+```bash
+curl -X GET "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/concepts/workspace_id/1921d58a6g2/list?scope=user" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN"
+```
+
+  </TabItem>
+</Tabs>
+
+---
+
+## Cleanup Concepts
+
+Delete concepts from a project.
+
+<Tabs>
+  <TabItem value="sdk" label="Python SDK" default>
+
+```python
+import prometheux_chain as px
+
+# Clean up all concepts in a project
+result = px.cleanup_concepts(project_id="my_project_id")
+
+# Clean up all user concepts
+result = px.cleanup_concepts()
+```
+
+**Function Signature**
+
+```python
+def cleanup_concepts(
+    workspace_id="workspace_id", 
+    project_id=None, 
+    project_scope="user"
+)
+```
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `workspace_id` | str | No | The workspace identifier. Defaults to "workspace_id" |
+| `project_id` | str | No | The project identifier. If None, cleans up all concepts for the user |
+| `project_scope` | str | No | The scope of the project. Defaults to "user" |
+
+  </TabItem>
+  <TabItem value="rest" label="REST API">
+
+### HTTP Request
+
+```bash
+POST /api/v1/concepts/{workspace_id}/{project_id}/cleanup
+```
+
+### Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| workspace_id | string | Yes | The workspace ID (in URL path) |
+| project_id | string | Yes | The project ID (in URL path) |
+| scope | string | No | Concept scope (default: "user") |
+| concept_names | array | No | Specific concept names to delete (if not provided, deletes all) |
+
+### cURL Example
+
+```bash
+curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/concepts/workspace_id/1921d58a6g2/cleanup" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -d '{
+    "scope": "user",
+    "concept_names": ["ordered_bom", "product_analysis"]
+  }'
+```
+
+  </TabItem>
+</Tabs>
+
+---
+
+## Rename Concept
+
+Rename an existing concept.
+
+<Tabs>
+  <TabItem value="sdk" label="Python SDK" default>
+
+```python
+import prometheux_chain as px
+
+# Rename a concept
+result = px.rename_concept(
+    project_id="my_project_id",
+    old_name="old_concept_name",
+    new_name="new_concept_name"
+)
+```
+
+  </TabItem>
+  <TabItem value="rest" label="REST API">
+
+### HTTP Request
+
+```bash
+POST /api/v1/concepts/{workspace_id}/{project_id}/rename
+```
+
+### Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| workspace_id | string | Yes | The workspace ID (in URL path) |
+| project_id | string | Yes | The project ID (in URL path) |
+| name | string | Yes | Current concept name |
+| new_name | string | Yes | New concept name |
+| scope | string | No | Concept scope (default: "user") |
+
+### cURL Example
+
+```bash
+curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/concepts/workspace_id/1921d58a6g2/rename" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -d '{
+    "name": "old_concept_name",
+    "new_name": "new_concept_name",
+    "scope": "user"
+  }'
+```
+
+  </TabItem>
+</Tabs>
+
+---
+
+## Complete Workflow Example
+
+<Tabs>
+  <TabItem value="sdk" label="Python SDK" default>
+
+```python
+import prometheux_chain as px
+import os
+
+# Set up authentication and configuration
+os.environ['PMTX_TOKEN'] = 'my_pmtx_token'
+px.config.set('JARVISPY_URL', "https://api.prometheux.ai/jarvispy/my-org/my-user")
+
+# Create a project
+project_id = px.save_project(project_name="concept_demo")
+
+# Define and save a concept
+concept_logic = """
+company("Apple", "Redwood City, CA").
+company("Google", "Mountain View, CA").
+company("Microsoft", "Redmond, WA").
+
+location(Location) :- company(_,Location).
+
+@output("location").
+"""
+
+px.save_concept(project_id=project_id, concept_logic=concept_logic)
+
+# List all concepts
+concepts = px.list_concepts(project_id=project_id)
+print(f"Available concepts: {concepts}")
+
+# Run the concept
+results = px.run_concept(project_id=project_id, concept_name="location")
+print(f"Results: {results}")
+
+# Clean up when done
+px.cleanup_concepts(project_id=project_id)
+```
+
+  </TabItem>
+  <TabItem value="rest" label="REST API">
+
+```bash
+# Create a project
+curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/projects/workspace_id/save" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -d '{"project": {"name": "concept_demo"}}'
+
+# Save a concept
+curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/concepts/workspace_id/project_id/save" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -d '{
+    "concept_logic": "company(\"Apple\", \"Redwood City, CA\").\ncompany(\"Google\", \"Mountain View, CA\").\nlocation(Location) :- company(_,Location).\n@output(\"location\").",
+    "scope": "user"
+  }'
+
+# List concepts
+curl -X GET "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/concepts/workspace_id/project_id/list?scope=user" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN"
+
+# Run a concept
+curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/concepts/workspace_id/project_id/run" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -d '{"concept_name": "location"}'
+
+# Cleanup
+curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/concepts/workspace_id/project_id/cleanup" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -d '{"scope": "user"}'
+```
+
+  </TabItem>
+</Tabs>
+

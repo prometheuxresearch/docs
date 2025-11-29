@@ -408,7 +408,7 @@ b(3).
 
 ## String operators
 
-The String operators are `substring`, `contains`, `starts_with`, `ends_with`, `concat`, `+`, `index_of`, `string_length`, `to_lower`, `to_upper`, and `split`. These operators allow manipulation and comparison of `String` values.
+The String operators are `substring`, `contains`, `contains_any`, `starts_with`, `ends_with`, `concat`, `+`, `index_of`, `string_length`, `to_lower`, `to_upper`, and `split`. These operators allow manipulation and comparison of `String` values.
 
 ### `substring`
 A rule using `substring` returns a substring from the specified `start` to `end` index, using zero-based indexing:
@@ -474,6 +474,31 @@ Expected output:
 
 ```prolog
 q("prometheux", "theux", #T).
+```
+
+### `contains_any`
+A rule with `contains_any` returns true if the `string` contains any of the keywords in the `keywords_array`:
+
+```prolog
+q(K1, K2, Kn, J) :- body, J = contains_any(string, keywords_array).
+```
+
+Example:
+
+```prolog showLineNumbers {4-5}
+a("hello world", ["world", "foo"]).
+b("hello world", ["bar", "baz"]).
+c(Result) :- a(Text, Keywords), Result = contains_any(Text, Keywords).
+d(Result) :- b(Text, Keywords), Result = contains_any(Text, Keywords).
+@output("c").
+@output("d").
+```
+
+Expected output:
+
+```prolog
+c(#T).
+d(#F).
 ```
 
 ### `concat`

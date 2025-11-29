@@ -112,6 +112,7 @@ Some require a **library prefix** when used in assignments (e.g., math:, collect
 
   - substring(string, start, end) or substring(string, start)
   - contains(string, substring) : returns #T/#F
+  - contains_any(string, keywords_array) : returns #T if string contains any keyword from array
   - starts_with(string, prefix) : returns #T/#F
   - ends_with(string, suffix) : returns #T/#F
   - concat(string1, string2) or use '+' for concatenation

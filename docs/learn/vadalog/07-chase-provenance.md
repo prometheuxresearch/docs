@@ -178,7 +178,7 @@ four `CHASE_NODE` nodes
 CHASE_NODE(fact: 'path(1,2)')
 CHASE_NODE(fact: 'path(1,3)')
 CHASE_NODE(fact: 'arc(1,2)')
-CHASE_NODE(fact: 'arc(1,2)')
+CHASE_NODE(fact: 'arc(1,3)')
 ```
 
 and two `DERIVED_BY` edges

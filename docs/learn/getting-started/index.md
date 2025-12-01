@@ -15,7 +15,7 @@ confidently.
 Whether you're a Data Engineer trying to optimise processing millions of data
 points across hundreds of databases, or an analyst or CEO trying to gain
 visibility into how data flows through your business and not your systems,
-Prometheux lets you to focus on your business operations instead of the data
+Prometheux lets you focus on your business operations instead of the data
 plumbing.
 
 ### Main Features

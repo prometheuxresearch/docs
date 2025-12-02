@@ -19,6 +19,26 @@ The syntax is as follows:
       "table_name").
 ```
 
+:::important Syntax Rules
+**Critical syntax requirements for @bind annotations:**
+
+1. **Options must be comma-separated**: `option1='value1', option2='value2'`
+2. **Values must be quoted**: `host='localhost'` not `host=localhost`  
+3. **Use `username=` not `user=`** for database authentication
+4. **Must end with a dot**: `@bind(...).`
+
+**✅ Correct PostgreSQL example:**
+```prolog
+@bind("employees", "postgresql host='localhost', port=5432, username='postgres', password='mypass'", "company_db", "employees").
+```
+
+**❌ Common mistakes:**
+```prolog
+@bind("employees", "postgresql host=localhost port=5432 user=postgres password=mypass", "company_db", "employees"). // Missing commas and quotes
+@bind("employees", "postgresql", "host='localhost', port=5432", "employees") // Wrong parameter placement
+```
+:::
+
 where `datasource_type` should be one of:
 - `csv` for CSV files
 - `parquet` for Parquet files

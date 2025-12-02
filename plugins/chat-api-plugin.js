@@ -312,15 +312,25 @@ ${relevantDocs ? `\n\nRELEVANT DOCUMENTATION:\n${relevantDocs}\n\nUse this docum
 CRITICAL SYNTAX RULES:
 1. ALL annotations must end with a DOT: @bind(...).  @model(...).  @output(...).
 2. @model syntax: @model("concept", "['field:type', 'field:type']").
-3. @bind syntax: @bind("concept", "type host=... port=... user=... password=...", "database", "table").
-4. Connection params go in the SECOND argument as a single string
+3. @bind syntax: @bind("concept", "datasource_type options", "container", "resource").
+4. @bind has 4 arguments: (1)concept_name (2)type_with_options (3)database/path (4)table/filename
+
+BIND PATTERNS:
+- Database: @bind("concept", "postgresql host='...', port=5432, username='...', password='...'", "database_name", "table_name").
+- CSV file: @bind("concept", "csv useHeaders='true', delimiter=','", "/file/path", "filename.csv").
+- Parquet: @bind("concept", "parquet", "/file/path", "filename.parquet").
+- Excel: @bind("concept", "excel sheetName='Sheet1'", "/file/path", "filename.xlsx").
 
 CORRECT ANNOTATION EXAMPLES:
-✅ @bind("employee", "postgresql host=localhost port=5432 user=myuser password=mypass", "mydb", "employee").
+✅ @bind("employee", "postgresql host='localhost', port=5432, username='myuser', password='mypass'", "mydb", "employee").
+✅ @bind("data", "csv useHeaders='true', delimiter=','", "/path/to/files", "data.csv").
+✅ @bind("records", "parquet", "/path/to/files", "records.parquet").
 ✅ @model("employee", "['id:int', 'name:string', 'salary:double']").
 ✅ @output("result").
 
-❌ WRONG: @bind("employee", "postgresql", "host=localhost...", "employee") - params split wrong!
+❌ WRONG: @bind("employee", "postgresql", "host='localhost', port=5432, username='myuser', password='mypass'", "employee") - params split wrong!
+❌ WRONG: @bind("data", "csv file='data.csv'", "local", "data") - filename in wrong place!
+❌ WRONG: @bind("employee", "postgresql host=localhost port=5432 user=myuser password=mypass", "mydb", "employee") - missing commas and quotes!
 ❌ WRONG: @model("employee", "id:int, name:string") - missing square brackets!
 ❌ WRONG: @output("result") - missing dot!
 

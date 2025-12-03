@@ -142,6 +142,7 @@ Array Operations:
   - collections:add(arr, elem) : add element
   - collections:remove(arr, elem) : remove all occurrences
   - collections:get(arr, index) : get element at index (1-based)
+  - collections:flatten(arrayOfArrays) : transforms an array of arrays into a single array.
 
 Set Operations on Arrays:
   - collections:union(a, b) : combine, remove duplicates

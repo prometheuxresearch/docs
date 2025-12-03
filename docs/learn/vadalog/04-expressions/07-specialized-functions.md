@@ -673,6 +673,46 @@ formatted_phone_uk(Ph, Fmt) :-
 
 Privacy-preserving data operations.
 
+### `mask()`
+Mask sensitive data for privacy protection:
+
+```prolog
+mask(input: string) → string
+mask(input: string, upperChar: char, lowerChar: char, digitChar: char, otherChar: char) → string
+```
+
+Masks the given string value by replacing characters with configurable mask characters. The function replaces characters with 'X' or 'x', and numbers with 'n' by default. This is useful for creating copies of tables with sensitive information removed.
+
+**Arguments:**
+- `input` - string value to mask (STRING, VARCHAR, CHAR)
+- `upperChar` - character to replace upper-case characters with. Specify NULL to retain original character. Default: 'X'
+- `lowerChar` - character to replace lower-case characters with. Specify NULL to retain original character. Default: 'x'  
+- `digitChar` - character to replace digit characters with. Specify NULL to retain original character. Default: 'n'
+- `otherChar` - character to replace other characters with. Specify NULL to retain original character
+
+**Examples:**
+```prolog
+% Basic masking with default characters
+masked_email(Name, MaskedEmail) :- 
+    user(Name, Email), 
+    MaskedEmail = mask(Email).
+% Input: "John.Doe123@example.com" 
+% Output: "Xxxx.Xxx nnn@xxxxxxx.xxx"
+
+% Custom masking with specific characters
+custom_masked_ssn(Person, MaskedSSN) :- 
+    person(Person, SSN), 
+    MaskedSSN = mask(SSN, '*', '*', '#', '-').
+% Input: "123-45-6789"
+% Output: "###-##-####"
+
+% Preserve certain character types
+partial_mask(Data, PartiallyMasked) :- 
+    sensitive_data(Data), 
+    PartiallyMasked = mask(Data, 'X', NULL, '#', NULL).
+% Masks only uppercase letters and digits, preserves lowercase and symbols
+```
+
 ### `anonymization:risk()`
 Calculate privacy risk score:
 

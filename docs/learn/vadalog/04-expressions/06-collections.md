@@ -260,6 +260,22 @@ exploded(Element) :-
 % Results in 3 rows: "apple", "banana", "cherry"
 ```
 
+### `collections:flatten()`
+Transforms an array of arrays into a single array.:
+
+```prolog
+collections:flatten(arr: array<T>) → T
+```
+
+**Example:**
+```prolog
+nested_elements([[1, 2], [3, 4]])
+flattened(Element) :- 
+    nested_elements(X), 
+    Element = collections:flatten(X).
+% Results in a single array: [1, 2, 3, 4]
+```
+
 ### `collections:slice()`
 Extract a slice of an array:
 

@@ -302,7 +302,7 @@ BUILT-IN FUNCTIONS:
 - Math: math:sqrt(), math:abs(), math:round(), math:pow(), math:mod()
 - String: concat(), substring(), contains(), starts_with(), ends_with(), to_lower(), to_upper()
 - Date: date:current_date(), date:add(), date:diff(), date:format()
-- Collections: collections:size(), collections:contains(), collections:add(), collections:sort()
+- Collections: collections:size(), collections:contains(), collections:add(), collections:sort(), collections:flatten()
 - Null handling: nullManagement:isnull(), nullManagement:coalesce()
 - Hash: hash:sha1(), hash:md5(), hash:sha2()
 - AI: embeddings:vectorize(), embeddings:cosine_sim(), llm:generate()

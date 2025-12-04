@@ -375,6 +375,51 @@ customer_postgres_test(CustomerID, Email) :-
 
 ```
 
+### PostgreSQL with Supabase
+
+[Supabase](https://supabase.com) is an open-source Firebase alternative that provides a hosted PostgreSQL database. To connect Prometheux to your Supabase database, you can use the **Transaction Pooler** connection method with a **JDBC** URL.
+
+#### How to Retrieve Your Supabase Connection String
+
+1. Log in to your [Supabase Dashboard](https://supabase.com/dashboard).
+2. Select your project.
+3. Navigate to **Project Settings** → **Database**.
+4. Under **Connection string**, select the **JDBC** tab.
+5. Choose **Transaction Pooler** as the connection mode (recommended for serverless and short-lived connections).
+6. Copy the JDBC connection string.
+
+The connection string will be in the following format:
+
+```
+jdbc:postgresql://aws-1-eu-west-1.pooler.supabase.com:6543/postgres?user=postgres.yourprojectref&password=[YOUR_PASSWORD]
+```
+
+#### Example: Connecting to Supabase with JDBC URL
+
+This example demonstrates how to read data from a Supabase PostgreSQL table using the Transaction Pooler and JDBC connection type.
+
+```prolog
+% Bind the 'owns' concept to the Supabase PostgreSQL database using JDBC URL
+% Replace [YOUR_PASSWORD] with your actual Supabase database password
+@bind("owns", "postgresql url='jdbc:postgresql://aws-1-eu-west-1.pooler.supabase.com:6543/postgres?user=postgres.yourprojectref&password=[YOUR_PASSWORD]'",
+      "postgres", "owns").
+
+% Define a rule to extract data from the 'owns' table
+out(X, Y, Z) :- owns(X, Y, Z).
+
+% Declare the output concept 'out' for making the processed data available
+@output("out").
+```
+
+:::tip Connection Modes
+Supabase offers different connection modes:
+- **Transaction Pooler** (port `6543`): Best for serverless functions and short-lived connections. Uses PgBouncer in transaction mode.
+- **Session Pooler** (port `5432`): For long-lived connections that need session-level features.
+- **Direct Connection** (port `5432`): Direct connection to the database without pooling.
+
+For most Prometheux use cases, the **Transaction Pooler** is recommended as it efficiently manages connection pooling.
+:::
+
 ## MariaDB Database
 MariaDB is a popular open-source relational database, highly compatible with MySQL. It supports various SQL features and is commonly used in web applications and data platforms. In this example, we will explore how to interact with a MariaDB database in Prometheux, focusing on reading data from the order_customer table to test if the data has been populated correctly.
 

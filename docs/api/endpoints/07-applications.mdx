@@ -39,7 +39,6 @@ result = px.graph_rag(
 
 ```python
 def graph_rag(
-    workspace_id="workspace_id", 
     project_id, 
     question, 
     graph_selected_concepts=None, 
@@ -56,7 +55,6 @@ def graph_rag(
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `workspace_id` | str | No | The workspace identifier. Defaults to "workspace_id" |
 | `project_id` | str | Yes | The project identifier |
 | `question` | str | Yes | The question to answer |
 | `graph_selected_concepts` | list | No | Concept names to directly execute for graph operations |

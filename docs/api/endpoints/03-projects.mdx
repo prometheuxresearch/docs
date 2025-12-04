@@ -35,7 +35,6 @@ updated_project_id = px.save_project(
 
 ```python
 def save_project(
-    workspace_id="workspace_id", 
     project_id=None, 
     project_name=None, 
     project_scope="user"
@@ -46,7 +45,6 @@ def save_project(
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `workspace_id` | str | No | The workspace identifier. Defaults to "workspace_id" |
 | `project_id` | str | No | The project identifier. If None, a new project will be created |
 | `project_name` | str | Yes* | The name of the project. Required when creating a new project |
 | `project_scope` | str | No | The scope of the project. Defaults to "user" |
@@ -61,14 +59,13 @@ The project ID of the created or updated project.
 ### HTTP Request
 
 ```bash
-POST /api/v1/projects/{workspace_id}/save
+POST /api/v1/projects/save
 ```
 
 ### Parameters
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| workspace_id | string | Yes | The workspace ID (in URL path) |
 | project | object | Yes | Project data object |
 
 The project object should contain:
@@ -83,7 +80,7 @@ The project object should contain:
 ### cURL Example
 
 ```bash
-curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/projects/workspace_id/save" \
+curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/projects/save" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
   -d '{
@@ -124,7 +121,6 @@ projects = px.list_projects(project_scopes=["user", "shared"])
 
 ```python
 def list_projects(
-    workspace_id="workspace_id", 
     project_scopes=["user"]
 )
 ```
@@ -133,7 +129,6 @@ def list_projects(
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `workspace_id` | str | No | The workspace identifier. Defaults to "workspace_id" |
 | `project_scopes` | list | No | List of project scopes to filter by. Defaults to ["user"] |
 
 **Returns**
@@ -146,20 +141,19 @@ A list of project data dictionaries.
 ### HTTP Request
 
 ```bash
-GET /api/v1/projects/{workspace_id}/list?scopes=user
+GET /api/v1/projects/list?scopes=user
 ```
 
 ### Parameters
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| workspace_id | string | Yes | The workspace ID (in URL path) |
 | scopes | string | No | Comma-separated list of scopes (default: "user") |
 
 ### cURL Example
 
 ```bash
-curl -X GET "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/projects/workspace_id/list?scopes=user,organization" \
+curl -X GET "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/projects/list?scopes=user,organization" \
   -H "Authorization: Bearer YOUR_JWT_TOKEN"
 ```
 
@@ -187,7 +181,6 @@ project_data = px.load_project(project_id="my_project_id")
 ```python
 def load_project(
     project_id, 
-    workspace_id="workspace_id", 
     project_scope="user"
 )
 ```
@@ -197,7 +190,6 @@ def load_project(
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
 | `project_id` | str | Yes | The project identifier to load |
-| `workspace_id` | str | No | The workspace identifier. Defaults to "workspace_id" |
 | `project_scope` | str | No | The scope of the project. Defaults to "user" |
 
 **Returns**
@@ -210,21 +202,20 @@ The project data dictionary.
 ### HTTP Request
 
 ```bash
-GET /api/v1/projects/{workspace_id}/load?project_id={project_id}&scope=user
+GET /api/v1/projects/load?project_id={project_id}&scope=user
 ```
 
 ### Parameters
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| workspace_id | string | Yes | The workspace ID (in URL path) |
 | project_id | string | Yes | The project ID to load |
 | scope | string | No | Project scope (default: "user") |
 
 ### cURL Example
 
 ```bash
-curl -X GET "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/projects/workspace_id/load?project_id=proj_12345&scope=user" \
+curl -X GET "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/projects/load?project_id=proj_12345&scope=user" \
   -H "Authorization: Bearer YOUR_JWT_TOKEN"
 ```
 
@@ -244,7 +235,7 @@ List all available project templates from the marketplace.
 import prometheux_chain as px
 
 # List all available project templates
-templates = px.list_templates(workspace_id="workspace_id")
+templates = px.list_templates()
 for template in templates:
     print(f"Template: {template['name']} (ID: {template['id']})")
 ```
@@ -255,19 +246,17 @@ for template in templates:
 ### HTTP Request
 
 ```bash
-GET /api/v1/projects/{workspace_id}/list-templates
+GET /api/v1/projects/list-templates
 ```
 
 ### Parameters
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| workspace_id | string | Yes | The workspace ID (in URL path) |
+None
 
 ### cURL Example
 
 ```bash
-curl -X GET "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/projects/workspace_id/list-templates" \
+curl -X GET "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/projects/list-templates" \
   -H "Authorization: Bearer YOUR_JWT_TOKEN"
 ```
 
@@ -311,7 +300,6 @@ import prometheux_chain as px
 
 # Import a template as a new project
 result = px.import_template(
-    workspace_id="workspace_id",
     template_id="template_001", 
     new_project_name="My Financial Analysis"
 )
@@ -324,14 +312,13 @@ print(f"Template imported as project: {result['name']}")
 ### HTTP Request
 
 ```bash
-POST /api/v1/projects/{workspace_id}/import-template
+POST /api/v1/projects/import-template
 ```
 
 ### Parameters
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| workspace_id | string | Yes | The workspace ID (in URL path) |
 | template_id | string | Yes | The template ID to import |
 | new_project_name | string | No | Custom name for the new project |
 | project_scope | string | No | Project scope (default: "user") |
@@ -339,7 +326,7 @@ POST /api/v1/projects/{workspace_id}/import-template
 ### cURL Example
 
 ```bash
-curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/projects/workspace_id/import-template" \
+curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/projects/import-template" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
   -d '{
@@ -388,7 +375,6 @@ customer lifetime value calculations.
 
 files = ["customer_data.csv", "marketing_report.pdf"]
 result = px.create_project_from_context(
-    workspace_id="workspace_id",
     context=context, 
     files=files
 )
@@ -401,14 +387,13 @@ print(f"Created project: {result['name']}")
 ### HTTP Request
 
 ```bash
-POST /api/v1/projects/{workspace_id}/create-from-context
+POST /api/v1/projects/create-from-context
 ```
 
 ### Parameters (Form Data)
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| workspace_id | string | Yes | The workspace ID (in URL path) |
 | context | string | No | Text context describing the domain or task |
 | scope | string | No | Project scope (default: "user") |
 | files | file[] | No | Optional file attachments (PDF, CSV, TXT, images) |
@@ -416,7 +401,7 @@ POST /api/v1/projects/{workspace_id}/create-from-context
 ### cURL Example
 
 ```bash
-curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/projects/workspace_id/create-from-context" \
+curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/projects/create-from-context" \
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
   -F "context=Analyze customer purchase patterns and identify high-value segments for targeted marketing campaigns" \
   -F "scope=user" \
@@ -442,7 +427,6 @@ import json
 
 # Export a project
 export_data = px.export_project(
-    workspace_id="workspace_id",
     project_id="proj_12345"
 )
 print(f"Exported {export_data['summary']['total_tables']} tables")
@@ -458,21 +442,20 @@ with open("project_export.json", "w") as f:
 ### HTTP Request
 
 ```bash
-POST /api/v1/projects/{workspace_id}/export-project
+POST /api/v1/projects/export-project
 ```
 
 ### Parameters
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| workspace_id | string | Yes | The workspace ID (in URL path) |
 | project_id | string | Yes | The project ID to export |
 | scope | string | No | Export scope (default: "user") |
 
 ### cURL Example
 
 ```bash
-curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/projects/workspace_id/export-project" \
+curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/projects/export-project" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
   -d '{
@@ -503,7 +486,6 @@ with open("project_export.json", "r") as f:
 
 # Import the project
 result = px.import_project(
-    workspace_id="target_workspace_id",
     export_data=export_data
 )
 print(f"Imported project with new ID: {result['new_project_id']}")
@@ -515,21 +497,20 @@ print(f"Imported project with new ID: {result['new_project_id']}")
 ### HTTP Request
 
 ```bash
-POST /api/v1/projects/{workspace_id}/import-project
+POST /api/v1/projects/import-project
 ```
 
 ### Parameters
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| workspace_id | string | Yes | The target workspace ID (in URL path) |
 | export_data | object | Yes | Previously exported project data |
 | scope | string | No | Import scope (default: "user") |
 
 ### cURL Example
 
 ```bash
-curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/projects/workspace_id/import-project" \
+curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/projects/import-project" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
   -d '{
@@ -553,11 +534,9 @@ Copy a project within or between workspaces.
 ```python
 import prometheux_chain as px
 
-# Copy a project to another workspace
+# Copy a project
 result = px.copy_project(
-    target_workspace_id="target_workspace",
     project_id="proj_12345", 
-    source_workspace_id="source_workspace",
     new_project_name="Copy of Financial Analysis"
 )
 print(f"Project copied with new ID: {result['new_project_id']}")
@@ -569,28 +548,25 @@ print(f"Project copied with new ID: {result['new_project_id']}")
 ### HTTP Request
 
 ```bash
-POST /api/v1/projects/{workspace_id}/copy
+POST /api/v1/projects/copy
 ```
 
 ### Parameters
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| workspace_id | string | Yes | The target workspace ID (in URL path) |
 | project_id | string | Yes | Source project ID |
-| workspace_id | string | Yes | Source workspace ID |
 | new_project_name | string | No | Name for the copied project |
 | target_scope | string | No | Target scope (default: "user") |
 
 ### cURL Example
 
 ```bash
-curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/projects/target_workspace/copy" \
+curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/projects/copy" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
   -d '{
     "project_id": "proj_12345",
-    "workspace_id": "source_workspace",
     "new_project_name": "Copy of Financial Analysis",
     "target_scope": "user"
   }'
@@ -622,7 +598,6 @@ px.cleanup_projects(project_id="my_project_id")
 
 ```python
 def cleanup_projects(
-    workspace_id="workspace_id", 
     project_id=None, 
     project_scope="user"
 )
@@ -632,7 +607,6 @@ def cleanup_projects(
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `workspace_id` | str | No | The workspace identifier. Defaults to "workspace_id" |
 | `project_id` | str | No | The project identifier. If None, cleans up all project resources for the user |
 | `project_scope` | str | No | The scope of the project. Defaults to "user" |
 
@@ -642,14 +616,13 @@ def cleanup_projects(
 ### HTTP Request
 
 ```bash
-POST /api/v1/projects/{workspace_id}/cleanup
+POST /api/v1/projects/cleanup
 ```
 
 ### Parameters
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| workspace_id | string | Yes | The workspace ID (in URL path) |
 | project | object | No | Project specification for deletion |
 
 The project object can contain:
@@ -662,7 +635,7 @@ The project object can contain:
 ### cURL Example
 
 ```bash
-curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/projects/workspace_id/cleanup" \
+curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/projects/cleanup" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
   -d '{
@@ -710,21 +683,21 @@ px.cleanup_projects(project_id=project_id)
 
 ```bash
 # Create a project
-curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/projects/workspace_id/save" \
+curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/projects/save" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
   -d '{"project": {"name": "test_project"}}'
 
 # List projects
-curl -X GET "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/projects/workspace_id/list?scopes=user" \
+curl -X GET "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/projects/list?scopes=user" \
   -H "Authorization: Bearer YOUR_JWT_TOKEN"
 
 # Load a specific project
-curl -X GET "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/projects/workspace_id/load?project_id=proj_12345" \
+curl -X GET "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/projects/load?project_id=proj_12345" \
   -H "Authorization: Bearer YOUR_JWT_TOKEN"
 
 # Cleanup
-curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/projects/workspace_id/cleanup" \
+curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/projects/cleanup" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
   -d '{"project": {"id": "proj_12345", "scope": "user"}}'

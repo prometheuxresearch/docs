@@ -43,7 +43,6 @@ result = px.save_concept(
 
 ```python
 def save_concept(
-    workspace_id="workspace_id", 
     project_id=None, 
     concept_logic=None, 
     scope="user", 
@@ -55,7 +54,6 @@ def save_concept(
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `workspace_id` | str | No | The workspace identifier. Defaults to "workspace_id" |
 | `project_id` | str | Yes | The project identifier |
 | `concept_logic` | str | Yes | The Vadalog logic defining the concept |
 | `scope` | str | No | The scope of the concept. Defaults to "user" |
@@ -71,14 +69,13 @@ The response data from saving the concept.
 ### HTTP Request
 
 ```bash
-POST /api/v1/concepts/{workspace_id}/{project_id}/save
+POST /api/v1/concepts/{project_id}/save
 ```
 
 ### Parameters
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| workspace_id | string | Yes | The workspace ID (in URL path) |
 | project_id | string | Yes | The project ID (in URL path) |
 | concept_logic | string | Yes | Vadalog program/annotations |
 | scope | string | No | Concept scope (default: "user") |
@@ -87,7 +84,7 @@ POST /api/v1/concepts/{workspace_id}/{project_id}/save
 ### cURL Example
 
 ```bash
-curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/concepts/workspace_id/1921d58a6g2/save" \
+curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/concepts/1921d58a6g2/save" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
   -d '{
@@ -159,7 +156,7 @@ result = px.save_concept(
   <TabItem value="rest" label="REST API">
 
 ```bash
-curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/concepts/workspace_id/project_id/save" \
+curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/concepts/project_id/save" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
   -d '{
@@ -254,7 +251,6 @@ results = px.run_concept(
 
 ```python
 def run_concept(
-    workspace_id="workspace_id", 
     project_id=None, 
     concept_name=None, 
     params=None, 
@@ -270,7 +266,6 @@ def run_concept(
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `workspace_id` | str | No | The workspace identifier. Defaults to "workspace_id" |
 | `project_id` | str | Yes | The project identifier |
 | `concept_name` | str | Yes | The name of the concept to run |
 | `params` | dict | No | Parameters to pass to the concept execution |
@@ -290,14 +285,13 @@ The execution results data.
 ### HTTP Request
 
 ```bash
-POST /api/v1/concepts/{workspace_id}/{project_id}/run
+POST /api/v1/concepts/{project_id}/run
 ```
 
 ### Parameters
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| workspace_id | string | Yes | The workspace ID (in URL path) |
 | project_id | string | Yes | The project ID (in URL path) |
 | concept_name | string | Yes | Name of the concept to execute |
 | params | object | No | Parameters to pass to the concept |
@@ -310,7 +304,7 @@ POST /api/v1/concepts/{workspace_id}/{project_id}/run
 ### cURL Example
 
 ```bash
-curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/concepts/workspace_id/1921d58a6g2/run" \
+curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/concepts/1921d58a6g2/run" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
   -d '{
@@ -357,7 +351,6 @@ print(f"Available concepts: {concepts}")
 
 ```python
 def list_concepts(
-    workspace_id="workspace_id", 
     project_id=None, 
     project_scope="user"
 )
@@ -367,7 +360,6 @@ def list_concepts(
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `workspace_id` | str | No | The workspace identifier. Defaults to "workspace_id" |
 | `project_id` | str | Yes | The project identifier |
 | `project_scope` | str | No | The scope of the project. Defaults to "user" |
 
@@ -381,21 +373,20 @@ List of concept information dictionaries.
 ### HTTP Request
 
 ```bash
-GET /api/v1/concepts/{workspace_id}/{project_id}/list?scope=user
+GET /api/v1/concepts/{project_id}/list?scope=user
 ```
 
 ### Parameters
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| workspace_id | string | Yes | The workspace ID (in URL path) |
 | project_id | string | Yes | The project ID (in URL path) |
 | scope | string | No | Concept scope (default: "user") |
 
 ### cURL Example
 
 ```bash
-curl -X GET "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/concepts/workspace_id/1921d58a6g2/list?scope=user" \
+curl -X GET "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/concepts/1921d58a6g2/list?scope=user" \
   -H "Authorization: Bearer YOUR_JWT_TOKEN"
 ```
 
@@ -425,7 +416,6 @@ result = px.cleanup_concepts()
 
 ```python
 def cleanup_concepts(
-    workspace_id="workspace_id", 
     project_id=None, 
     project_scope="user"
 )
@@ -435,7 +425,6 @@ def cleanup_concepts(
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `workspace_id` | str | No | The workspace identifier. Defaults to "workspace_id" |
 | `project_id` | str | No | The project identifier. If None, cleans up all concepts for the user |
 | `project_scope` | str | No | The scope of the project. Defaults to "user" |
 
@@ -445,14 +434,13 @@ def cleanup_concepts(
 ### HTTP Request
 
 ```bash
-POST /api/v1/concepts/{workspace_id}/{project_id}/cleanup
+POST /api/v1/concepts/{project_id}/cleanup
 ```
 
 ### Parameters
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| workspace_id | string | Yes | The workspace ID (in URL path) |
 | project_id | string | Yes | The project ID (in URL path) |
 | scope | string | No | Concept scope (default: "user") |
 | concept_names | array | No | Specific concept names to delete (if not provided, deletes all) |
@@ -460,7 +448,7 @@ POST /api/v1/concepts/{workspace_id}/{project_id}/cleanup
 ### cURL Example
 
 ```bash
-curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/concepts/workspace_id/1921d58a6g2/cleanup" \
+curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/concepts/1921d58a6g2/cleanup" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
   -d '{
@@ -498,14 +486,13 @@ result = px.rename_concept(
 ### HTTP Request
 
 ```bash
-POST /api/v1/concepts/{workspace_id}/{project_id}/rename
+POST /api/v1/concepts/{project_id}/rename
 ```
 
 ### Parameters
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| workspace_id | string | Yes | The workspace ID (in URL path) |
 | project_id | string | Yes | The project ID (in URL path) |
 | name | string | Yes | Current concept name |
 | new_name | string | Yes | New concept name |
@@ -514,7 +501,7 @@ POST /api/v1/concepts/{workspace_id}/{project_id}/rename
 ### cURL Example
 
 ```bash
-curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/concepts/workspace_id/1921d58a6g2/rename" \
+curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/concepts/1921d58a6g2/rename" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
   -d '{
@@ -575,13 +562,13 @@ px.cleanup_concepts(project_id=project_id)
 
 ```bash
 # Create a project
-curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/projects/workspace_id/save" \
+curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/projects/save" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
   -d '{"project": {"name": "concept_demo"}}'
 
 # Save a concept
-curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/concepts/workspace_id/project_id/save" \
+curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/concepts/project_id/save" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
   -d '{
@@ -590,17 +577,17 @@ curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/concepts/
   }'
 
 # List concepts
-curl -X GET "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/concepts/workspace_id/project_id/list?scope=user" \
+curl -X GET "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/concepts/project_id/list?scope=user" \
   -H "Authorization: Bearer YOUR_JWT_TOKEN"
 
 # Run a concept
-curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/concepts/workspace_id/project_id/run" \
+curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/concepts/project_id/run" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
   -d '{"concept_name": "location"}'
 
 # Cleanup
-curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/concepts/workspace_id/project_id/cleanup" \
+curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/concepts/project_id/cleanup" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
   -d '{"scope": "user"}'

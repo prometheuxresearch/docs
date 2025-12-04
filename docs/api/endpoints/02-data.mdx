@@ -43,7 +43,6 @@ source_data = px.connect_sources(
 
 ```python
 def connect_sources(
-    workspace_id="workspace_id", 
     database_payload=None, 
     compute_row_count=False
 )
@@ -53,7 +52,6 @@ def connect_sources(
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `workspace_id` | str | No | The workspace identifier. Defaults to "workspace_id" |
 | `database_payload` | dict | Yes | The database connection configuration |
 | `compute_row_count` | bool | No | Whether to compute row counts for tables. Defaults to False |
 
@@ -67,14 +65,13 @@ The connection response data containing source information.
 ### HTTP Request
 
 ```bash
-POST /api/v1/data/{workspace_id}/connect
+POST /api/v1/data/connect
 ```
 
 ### Parameters
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| workspace_id | string | Yes | The workspace ID (in URL path) |
 | scope | string | No | Data source scope (default: "user") |
 | database | object | Yes | Database connection configuration |
 | computeRowCount | boolean | No | Compute row counts for tables (default: false) |
@@ -94,7 +91,7 @@ The database object should contain:
 ### cURL Example
 
 ```bash
-curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/data/workspace_id/connect" \
+curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/data/connect" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
   -d '{
@@ -156,14 +153,13 @@ print(f"Available sources: {sources}")
 **Function Signature**
 
 ```python
-def list_sources(workspace_id="workspace_id")
+def list_sources()
 ```
 
 **Parameters**
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `workspace_id` | str | No | The workspace identifier. Defaults to "workspace_id" |
 
 **Returns**
 
@@ -175,20 +171,19 @@ A list of data source information dictionaries.
 ### HTTP Request
 
 ```bash
-GET /api/v1/data/{workspace_id}/list?scope=user
+GET /api/v1/data/list?scope=user
 ```
 
 ### Parameters
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| workspace_id | string | Yes | The workspace ID (in URL path) |
 | scope | string | No | Data source scope (default: "user") |
 
 ### cURL Example
 
 ```bash
-curl -X GET "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/data/workspace_id/list?scope=user" \
+curl -X GET "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/data/list?scope=user" \
   -H "Authorization: Bearer YOUR_JWT_TOKEN"
 ```
 
@@ -217,14 +212,13 @@ px.cleanup_sources(source_ids=['source1', 'source2'])
 **Function Signature**
 
 ```python
-def cleanup_sources(workspace_id="workspace_id", source_ids=None)
+def cleanup_sources(source_ids=None)
 ```
 
 **Parameters**
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `workspace_id` | str | No | The workspace identifier. Defaults to "workspace_id" |
 | `source_ids` | list | No | List of specific source IDs to clean up. If None, cleans up all sources |
 
   </TabItem>
@@ -233,21 +227,20 @@ def cleanup_sources(workspace_id="workspace_id", source_ids=None)
 ### HTTP Request
 
 ```bash
-POST /api/v1/data/{workspace_id}/cleanup
+POST /api/v1/data/cleanup
 ```
 
 ### Parameters
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| workspace_id | string | Yes | The workspace ID (in URL path) |
 | scope | string | No | Data source scope (default: "user") |
 | source_ids | array | No | Specific source IDs to delete (if not provided, deletes all) |
 
 ### cURL Example
 
 ```bash
-curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/data/workspace_id/cleanup" \
+curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/data/cleanup" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
   -d '{
@@ -350,7 +343,7 @@ px.cleanup_sources()
 
 ```bash
 # Connect a database
-curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/data/workspace_id/connect" \
+curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/data/connect" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
   -d '{
@@ -367,11 +360,11 @@ curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/data/work
   }'
 
 # List data sources
-curl -X GET "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/data/workspace_id/list?scope=user" \
+curl -X GET "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/data/list?scope=user" \
   -H "Authorization: Bearer YOUR_JWT_TOKEN"
 
 # Cleanup data sources
-curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/data/workspace_id/cleanup" \
+curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/data/cleanup" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
   -d '{"scope": "user"}'

@@ -400,8 +400,25 @@ This example demonstrates how to read data from a Supabase PostgreSQL table usin
 
 ```prolog
 % Bind the 'owns' concept to the Supabase PostgreSQL database using JDBC URL
+% Replace [YOUR_PROJECT_ID] with your Supabase project ID
 % Replace [YOUR_PASSWORD] with your actual Supabase database password
 @bind("owns", "postgresql url='jdbc:postgresql://aws-1-eu-west-1.pooler.supabase.com:6543/postgres?user=postgres.[YOUR_PROJECT_ID]&password=[YOUR_PASSWORD]'",
+      "postgres", "owns").
+
+% Define a rule to extract data from the 'owns' table
+out(X, Y, Z) :- owns(X, Y, Z).
+
+% Declare the output concept 'out' for making the processed data available
+@output("out").
+```
+
+Alternatively, instead of using the `url` parameter, you can specify the connection details individually:
+
+```prolog
+% Bind the 'owns' concept to the Supabase PostgreSQL database using individual connection parameters
+% Replace [YOUR_PROJECT_ID] with your Supabase project ID
+% Replace [YOUR_PASSWORD] with your actual Supabase database password
+@bind("owns", "postgresql host='aws-1-eu-west-1.pooler.supabase.com', port='6543', username='postgres.[YOUR_PROJECT_ID]', password='[YOUR_PASSWORD]'",
       "postgres", "owns").
 
 % Define a rule to extract data from the 'owns' table
@@ -475,7 +492,6 @@ order_mariadb_test(OrderId, CustomerId, Cost) :-
 
 % Declare the output concept 'order_mariadb_test', making the processed data available
 @output("order_mariadb_test").
-
 ```
 
 ## Neo4j Database

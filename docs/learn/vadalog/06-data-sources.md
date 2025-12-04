@@ -391,7 +391,7 @@ customer_postgres_test(CustomerID, Email) :-
 The connection string will be in the following format:
 
 ```
-jdbc:postgresql://aws-1-eu-west-1.pooler.supabase.com:6543/postgres?user=postgres.yourprojectref&password=[YOUR_PASSWORD]
+jdbc:postgresql://aws-1-eu-west-1.pooler.supabase.com:6543/postgres?user=postgres.[YOUR_PROJECT_ID]&password=[YOUR_PASSWORD]
 ```
 
 #### Example: Connecting to Supabase with JDBC URL
@@ -401,7 +401,7 @@ This example demonstrates how to read data from a Supabase PostgreSQL table usin
 ```prolog
 % Bind the 'owns' concept to the Supabase PostgreSQL database using JDBC URL
 % Replace [YOUR_PASSWORD] with your actual Supabase database password
-@bind("owns", "postgresql url='jdbc:postgresql://aws-1-eu-west-1.pooler.supabase.com:6543/postgres?user=postgres.yourprojectref&password=[YOUR_PASSWORD]'",
+@bind("owns", "postgresql url='jdbc:postgresql://aws-1-eu-west-1.pooler.supabase.com:6543/postgres?user=postgres.[YOUR_PROJECT_ID]&password=[YOUR_PASSWORD]'",
       "postgres", "owns").
 
 % Define a rule to extract data from the 'owns' table
@@ -419,6 +419,43 @@ Supabase offers different connection modes:
 
 For most Prometheux use cases, the **Transaction Pooler** is recommended as it efficiently manages connection pooling.
 :::
+
+#### Alternative: Connecting via Supabase REST API
+
+Supabase also exposes a **REST API** (powered by PostgREST) that allows you to access your database tables directly via HTTP. This approach uses your Supabase API keys for authentication.
+
+##### How to Retrieve Your Supabase API Credentials
+
+1. Log in to your [Supabase Dashboard](https://supabase.com/dashboard).
+2. Select your project.
+3. Navigate to **Project Settings** → **API**.
+4. Copy your **Project URL** (e.g., `https://yourprojectid.supabase.co`).
+5. Copy your **service_role** key (secret) or **anon** key depending on your security requirements.
+
+:::warning API Keys
+- **publishable key / anon (legacy**: Respects Row Level Security (RLS) policies if enabled for your tables.
+- **secret key**: Bypasses RLS policies.
+:::
+
+##### Example: Connecting to Supabase via REST API
+
+This example demonstrates how to read data from a Supabase table using the REST API with bearer token authentication.
+
+```prolog
+% Bind the 'owns' concept to the Supabase REST API
+% Replace [YOUR_PROJECT_ID] with your Supabase project ID
+% Replace [YOUR_KEY] with your key
+@bind("owns", "api 
+               authType='bearer', 
+               headers='apikey:[YOUR_KEY]'", 
+               "https://[YOUR_PROJECT_ID].supabase.co/rest/v1/", "owns").
+
+% Define a rule to extract data from the 'owns' table
+out(X, Y, Z) :- owns(X, Y, Z).
+
+% Declare the output concept 'out' for making the processed data available
+@output("out").
+```
 
 ## MariaDB Database
 MariaDB is a popular open-source relational database, highly compatible with MySQL. It supports various SQL features and is commonly used in web applications and data platforms. In this example, we will explore how to interact with a MariaDB database in Prometheux, focusing on reading data from the order_customer table to test if the data has been populated correctly.

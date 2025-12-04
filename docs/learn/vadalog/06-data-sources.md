@@ -396,7 +396,7 @@ jdbc:postgresql://aws-1-eu-west-1.pooler.supabase.com:6543/postgres?user=postgre
 
 #### Example: Connecting to Supabase with JDBC URL
 
-This example demonstrates how to read data from a Supabase PostgreSQL table using the Transaction Pooler and JDBC connection type.
+This example demonstrates how to read data from a Supabase PostgreSQL table using the Transaction Pooler and JDBC connection.
 
 ```prolog
 % Bind the 'owns' concept to the Supabase PostgreSQL database using JDBC URL

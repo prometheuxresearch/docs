@@ -611,6 +611,26 @@ record_with_metadata(X, S) :-
     S = struct(X, "originalValue", X + 1, "incrementedValue").
 ```
 
+### `struct:get()`
+Extract a field value from a struct by its field name:
+
+```prolog
+struct:get(struct: struct, fieldName: string) → any
+```
+
+**Example:**
+```prolog
+a(10, 20).
+b(S) :- a(X, Y), S = struct(X, "field1", Y, "field2").
+c(F1, F2) :- b(S), F1 = struct:get(S, "field1"), F2 = struct:get(S, "field2").
+@output("c").
+```
+
+Expected output:
+```prolog
+c(10, 20).
+```
+
 ### `uuid()`
 Generate universally unique identifiers:
 

@@ -249,6 +249,7 @@ Check if value falls within range:
 ## Utility Functions
 
   - struct(key1, value1, key2, value2, ...) : create structured data
+  - struct:get(struct, "field_name") : extract field value from struct by field name
   - uuid() : generate random UUID
   - uuid(arg1, arg2, ...) : generate deterministic UUID
   - monotonically_increasing_id() : generate increasing ID

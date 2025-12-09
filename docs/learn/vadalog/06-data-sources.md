@@ -450,7 +450,7 @@ Supabase also exposes a **REST API** (powered by PostgREST) that allows you to a
 5. Copy your **service_role** key (secret) or **anon** key depending on your security requirements.
 
 :::warning API Keys
-- **publishable key / anon (legacy**: Respects Row Level Security (RLS) policies if enabled for your tables.
+- **publishable key / anon (legacy)**: Respects Row Level Security (RLS) policies if enabled for your tables.
 - **secret key**: Bypasses RLS policies.
 :::
 

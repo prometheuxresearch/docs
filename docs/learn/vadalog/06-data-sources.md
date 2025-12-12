@@ -437,7 +437,71 @@ Supabase offers different connection modes:
 For most Prometheux use cases, the **Transaction Pooler** is recommended as it efficiently manages connection pooling.
 :::
 
+#### Creating a Read-Only Database User (Recommended)
+
+For enhanced security, instead of using your main database password, you can create a dedicated read-only user with access limited to specific tables. This follows the principle of least privilege and minimizes security risks.
+
+##### Steps to Create a Read-Only User in Supabase
+
+1. Log in to your [Supabase Dashboard](https://supabase.com/dashboard).
+2. Select your project.
+3. Navigate to **SQL Editor** and execute the following SQL commands:
+
+```sql
+-- Create read-only user with a secure password
+CREATE USER vadalog_reader WITH PASSWORD '[YOUR_SECURE_PASSWORD]';
+
+-- Grant connect permission to the database
+GRANT CONNECT ON DATABASE postgres TO vadalog_reader;
+
+-- Grant usage on the public schema
+GRANT USAGE ON SCHEMA public TO vadalog_reader;
+
+-- ============================================
+-- Grant SELECT only on specific tables
+-- ============================================
+
+-- Example: Grant read access to the 'ownerships' table
+GRANT SELECT ON public.ownerships TO vadalog_reader;
+
+-- Add more tables as needed
+-- GRANT SELECT ON public.your_other_table TO vadalog_reader;
+
+-- ============================================
+-- Configure Row Level Security (RLS) policies
+-- ============================================
+
+-- Enable RLS on the table (if not already enabled)
+ALTER TABLE public.ownerships ENABLE ROW LEVEL SECURITY;
+
+-- Create policy to allow vadalog_reader to read all rows
+CREATE POLICY "Allow vadalog_reader to read all ownerships"
+ON public.ownerships
+FOR SELECT
+TO vadalog_reader
+USING (true);
+```
+
+:::info Setup Time
+After creating the user and granting permissions, it may take a few minutes for the changes to propagate and become active. If you encounter connection issues immediately after setup, wait 5 minutes and try again.
+:::
+
+Once the read-only user is created, use it in your connection string:
+
+```prolog
+% Connect using the read-only user
+@bind("owns", "postgresql host='aws-1-eu-west-1.pooler.supabase.com', port='6543', username='vadalog_reader', password='[YOUR_SECURE_PASSWORD]'",
+      "postgres", "ownerships").
+
+out(X, Y, Z) :- owns(X, Y, Z).
+@output("out").
+```
+
 #### Alternative: Connecting via Supabase REST API
+
+:::warning Recommendation
+**The JDBC connection method (shown above) is heavily recommended for production use.** It provides full PostgreSQL capabilities, better performance, and more reliable connections. The REST API method below is primarily suitable for one-time access to simple tables or quick prototyping scenarios.
+:::
 
 Supabase also exposes a **REST API** (powered by PostgREST) that allows you to access your database tables directly via HTTP. This approach uses your Supabase API keys for authentication.
 
@@ -456,12 +520,12 @@ Supabase also exposes a **REST API** (powered by PostgREST) that allows you to a
 
 ##### Example: Connecting to Supabase via REST API
 
-This example demonstrates how to read data from a Supabase table using the REST API with bearer token authentication.
+This example demonstrates how to read data from a simple Supabase table using the REST API with bearer token authentication. This method is best suited for quick, one-time data access or prototyping scenarios.
 
 ```prolog
 % Bind the 'owns' concept to the Supabase REST API
 % Replace [YOUR_PROJECT_ID] with your Supabase project ID
-% Replace [YOUR_KEY] with your key
+% Replace [YOUR_KEY] with your publishable or secret key
 @bind("owns", "api 
                authType='bearer', 
                headers='apikey:[YOUR_KEY]'", 
@@ -473,6 +537,10 @@ out(X, Y, Z) :- owns(X, Y, Z).
 % Declare the output concept 'out' for making the processed data available
 @output("out").
 ```
+
+:::tip
+For complex queries, joins, transactions, or production workloads, always prefer the **JDBC connection method** described above.
+:::
 
 ## MariaDB Database
 MariaDB is a popular open-source relational database, highly compatible with MySQL. It supports various SQL features and is commonly used in web applications and data platforms. In this example, we will explore how to interact with a MariaDB database in Prometheux, focusing on reading data from the order_customer table to test if the data has been populated correctly.

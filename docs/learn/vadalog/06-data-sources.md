@@ -513,10 +513,7 @@ Supabase also exposes a **REST API** (powered by PostgREST) that allows you to a
 4. Copy your **Project URL** (e.g., `https://yourprojectid.supabase.co`).
 5. Copy your **service_role** key (secret) or **anon** key depending on your security requirements.
 
-:::warning API Keys
-- **publishable key / anon (legacy)**: Respects Row Level Security (RLS) policies if enabled for your tables.
-- **secret key**: Bypasses RLS policies.
-:::
+API keys: the **publishable key / anon (legacy)** respects Row Level Security (RLS) policies if enabled for your tables, while the **secret key** bypasses RLS policies.
 
 ##### Example: Connecting to Supabase via REST API
 
@@ -537,10 +534,6 @@ out(X, Y, Z) :- owns(X, Y, Z).
 % Declare the output concept 'out' for making the processed data available
 @output("out").
 ```
-
-:::tip
-For complex queries, joins, transactions, or production workloads, always prefer the **JDBC connection method** described above.
-:::
 
 ## MariaDB Database
 MariaDB is a popular open-source relational database, highly compatible with MySQL. It supports various SQL features and is commonly used in web applications and data platforms. In this example, we will explore how to interact with a MariaDB database in Prometheux, focusing on reading data from the order_customer table to test if the data has been populated correctly.

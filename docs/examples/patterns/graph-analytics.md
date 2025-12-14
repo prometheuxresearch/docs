@@ -35,20 +35,30 @@ After execution, the relation `path` contains all connected node pairs, showing 
 Degree centrality measures the importance of a node based on the number of edges connected to it. This is a fundamental metric in network analysis that helps identify the most connected or influential nodes in a graph.
 
 ```prolog showLineNumbers
-% Create undirected edges from directed edges
+edge("a","b").
+edge("a","e").
+edge("a","f").
+edge("b","d").
+edge("c","b").
+edge("c","e").
+edge("d","c").
+edge("d","h").
+edge("f","g").
+
+% create undirected edges from directed edges
 edge_undirected(X,Y) :- edge(X,Y).
 edge_undirected(Y,X) :- edge(X,Y).
 
-% Define all nodes in the graph
+% define all nodes in the graph
 node(X) :- edge_undirected(X,Y).
 
-% Count the total number of nodes
+% count the total number of nodes
 num_nodes(Num) :- node(X), Num = mcount(). 
 
-% Calculate the degree of each node
+% calculate the degree of each node
 node_degree(N1,Degree) :- edge_undirected(N1,N2), Degree = mcount().
 
-% Calculate normalized degree centrality for each node
+% calculate normalized degree centrality for each node
 degree_centrality(N,DC) :- 
     node_degree(N,Degree),
     num_nodes(Num),
@@ -60,4 +70,39 @@ degree_centrality(N,DC) :-
 ```
 
 The degree centrality is normalized by dividing by `N-1` (where N is the total number of nodes), producing values between 0 and 1. The `@post` annotation orders the results by degree centrality in descending order, making it easy to identify the most central nodes in your network.
+
+## Community Detection (Connected Components)
+
+Community detection identifies groups of nodes that are more densely connected to each other than to nodes outside the group. One fundamental approach is finding connected components—groups of nodes where every node is reachable from every other node in the group through a path of edges.
+
+This example uses [Equality Generating Dependencies (EGDs)](/learn/vadalog/03-rules#equality-generating-dependencies-egds) to merge communities when nodes are connected, effectively computing connected components in an undirected graph:
+
+```prolog showLineNumbers
+edge("a","b").
+edge("a","e").
+edge("a","f").
+edge("b","d").
+edge("c","b").
+edge("c","e").
+edge("d","c").
+edge("d","h").
+edge("f","g").
+
+% create undirected edges from directed edges
+edge_undirected(X,Y) :- edge(X,Y).
+edge_undirected(Y,X) :- edge(X,Y).
+
+% define all nodes in the graph
+node(X) :- edge_undirected(X,Y).
+
+% each node belongs to a community
+community(X, C) :- node(X).
+
+% if two nodes are connected by an (undirected) edge, they belong to the same community
+C1 = C2 :- edge_undirected(X, Y), community(X, C1), community(Y, C2).
+
+@post("community", "orderby(1)").
+```
+
+The EGD `C1 = C2` ensures that whenever two nodes are connected by an edge, their community identifiers are unified. This propagates through the graph, merging all connected nodes into the same community. The `@post` annotation orders results by the first column (node), making it easy to see which community each node belongs to.
 

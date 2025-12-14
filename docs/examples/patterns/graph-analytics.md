@@ -75,7 +75,7 @@ The degree centrality is normalized by dividing by `N-1` (where N is the total n
 
 Community detection identifies groups of nodes that are more densely connected to each other than to nodes outside the group. One fundamental approach is finding connected components—groups of nodes where every node is reachable from every other node in the group through a path of edges.
 
-This example uses [Equality Generating Dependencies (EGDs)](/learn/vadalog/03-rules#equality-generating-dependencies-egds) to merge communities when nodes are connected, effectively computing connected components in an undirected graph:
+This example uses Equality Generating Dependencies (EGDs) to merge communities when nodes are connected, effectively computing connected components in an undirected graph:
 
 ```prolog showLineNumbers
 edge("a","b").

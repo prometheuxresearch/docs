@@ -132,6 +132,104 @@ customer_orders(CustomerName, OrderId, OrderDate, Amount) :-
 @bind("customer_orders", "databricks", "analytics_catalog.reports_schema", "customer_orders").
 ```
 
+### Running in Databricks Notebooks
+
+Prometheux can be executed directly within Databricks notebooks for interactive analysis and development. This approach is ideal for data scientists and analysts who want to combine Vadalog reasoning with Spark's computational capabilities.
+
+#### Graph Analytics Example
+
+Here's a complete example demonstrating how to perform graph analytics using Prometheux in a Databricks notebook. This example computes all shortest paths between airports using flight route data:
+
+```scala
+%scala
+val tableName = "air_routes_edges"
+val outputTable = "all_shortest_paths_routes"
+
+val program = s"""
+  @bind("air_routes","databricks inCluster=true","","prometheux_workspace.default.$tableName").
+  edge(From, To, Dist) :- 
+    air_routes(Id, From, To,Label,Dist).
+
+  all_shortest_paths_routes(From,To,Distance) :- #ASP(edge).
+  
+  @output("all_shortest_paths_routes"). 
+  @bind("all_shortest_paths_routes","databricks inCluster=true","","$outputTable").
+"""
+
+val args = Array(program)
+uk.co.prometheux.prometheuxreasoner.PrometheuxReasonerMain.main(args)
+```
+
+**Key Features of In-Cluster Execution:**
+
+- **`inCluster=true`**: Enables direct access to Spark tables without JDBC overhead
+- **Dynamic Table Names**: Use Scala string interpolation for flexible table references
+- **Unity Catalog Support**: Access tables using three-level namespace (`catalog.schema.table`)
+- **Immediate Results**: Output tables are created directly in the cluster
+
+#### Notebook Setup Requirements
+
+Before running Prometheux in a Databricks notebook, ensure:
+
+1. **Prometheux JAR Installation**: Upload the Prometheux JAR to your cluster
+2. **Cluster Configuration**: Configure the cluster with appropriate Spark settings
+3. **Data Preparation**: Ensure input tables exist with the correct schema
+
+**Sample Data Schema:**
+```sql
+CREATE TABLE prometheux_workspace.default.air_routes_edges (
+  Id INT,
+  From STRING,
+  To STRING,
+  Label STRING,
+  Dist DOUBLE
+) USING DELTA;
+```
+
+#### Advanced Notebook Patterns
+
+**Multi-Step Analysis:**
+```scala
+%scala
+// Step 1: Data preprocessing
+val preprocessProgram = s"""
+  @bind("raw_routes","databricks inCluster=true","","raw_flight_data").
+  
+  clean_routes(From, To, Distance) :- 
+    raw_routes(_, From, To, _, Distance),
+    Distance > 0.
+  
+  @output("clean_routes").
+  @bind("clean_routes","databricks inCluster=true","","clean_air_routes").
+"""
+
+// Step 2: Graph analysis
+val analysisProgram = s"""
+  @bind("routes","databricks inCluster=true","","clean_air_routes").
+  
+  edge(From, To, Dist) :- routes(From, To, Dist).
+  shortest_path(From, To, MinDist) :- #ASP(edge).
+  
+  @output("shortest_path").
+  @bind("shortest_path","databricks inCluster=true","","flight_shortest_paths").
+"""
+
+// Execute both steps
+uk.co.prometheux.prometheuxreasoner.PrometheuxReasonerMain.main(Array(preprocessProgram))
+uk.co.prometheux.prometheuxreasoner.PrometheuxReasonerMain.main(Array(analysisProgram))
+```
+
+**Result Visualization:**
+```scala
+%sql
+-- Visualize results directly in Databricks
+SELECT From, To, Distance 
+FROM all_shortest_paths_routes 
+WHERE Distance < 1000 
+ORDER BY Distance 
+LIMIT 100
+```
+
 ## Security and Governance
 
 ### Unity Catalog Integration
@@ -154,22 +252,6 @@ Prometheux fully respects Unity Catalog governance policies:
 - Use personal access tokens with limited scopes
 - Configure token expiration policies
 - Enable IP allowlisting for additional security
-
-## Performance Optimization
-
-### Query Optimization
-
-Prometheux optimizes JDBC queries for Databricks SQL warehouses:
-
-```sql
--- Automatic query optimization
--- Original Vadalog rule generates optimized SQL
-SELECT c.CustomerName, o.OrderId, o.OrderDate, o.Amount
-FROM sales_catalog.crm_schema.customers c
-JOIN sales_catalog.transactions_schema.orders o 
-  ON c.CustomerId = o.CustomerId
-WHERE o.OrderDate >= current_date() - interval '30' day
-```
 
 ### Best Practices
 

@@ -1,6 +1,6 @@
 # Chat API
 
-The Prometheux documentation includes an AI-powered chat API that provides Vadalog code assistance and answers questions about the platform. This API is available at `https://api.prometheux.ai/docs/api/docsChat` and can be integrated into your applications.
+The Prometheux documentation includes an AI-powered chat API that provides Vadalog code assistance and answers questions about the platform. This API is available at `https://chat-docs.prometheux.ai/api/docsChat` and can be integrated into your applications.
 
 ---
 
@@ -21,7 +21,7 @@ The Chat API provides:
 
 **Purpose**: Optimized for chat interfaces and streaming responses.
 
-- **URL**: `https://api.prometheux.ai/docs/api/docsChat`
+- **URL**: `https://chat-docs.prometheux.ai/api/docsChat`
 - **Method**: `POST`
 - **Content-Type**: `application/json`
 - **Response**: Streaming text (AI SDK format)
@@ -55,7 +55,7 @@ Streaming text response in AI SDK format:
 
 **JavaScript/TypeScript:**
 ```javascript
-const response = await fetch('https://api.prometheux.ai/docs/api/docsChat', {
+const response = await fetch('https://chat-docs.prometheux.ai/api/docsChat', {
   method: 'POST',
   headers: {
     'Content-Type': 'application/json',
@@ -94,7 +94,7 @@ console.log(result); // Complete Vadalog code example
 import requests
 import re
 
-url = "https://api.prometheux.ai/docs/api/docsChat"
+url = "https://chat-docs.prometheux.ai/api/docsChat"
 payload = {
     "messages": [
         {"role": "user", "content": "Show me aggregation examples"}
@@ -117,7 +117,7 @@ print(result)  # Complete Vadalog code
 
 **cURL:**
 ```bash
-curl -X POST https://api.prometheux.ai/docs/api/docsChat \
+curl -X POST https://chat-docs.prometheux.ai/api/docsChat \
   -H "Content-Type: application/json" \
   -d '{
     "messages": [
@@ -132,7 +132,7 @@ curl -X POST https://api.prometheux.ai/docs/api/docsChat \
 
 **Purpose**: Standard REST API for programmatic integration.
 
-- **URL**: `https://api.prometheux.ai/docs/api/vadalog`
+- **URL**: `https://chat-docs.prometheux.ai/api/vadalog`
 - **Method**: `POST`
 - **Content-Type**: `application/json`
 - **Response**: Standard JSON
@@ -179,7 +179,7 @@ curl -X POST https://api.prometheux.ai/docs/api/docsChat \
 
 **JavaScript/TypeScript:**
 ```javascript
-const response = await fetch('https://api.prometheux.ai/docs/api/vadalog', {
+const response = await fetch('https://chat-docs.prometheux.ai/api/vadalog', {
   method: 'POST',
   headers: {
     'Content-Type': 'application/json',
@@ -200,7 +200,7 @@ console.log(data.relevant_docs);   // Related documentation
 ```python
 import requests
 
-url = "https://api.prometheux.ai/docs/api/vadalog"
+url = "https://chat-docs.prometheux.ai/api/vadalog"
 payload = {
     "query": "Show me CSV file processing",
     "context": "data integration",
@@ -217,7 +217,7 @@ print(f"Related docs: {len(data['relevant_docs'])}")
 
 **cURL:**
 ```bash
-curl -X POST https://api.prometheux.ai/docs/api/vadalog \
+curl -X POST https://chat-docs.prometheux.ai/api/vadalog \
   -H "Content-Type: application/json" \
   -d '{
     "query": "Show me CSV file processing",
@@ -314,7 +314,7 @@ curl -X POST https://api.prometheux.ai/docs/api/vadalog \
 
 **JavaScript/TypeScript:**
 ```javascript
-const response = await fetch('https://api.prometheux.ai/docs/api/docsChat', {
+const response = await fetch('https://chat-docs.prometheux.ai/api/docsChat', {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
   body: JSON.stringify({
@@ -349,7 +349,7 @@ console.log(vadalogCode); // Complete @bind example with connection parameters
 ```python
 import requests
 
-url = "https://api.prometheux.ai/docs/api/docsChat"
+url = "https://chat-docs.prometheux.ai/api/docsChat"
 payload = {
     "messages": [
         {"role": "user", "content": "How do I connect to PostgreSQL with authentication?"}
@@ -371,7 +371,7 @@ print(vadalog_code)  # Complete @bind example with connection parameters
 
 **cURL:**
 ```bash
-curl -X POST https://api.prometheux.ai/docs/api/docsChat \
+curl -X POST https://chat-docs.prometheux.ai/api/docsChat \
   -H "Content-Type: application/json" \
   -d '{
     "messages": [
@@ -384,7 +384,7 @@ curl -X POST https://api.prometheux.ai/docs/api/docsChat \
 
 **JavaScript/TypeScript:**
 ```javascript
-const response = await fetch('https://api.prometheux.ai/docs/api/vadalog', {
+const response = await fetch('https://chat-docs.prometheux.ai/api/vadalog', {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
   body: JSON.stringify({
@@ -407,7 +407,7 @@ data.code_examples.forEach(example => {
 ```python
 import requests
 
-url = "https://api.prometheux.ai/docs/api/vadalog"
+url = "https://chat-docs.prometheux.ai/api/vadalog"
 payload = {
     "query": "Show me aggregation examples with grouping",
     "context": "data analysis",
@@ -425,7 +425,7 @@ for example in data['code_examples']:
 
 **cURL:**
 ```bash
-curl -X POST https://api.prometheux.ai/docs/api/vadalog \
+curl -X POST https://chat-docs.prometheux.ai/api/vadalog \
   -H "Content-Type: application/json" \
   -d '{
     "query": "Show me aggregation examples with grouping",
@@ -438,7 +438,7 @@ curl -X POST https://api.prometheux.ai/docs/api/vadalog \
 
 **JavaScript/TypeScript:**
 ```javascript
-const response = await fetch('https://api.prometheux.ai/docs/api/docsChat', {
+const response = await fetch('https://chat-docs.prometheux.ai/api/docsChat', {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
   body: JSON.stringify({
@@ -480,7 +480,7 @@ console.log('AI Functions Example:', assistantResponse);
 ```python
 import requests
 
-url = "https://api.prometheux.ai/docs/api/docsChat"
+url = "https://chat-docs.prometheux.ai/api/docsChat"
 
 # Start conversation
 conversation = [
@@ -510,7 +510,7 @@ follow_up = requests.post(url, json={"messages": conversation}, stream=True)
 **cURL:**
 ```bash
 # Initial request
-curl -X POST https://api.prometheux.ai/docs/api/docsChat \
+curl -X POST https://chat-docs.prometheux.ai/api/docsChat \
   -H "Content-Type: application/json" \
   -d '{
     "messages": [
@@ -519,7 +519,7 @@ curl -X POST https://api.prometheux.ai/docs/api/docsChat \
   }'
 
 # Follow-up with conversation context
-curl -X POST https://api.prometheux.ai/docs/api/docsChat \
+curl -X POST https://chat-docs.prometheux.ai/api/docsChat \
   -H "Content-Type: application/json" \
   -d '{
     "messages": [

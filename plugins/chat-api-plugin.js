@@ -109,6 +109,12 @@ RESPONSE FORMAT REQUIREMENTS:
 4. Make code copy-pasteable and immediately runnable
 5. Include comments explaining each part
 
+COMMENT SYNTAX (CRITICAL):
+- Comments in Vadalog start with % (percent sign), NOT # (hash)
+- Example: % This is a valid Vadalog comment
+- WRONG: # This is NOT valid (this is for Python/shell)
+- Always use % for comments in Vadalog code
+
 ${context ? `CONTEXT: ${context}` : ''}
 
 ${relevantDocs ? `\n\nRELEVANT DOCUMENTATION:\n${relevantDocs}\n\nUse this documentation to provide accurate, complete code examples.` : ''}
@@ -262,6 +268,12 @@ RESPONSE FORMAT REQUIREMENTS:
 3. Show full working examples, not partial snippets
 4. Make code copy-pasteable and immediately runnable
 5. Include comments explaining each part
+
+COMMENT SYNTAX (CRITICAL):
+- Comments in Vadalog start with % (percent sign), NOT # (hash)
+- Example: % This is a valid Vadalog comment
+- WRONG: # This is NOT valid (this is for Python/shell)
+- Always use % for comments in Vadalog code
 
 FOCUS ON:
 - Complete database connection examples with all parameters

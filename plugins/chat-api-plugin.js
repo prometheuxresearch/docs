@@ -115,6 +115,13 @@ COMMENT SYNTAX (CRITICAL):
 - WRONG: # This is NOT valid (this is for Python/shell)
 - Always use % for comments in Vadalog code
 
+LOGICAL OPERATORS:
+Vadalog supports explicit logical operator functions:
+- and(args), or(args), not(expr), xor(expr1, expr2)
+- if(condition, true_val, false_val) for conditional logic
+- Example: IsValid=and(X>2, X<5) assigns result to variable
+These are different from implicit AND/OR in rule bodies.
+
 ${context ? `CONTEXT: ${context}` : ''}
 
 ${relevantDocs ? `\n\nRELEVANT DOCUMENTATION:\n${relevantDocs}\n\nUse this documentation to provide accurate, complete code examples.` : ''}
@@ -289,6 +296,21 @@ Vadalog syntax essentials:
 - Annotations: @output("concept"), @bind("concept", "type params", "db", "table"), @model("concept", "schema")
 - Common types: postgresql, neo4j, csv, json, excel, parquet, s3, text, binaryfile
 - NOTE: @input annotations are no longer required
+
+LOGICAL OPERATORS (CRITICAL - Vadalog HAS explicit logical operators):
+- and(args) - Logical AND, can take multiple arguments
+- or(args) - Logical OR, can take multiple arguments
+- not(expression) - Logical NOT/negation
+- xor(expr1, expr2) - Exclusive OR
+- nand(expr1, expr2) - NOT AND
+- nor(expr1, expr2) - NOT OR
+- xnor(expr1, expr2) - Exclusive NOR
+- implies(expr1, expr2) - Logical implication
+- iff(expr1, expr2) - If and only if (biconditional)
+- if(condition, true_val, false_val) - Conditional expression
+- Example: IsValid=and(X>2, X<5, X==3) assigns boolean result to IsValid
+- Example: Result=if(Score>80, "pass", "fail") returns conditional value
+- IMPORTANT: These are DIFFERENT from implicit AND/OR in rule bodies
 
 AGGREGATION FUNCTIONS (CRITICAL - use correct syntax):
 - mavg(expression) - average (NO variable list in function!)

@@ -71,7 +71,23 @@ combine Boolean data types.
 
 ## Logical operators
 
-Vadalog supports a comprehensive set of logical operators that allow for combining and manipulating Boolean expressions. These operators can be used to evaluate complex logical conditions and can be assigned to variables for further processing.
+Vadalog supports **explicit logical operators as functions** in addition to implicit logical operations through rule structure. These explicit operators (`and()`, `or()`, `not()`, etc.) allow for combining and manipulating Boolean expressions within a single rule. The operators can evaluate complex logical conditions and can be assigned to variables for further processing.
+
+**Key distinction:**
+- **Implicit AND/OR**: Multiple conditions in a rule body are implicitly AND-ed. Multiple rules with the same head represent OR.
+- **Explicit operators**: Functions like `and()`, `or()`, `not()`, `xor()`, `if()` allow complex boolean logic within expressions and can be assigned to variables.
+
+**Available explicit logical operators:**
+- `and(args)` - Logical AND of multiple conditions
+- `or(args)` - Logical OR of multiple conditions  
+- `not(expression)` - Logical NOT/negation
+- `xor(expression1, expression2)` - Exclusive OR
+- `nand(expression1, expression2)` - NOT AND
+- `nor(expression1, expression2)` - NOT OR
+- `xnor(expression1, expression2)` - Exclusive NOR
+- `implies(expression1, expression2)` - Logical implication
+- `iff(expression1, expression2)` - If and only if
+- `if(condition, true_value, false_value)` - Conditional expression
 
 ### `and(args)`
 The `and(args)` operator evaluates to true if all the conditions in `args` are true. You can assign the result to a variable and use `==#T` to enforce that all conditions must be true.

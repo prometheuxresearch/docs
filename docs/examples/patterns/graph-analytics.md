@@ -99,7 +99,7 @@ node(X) :- edge_undirected(X,Y).
 community(X, C) :- node(X).
 
 % if two nodes are connected by an (undirected) edge, they belong to the same community
-C1 = C2 :- edge_undirected(X, Y), community(X, C1), community(Y, C2).
+C1 = C2 :- edge_undirected(X, Y), community(X, C1), community(Y, C2), X!=Y.
 
 @post("community", "orderby(1)").
 ```

@@ -582,4 +582,4 @@ For feedback or enterprise use cases, contact the Prometheux team at [support@pr
 
 ---
 
-© 2025 Prometheux. All rights reserved.
+© 2026 Prometheux. All rights reserved.

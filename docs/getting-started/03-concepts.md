@@ -28,13 +28,13 @@ At the core of Prometheux is an Ontology. This is the set of business rules that
 you write to define how the entities in your system relate to each other, and
 how entities are connected to your real data.
 
-These rules are written in [**Vadalog**](../vadalog).
+These rules are written in [**Vadalog**](/learn/vadalog).
 
 ### Data Binding
 
 Included in your Ontology is a way to tell Prometheux which data sources power
 the entities in your ruleset. In Vadalog, there are specific annotations for
-[binding](../vadalog/annotations#bind-mappings-and-qbind) your rules to your
+[binding](/learn/vadalog/annotations#bind-mappings-and-qbind) your rules to your
 data.
 
 ### Reasoning
@@ -50,6 +50,6 @@ processing by repeatedly _chasing_ the rules in your ruleset until its logical
 conclusion.
 
 The steps it takes to get to your answer are known as a [Chase
-Graph](../vadalog/chase-provenance), which is a graph of the rules and
+Graph](/learn/vadalog/chase-provenance), which is a graph of the rules and
 data that contributed to the answer. This graph itself is a knowledge graph that
 can be explored and analysed.

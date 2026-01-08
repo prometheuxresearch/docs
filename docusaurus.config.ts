@@ -136,7 +136,7 @@ const config: Config = {
           items: [
             {
               label: "Learn",
-              to: "/learn/getting-started",
+              to: "/getting-started",
             },
             {
               label: "Examples",

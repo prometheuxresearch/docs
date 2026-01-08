@@ -5,7 +5,7 @@ export default function Home(): JSX.Element {
   React.useEffect(() => {
     // Redirect root to the getting-started docs page
     if (typeof window !== 'undefined') {
-      window.location.replace('/learn/getting-started');
+      window.location.replace('/getting-started');
     }
   }, []);
 
@@ -13,7 +13,7 @@ export default function Home(): JSX.Element {
     <Layout title="Redirecting...">
       <main style={{ padding: '2rem', textAlign: 'center' }}>
         <h2>Redirecting to the documentation...</h2>
-        <p>If you are not redirected, <a href="/learn/getting-started">click here</a>.</p>
+        <p>If you are not redirected, <a href="/getting-started">click here</a>.</p>
       </main>
     </Layout>
   );

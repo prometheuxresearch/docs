@@ -1,47 +1,86 @@
+---
+slug: /getting-started
+permalink: /getting-started/
+---
+
 # Getting Started
 
-### What is Prometheux
+## What is Prometheux?
 
-Prometheux is a fast and intelligent AI platform powered by a research-backed
-parallel and distributed logic reasoning engine based on the
-[**Vadalog**](./vadalog) Language.
+Prometheux is an ontology-native data processing engine. It allows you to
+define ontologies that are executable—meaning they can be used directly to
+query and process data across multiple systems.
 
-More than just a big-data processing system, it lets you harness the power of
-your business rules by expressing them as **logical programs** in Vadalog.
-Combining them with your proprietary data no matter where or how it's stored,
-the Prometheux engine helps you connect the dots to make data-driven decisions quickly and
-confidently.
+An ontology in Prometheux is not just documentation. It is a runnable model
+that defines:
 
-Whether you're a Data Engineer trying to optimise processing millions of data
-points across hundreds of databases, or an analyst or CEO trying to gain
-visibility into how data flows through your business and not your systems,
-Prometheux lets you focus on your business operations instead of the data
-plumbing.
+- Entities and relationships
+- Semantics and constraints
+- Query and processing logic
 
-### Main Features
+Once defined, the same ontology can be used consistently across analytics,
+applications, and AI systems.
 
-- 🌌 Connect disparate data sources in various formats:
-  - Cassandra
-  - CSV
-  - MongoDB
-  - Neo4j
-  - Oracle
-  - Parquet
-  - PostGres
-  - Redis
-  - JSON
-- 📖 Use AI to learn relationships between the entities in your data sources
-- ✍️ Express your business logic in our powerful **Vadalog** language
-- ⏰ Process data orders of magnitude faster than other query languages
-- 🧐 Deduce new information not already in your databases
-- 👣 Explain with full traceability, giving you confidence in your answers
-- 💾 Write deduced data back to your datasources to ensure high data quality
+## How Prometheux Works
 
-### How to read the docs
+Prometheux introduces an ontology layer that sits above your existing data
+systems.
 
-You'll find the main docs navbar on the left, where pages are organised in order
-of difficulty, so you can gain a high level of understanding before digging
-further.
+Instead of moving or transforming data into a single location, Prometheux:
 
-Most pages have a table of contents on the right, which makes it easier to know
-if you're on the right page, or jump to a section within a page.
+- Connects to data where it already lives
+- Applies ontology-defined logic at query or execution time
+- Produces results with full lineage and traceability
+
+This allows teams to work across databases, warehouses, and platforms without
+requiring mandatory migrations or ETL pipelines.
+
+## Key Concepts
+
+### Executable Ontologies
+Ontologies in Prometheux are directly executable. They can be queried,
+composed, and used to drive data processing workflows.
+
+### Ontology-Native Queries
+Queries are expressed in terms of ontology concepts rather than physical
+schemas, reducing coupling to underlying data structures.
+
+### Distributed Data Access
+Prometheux can operate across multiple data sources simultaneously, resolving
+semantics at runtime.
+
+### Lineage and Traceability
+All results retain explicit links back to the ontology definitions and
+underlying data sources.
+
+## Supported Environments
+
+Prometheux is designed to run in modern data stacks and can be deployed alongside
+existing platforms.
+
+- Native integrations with Databricks and Snowflake
+- Deployable in cloud or on-prem environments
+- Works with structured data across multiple storage and compute systems
+
+## Who This Documentation Is For
+
+This documentation is intended for:
+
+- Data engineers integrating Prometheux into existing platforms
+- Analytics and BI teams querying ontology-defined data
+- AI and application developers requiring consistent semantics
+- Architects designing ontology-driven data systems
+
+No prior ontology tooling is required, but familiarity with data modeling
+concepts is recommended.
+
+## What You’ll Learn Next
+
+The following sections walk through Prometheux from first principles:
+
+- Defining an ontology
+- Connecting data sources
+- Executing ontology-based queries
+- Deploying Prometheux in production environments
+
+➡️ **Next:** Create Your First Executable Ontology

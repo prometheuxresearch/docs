@@ -49,7 +49,11 @@ const config: Config = {
           customCss: "./src/css/custom.css",
         },
         sitemap: {
-          ignorePatterns: ["https://docs.prometheux.ai/"],
+          filename: 'sitemap.xml',
+          changefreq: 'weekly',
+          priority: 0.5,
+          // Exclude none by default; add patterns like '/private/**' if needed
+          ignorePatterns: [],
         },
       } satisfies Preset.Options,
     ],

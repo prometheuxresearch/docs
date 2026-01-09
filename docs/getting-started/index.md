@@ -1,6 +1,7 @@
 ---
 slug: /getting-started
 permalink: /getting-started/
+sidebar_position: 1
 ---
 
 # Getting Started

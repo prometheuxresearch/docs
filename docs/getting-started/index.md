@@ -36,6 +36,10 @@ Instead of moving or transforming data into a single location, Prometheux:
 This allows teams to work across databases, warehouses, and platforms without
 requiring mandatory migrations or ETL pipelines.
 
+![Prometheux architecture](/img/prometheux-architecture.png)
+
+*Figure: Prometheux architecture.*
+
 ## Key Concepts
 
 ### Executable Ontologies

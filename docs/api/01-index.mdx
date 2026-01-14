@@ -7,12 +7,13 @@ import TabItem from '@theme/TabItem';
 
 # API Reference
 
-The Prometheux platform provides two ways to interact with all platform features programmatically:
+The Prometheux platform provides multiple ways to interact with all platform features programmatically:
 
 - **Python SDK** (`prometheux_chain`): A high-level Python library for seamless integration
 - **REST API**: Direct HTTP endpoints for maximum flexibility and language-agnostic access
+- **MCP Integration** (`prometheux-mcp`): Connect AI agents like Claude to your knowledge graphs via Model Context Protocol
 
-Both interfaces provide equivalent functionality—choose the one that best fits your workflow.
+All interfaces provide equivalent functionality—choose the one that best fits your workflow.
 
 ## Quick Start
 
@@ -101,6 +102,43 @@ To update an existing installation of Prometheux Chain follow these steps:
     !cd prometheux_chain && cp -r prometheux_chain /opt/app-root/lib/python3.x/site-packages
     ```
 6. Restart the kernel
+
+  </TabItem>
+  <TabItem value="mcp" label="MCP (AI Agents)">
+
+### Installation
+
+```bash
+pipx install prometheux-mcp
+```
+
+### Configuration
+
+Add to Claude Desktop config (`~/Library/Application Support/Claude/claude_desktop_config.json`):
+
+```json
+{
+  "mcpServers": {
+    "prometheux": {
+      "command": "prometheux-mcp",
+      "args": ["--url", "https://api.prometheux.ai"],
+      "env": {
+        "PROMETHEUX_TOKEN": "your_token",
+        "PROMETHEUX_USERNAME": "your_username",
+        "PROMETHEUX_ORGANIZATION": "your_org"
+      }
+    }
+  }
+}
+```
+
+### First Interaction
+
+Restart Claude Desktop and ask:
+
+> "What concepts are available in my project-name project?"
+
+See the [full MCP documentation](/api/mcp) for detailed setup and usage.
 
   </TabItem>
   <TabItem value="rest" label="REST API">

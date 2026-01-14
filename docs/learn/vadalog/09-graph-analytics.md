@@ -25,12 +25,12 @@ Variables on the head of the rule with the function receive the algorithm’s re
 | Function | Problem solved | Input predicate (arity) | Output variables | Notes |
 |----------|----------------|-------------------------|------------------|-------|
 | `#TC(P)` | **Transitive Closure** – reachability. | `P/2` `edge(U,V)` | `(X,Y)` | Directed graph. Includes self-loops from cycles. |
-| `#PATHS(P[,V[,S[,A[,D]]]])` | **All Paths** with configurable options. | `P/2` `edge(U,V)` + optional params | `(X,Y,Visited)` or `(X,Y)` | All params optional. `V=#T` computes visited (default `#F`), `S=#T` includes self-loops (default `#F`), `A=#T` all paths (default `#F`), `D=N` max depth (default `-1` = unlimited). |
+| `#PATHS(P[,options])` | **All Paths** with configurable options. | `P/2` `edge(U,V)` + optional string | `(X,Y,Visited)` or `(X,Y)` | Optional parameters: `visited=true/false` (default `false`), `self_loops=true/false` (default `false`), `all_paths=true/false` (default `false`), `max_depth=N` (default `-1` = unlimited). Format: `"visited=true,max_depth=5"`. |
 | `#ASP(P)` | **All‑Shortest Paths** (weighted). | `P/3` `edge(U,V,W)` | `(X,Y,Z)` | Parallel multi‑source Dijkstra. Can include self-loops from cycles. |
 | `#SSSP(P,Src)` | **Single‑Source Shortest Path**. | same as `#ASP` plus constant `Src` | `(Y,Dist)` | |
 | `#BFS(P)` | **Breadth‑First Levels**. | `P/2` | `(X,Level)` | Unweighted tiers. |
 | `#PR(P[,d])` | **PageRank** scores. | `P/2` | `(X,Score)` | Optional damping `d` (default 0.85). |
-| `#CC(P)` | **Connected Components**. | `P/2` | `(X,Comp)` | For undirected graphs (assumes edges are symmetric). |
+| `#CC(P[,options])` | **Connected Components** with optional sorting and ID. | `P/2` `edge(U,V)` + optional string | `(X,Comp)` or `(X,ID,Comp)` | Optional parameters: `sort_component=true/false` (default `false`), `component_id=true/false` (default `false`). Format: `"sort_component=true,component_id=true"`. For undirected graphs (assumes edges are symmetric). |
 | `#WCC(P)` | **Weakly Connected Components**. | `P/2` | `(X,Comp)` | For directed graphs – ignores edge direction. |
 | `#TRI(P)` | **Triangle Enumeration**. | `P/2` | `(X,Y,Z)` | Unordered triangles. |
 | `#BC(P)` | **Betweenness Centrality** (approx.). | `P/2` | `(X,Score)` | Brandes with sampling. |
@@ -56,39 +56,37 @@ edge(1,2).
 edge(2,3).
 edge(3,1).
 
-% Default behavior (no parameters - same as all defaults)
+% Default behavior (no parameters)
 paths_default(X,Y) :- #PATHS(edge).
 
-% Basic paths without visited tracking (explicit)
-paths_basic(X,Y) :- #PATHS(edge, #F).
-
 % Paths with visited nodes tracking (simple paths only)
-paths_visited(X,Y,Visited) :- #PATHS(edge, #T).
+paths_visited(X,Y,Visited) :- #PATHS(edge, "visited=true").
 
 % Paths with self-loops enabled
-paths_with_loops(X,Y) :- #PATHS(edge, #F, #T).
+paths_with_loops(X,Y) :- #PATHS(edge, "self_loops=true").
 
 % Paths with max depth limit (only 1 hop)
-paths_depth1(X,Y) :- #PATHS(edge, #F, #F, #F, 1).
+paths_depth1(X,Y) :- #PATHS(edge, "max_depth=1").
 
 % Paths with visited tracking and max depth 2
-paths_visited_depth2(X,Y,V) :- #PATHS(edge, #T, #F, #F, 2).
+paths_visited_depth2(X,Y,V) :- #PATHS(edge, "visited=true,max_depth=2").
+
+% All options specified
+paths_custom(X,Y,V) :- #PATHS(edge, "visited=true,self_loops=false,all_paths=true,max_depth=10").
 
 @output("paths_default").
-@output("paths_basic").
 @output("paths_visited").
 @output("paths_with_loops").
 @output("paths_depth1").
 @output("paths_visited_depth2").
+@output("paths_custom").
 ```
 
 **`paths_default` Output**: All reachable pairs including self-loops from cycles (using defaults): `(1,2), (2,3), (3,1), (1,3), (2,1), (3,2), (1,1), (2,2), (3,3)` – 9 tuples.
 
-**`paths_basic` Output**: Same as `paths_default` – 9 tuples.
-
 **`paths_visited` Output**: Only simple acyclic paths: `(1,2,[1,2]), (2,3,[2,3]), (3,1,[3,1]), (1,3,[1,2,3]), (2,1,[2,3,1]), (3,2,[3,1,2])` – 6 tuples. Each includes visited nodes.
 
-**`paths_with_loops` Output**: Same as `paths_basic` – 9 tuples.
+**`paths_with_loops` Output**: Same as `paths_default` – 9 tuples (self-loops already included by default).
 
 **`paths_depth1` Output**: Only direct edges: `(1,2), (2,3), (3,1)` – 3 tuples.
 
@@ -118,10 +116,31 @@ edge_raw(4,5).
 edge(X,Y) :- edge_raw(X,Y).
 edge(Y,X) :- edge_raw(X,Y).
 
-cc(X,C) :- #CC(edge).
-@output("cc").
+% Default: no sorting, no component ID
+cc_default(X,C) :- #CC(edge).
+
+% With sorted components for determinism
+cc_sorted(X,C) :- #CC(edge, "sort_component=true").
+
+% With component ID (minimum node in component)
+cc_with_id(X,ID,C) :- #CC(edge, "component_id=true").
+
+% With both sorting and ID for full determinism
+cc_full(X,ID,C) :- #CC(edge, "sort_component=true,component_id=true").
+
+@output("cc_default").
+@output("cc_sorted").
+@output("cc_with_id").
+@output("cc_full").
 ```
-**Output**: Each node mapped to its component array. For example: `(1, [1,2,3]), (2, [1,2,3]), (3, [1,2,3]), (4, [4,5]), (5, [4,5])`.
+
+**`cc_default` Output**: Each node mapped to its component array (order may vary): `(1, [1,2,3]), (2, [1,2,3]), (3, [1,2,3]), (4, [4,5]), (5, [4,5])`.
+
+**`cc_sorted` Output**: Same but arrays are sorted: `(1, [1,2,3]), (2, [1,2,3]), (3, [1,2,3]), (4, [4,5]), (5, [4,5])`.
+
+**`cc_with_id` Output**: Includes component ID (minimum node): `(1, 1, [1,2,3]), (2, 1, [1,2,3]), (3, 1, [1,2,3]), (4, 4, [4,5]), (5, 4, [4,5])`.
+
+**`cc_full` Output**: Both sorted and with ID: `(1, 1, [1,2,3]), (2, 1, [1,2,3]), (3, 1, [1,2,3]), (4, 4, [4,5]), (5, 4, [4,5])`.
 
 #### 4b. Cyclic graph
 ```prolog
@@ -147,6 +166,29 @@ cc(X,C) :- #CC(edge).
 @output("cc").
 ```
 **Output**: Three components: `(1, [1,2]), (3, [3,4]), (5, [5,6])`.
+
+#### 4d. Why use `component_id=true`?
+
+The component ID (minimum node) is crucial for **deterministic results** in distributed execution:
+
+```prolog
+% Large graph processed across multiple partitions
+@bind("large_graph.csv")
+edge(X,Y).
+
+% Without ID: each partition might output the same component differently
+cc_no_id(X,C) :- #CC(edge).
+
+% With ID: all partitions agree on component identity (minimum node)
+cc_with_id(X,ID,C) :- #CC(edge, "component_id=true").
+
+% Deduplicate by component ID
+unique_components(ID,C) :- cc_with_id(X,ID,C), X = ID.
+
+@output("unique_components").
+```
+
+**Key insight**: Since components are **disjoint sets** (cannot overlap), all partitions discovering the same component will find the **same minimum node**, guaranteeing deterministic component IDs across the cluster.
 
 ### 5  Connected Components: CC vs WCC
 
@@ -177,6 +219,192 @@ wcc_result(X,C) :- #WCC(directed_edge).
 **When to use each**:
 - Use **`#CC`** when your graph is naturally undirected (friendships, co-authorship, etc.) and you've made edges symmetric.
 - Use **`#WCC`** when your graph is naturally directed (web links, citations, follows) but you want to find components ignoring direction.
+
+## Graph Analytics with Struct Nodes
+
+All graph functions (`#TC`, `#PATHS`, `#ASP`, `#CC`) automatically support **struct nodes**, allowing you to attach rich metadata (properties, attributes) to graph nodes while preserving them throughout computation.
+
+### Why Struct Nodes?
+
+In real-world graphs, nodes often have multiple properties:
+- **People**: ID, name, age, department
+- **Companies**: ID, name, industry, country
+- **Cities**: ID, name, population, coordinates
+
+Struct nodes let you keep this metadata attached during graph traversal instead of just tracking node IDs.
+
+### How It Works
+
+**Key requirements:**
+1. Both source and destination nodes **must be structs** (or both simple)
+2. The **first field** of the struct is used as the **node ID** for comparison and deduplication
+3. The **full struct** is preserved in the output
+
+### Example 1: Transitive Closure with Struct Nodes
+
+```prolog
+% Define node properties
+node(1, "Alice", "Engineering").
+node(2, "Bob", "Sales").
+node(3, "Charlie", "Engineering").
+
+% Define simple edges (just IDs)
+edge_simple(1, 2).
+edge_simple(2, 3).
+
+% Create struct edges by joining nodes with edges
+edge_struct(X, Y) :- 
+    edge_simple(Id1, Id2),
+    node(Id1, Name1, Dept1),
+    node(Id2, Name2, Dept2),
+    X = struct("id", Id1, "name", Name1, "dept", Dept1),
+    Y = struct("id", Id2, "name", Name2, "dept", Dept2).
+
+% Apply TC on struct edges - properties are preserved!
+tc(X, Y) :- #TC(edge_struct).
+
+@output("tc").
+```
+
+**Output** includes full structs with all properties preserved:
+```
+(struct(id=1, name="Alice", dept="Engineering"), 
+ struct(id=2, name="Bob", dept="Sales"))
+
+(struct(id=2, name="Bob", dept="Sales"), 
+ struct(id=3, name="Charlie", dept="Engineering"))
+
+(struct(id=1, name="Alice", dept="Engineering"), 
+ struct(id=3, name="Charlie", dept="Engineering"))
+```
+
+### Example 2: PATHS with Struct Nodes and Visited Tracking
+
+```prolog
+% Person nodes with metadata
+person(1, "Alice", 28).
+person(2, "Bob", 35).
+person(3, "Charlie", 42).
+
+% Social connections
+knows(1, 2).
+knows(2, 3).
+
+% Create struct edges
+knows_struct(X, Y) :- 
+    knows(Id1, Id2),
+    person(Id1, Name1, Age1),
+    person(Id2, Name2, Age2),
+    X = struct("id", Id1, "name", Name1, "age", Age1),
+    Y = struct("id", Id2, "name", Name2, "age", Age2).
+
+% Find all paths with visited nodes (visited nodes are also full structs!)
+paths_with_metadata(X, Y, Visited) :- 
+    #PATHS(knows_struct, "visited=true").
+
+@output("paths_with_metadata").
+```
+
+**Output** includes full structs in visited arrays:
+```
+(struct(id=1, name="Alice", age=28), 
+ struct(id=2, name="Bob", age=35), 
+ [struct(id=1, name="Alice", age=28), struct(id=2, name="Bob", age=35)])
+
+(struct(id=1, name="Alice", age=28), 
+ struct(id=3, name="Charlie", age=42), 
+ [struct(id=1, name="Alice", age=28), struct(id=2, name="Bob", age=35), struct(id=3, name="Charlie", age=42)])
+```
+
+### Example 3: All-Shortest Paths with Weighted Struct Edges
+
+```prolog
+% City nodes with coordinates
+city(1, "New York", 40.7128, -74.0060).
+city(2, "London", 51.5074, -0.1278).
+city(3, "Tokyo", 35.6762, 139.6503).
+
+% Weighted flights (with distance)
+flight(1, 2, 5570.0).  % NYC to London: 5570 km
+flight(2, 3, 9560.0).  % London to Tokyo: 9560 km
+flight(1, 3, 10850.0). % NYC to Tokyo (direct): 10850 km
+
+% Create weighted struct edges
+flight_struct(X, Y, Dist) :- 
+    flight(Id1, Id2, Dist),
+    city(Id1, Name1, Lat1, Lon1),
+    city(Id2, Name2, Lat2, Lon2),
+    X = struct("id", Id1, "name", Name1, "lat", Lat1, "lon", Lon1),
+    Y = struct("id", Id2, "name", Name2, "lat", Lat2, "lon", Lon2).
+
+% Find shortest paths with city metadata preserved
+asp(X, Y, Distance) :- #ASP(flight_struct).
+
+@output("asp").
+```
+
+**Output** shows shortest paths with full city information:
+```
+(struct(id=1, name="New York", lat=40.7128, lon=-74.0060),
+ struct(id=3, name="Tokyo", lat=35.6762, lon=139.6503),
+ 10850.0)  % Direct flight is shorter than via London
+```
+
+### Example 4: Connected Components with Struct Nodes
+
+```prolog
+% Company nodes
+company(1, "Acme Inc", "Technology").
+company(2, "Global Corp", "Technology").
+company(3, "Local Ltd", "Retail").
+company(4, "Small Co", "Retail").
+
+% Partnerships (undirected)
+partner_raw(1, 2).
+partner_raw(3, 4).
+
+% Make undirected and create struct edges
+partner(X, Y) :- partner_raw(A, B), company(A, N1, I1), company(B, N2, I2),
+                 X = struct("id", A, "name", N1, "industry", I1),
+                 Y = struct("id", B, "name", N2, "industry", I2).
+partner(X, Y) :- partner_raw(B, A), company(A, N1, I1), company(B, N2, I2),
+                 X = struct("id", A, "name", N1, "industry", I1),
+                 Y = struct("id", B, "name", N2, "industry", I2).
+
+% Find components with company metadata and IDs
+cc(Node, ComponentId, Component) :- 
+    #CC(partner, "component_id=true,sort_component=true").
+
+@output("cc").
+```
+
+**Output** includes full company structs:
+```
+(struct(id=1, name="Acme Inc", industry="Technology"),
+ struct(id=1, name="Acme Inc", industry="Technology"),  % Component ID
+ [struct(id=1, name="Acme Inc", industry="Technology"), 
+  struct(id=2, name="Global Corp", industry="Technology")])
+
+(struct(id=3, name="Local Ltd", industry="Retail"),
+ struct(id=3, name="Local Ltd", industry="Retail"),  % Component ID
+ [struct(id=3, name="Local Ltd", industry="Retail"), 
+  struct(id=4, name="Small Co", industry="Retail")])
+```
+
+### Benefits of Struct Nodes
+
+1. **Rich Context**: Keep all node metadata throughout graph traversal
+2. **Type Safety**: First field must be unique ID; all other fields are arbitrary
+3. **Query Flexibility**: Filter/aggregate on any struct field in downstream rules
+4. **Join Elimination**: No need to join back with node tables to get properties
+5. **Automatic**: Functions auto-detect struct vs simple nodes
+
+### Performance Notes
+
+- **Lightweight internals**: Graph algorithms work with IDs only (first field)
+- **Full reconstruction**: Complete structs are rebuilt for output
+- **Memory efficient**: ~50% savings vs storing full edges in adjacency lists
+- **Type validation**: Both source and destination must be the same type (both structs or both simple)
 
 ## Reasoning + Graph Analytics
 

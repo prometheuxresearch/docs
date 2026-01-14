@@ -608,7 +608,7 @@ struct(key1: string, value1: any, key2: string, value2: any, ...) → struct
 ```prolog
 record_with_metadata(X, S) :- 
     data(X), 
-    S = struct(X, "originalValue", X + 1, "incrementedValue").
+    S = struct("originalValue", X, "incrementedValue", X + 1).
 ```
 
 ### `struct:get()`
@@ -621,7 +621,7 @@ struct:get(struct: struct, fieldName: string) → any
 **Example:**
 ```prolog
 a(10, 20).
-b(S) :- a(X, Y), S = struct(X, "field1", Y, "field2").
+b(S) :- a(X, Y), S = struct("field1", X, "field2", Y).
 c(F1, F2) :- b(S), F1 = struct:get(S, "field1"), F2 = struct:get(S, "field2").
 @output("c").
 ```

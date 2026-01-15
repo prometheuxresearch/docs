@@ -120,7 +120,7 @@ Add to Claude Desktop config (`~/Library/Application Support/Claude/claude_deskt
 {
   "mcpServers": {
     "prometheux": {
-      "command": "prometheux-mcp",
+      "command": "/Users/YOUR_USERNAME/.local/bin/prometheux-mcp",
       "args": ["--url", "https://api.prometheux.ai"],
       "env": {
         "PROMETHEUX_TOKEN": "your_token",
@@ -131,6 +131,8 @@ Add to Claude Desktop config (`~/Library/Application Support/Claude/claude_deskt
   }
 }
 ```
+
+> **Tip:** Run `which prometheux-mcp` to find the exact path on your system.
 
 ### First Interaction
 

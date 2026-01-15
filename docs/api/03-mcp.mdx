@@ -89,30 +89,9 @@ Edit the Claude Desktop configuration file:
 - **Linux:** `~/.config/Claude/claude_desktop_config.json`
 
 <Tabs>
-  <TabItem value="simple" label="Simple Config" default>
+  <TabItem value="fullpath" label="Recommended (Full Path)" default>
 
-If `prometheux-mcp` is in your PATH (after `pipx ensurepath`):
-
-```json
-{
-  "mcpServers": {
-    "prometheux": {
-      "command": "prometheux-mcp",
-      "args": ["--url", "https://api.prometheux.ai"],
-      "env": {
-        "PROMETHEUX_TOKEN": "your_token_here",
-        "PROMETHEUX_USERNAME": "your_username",
-        "PROMETHEUX_ORGANIZATION": "your_organization"
-      }
-    }
-  }
-}
-```
-
-  </TabItem>
-  <TabItem value="fullpath" label="Full Path Config">
-
-If you need to specify the full path (find it with `which prometheux-mcp`):
+**Most reliable configuration:**
 
 ```json
 {
@@ -130,14 +109,43 @@ If you need to specify the full path (find it with `which prometheux-mcp`):
 }
 ```
 
-   :::tip
-   Replace `YOUR_USERNAME` with your actual username, or run `which prometheux-mcp` to find the exact path.
-   
-   **Advanced:** If you need to specify the complete JarvisPy path (e.g., for custom routing), include it in the URL:
-   ```
-   "args": ["--url", "https://api.prometheux.ai/jarvispy/myorg/myuser"]
-   ```
-   :::
+:::tip Finding Your Path
+Run `which prometheux-mcp` in your terminal to get the exact path. Replace `YOUR_USERNAME` with your actual macOS username.
+
+**Why the full path?** GUI applications like Claude Desktop don't inherit your terminal's PATH environment on macOS, even after `pipx ensurepath`. Using the full path ensures it always works.
+:::
+
+  </TabItem>
+  <TabItem value="simple" label="Short Command (May Not Work on macOS)">
+
+Alternative short format (may not work on macOS due to PATH issues):
+
+```json
+{
+  "mcpServers": {
+    "prometheux": {
+      "command": "prometheux-mcp",
+      "args": ["--url", "https://api.prometheux.ai"],
+      "env": {
+        "PROMETHEUX_TOKEN": "your_token_here",
+        "PROMETHEUX_USERNAME": "your_username",
+        "PROMETHEUX_ORGANIZATION": "your_organization"
+      }
+    }
+  }
+}
+```
+
+:::warning macOS Users
+This short format often doesn't work with Claude Desktop on macOS because GUI apps don't inherit the terminal's PATH. Use the full path (previous tab) instead.
+:::
+
+:::tip Advanced: Custom JarvisPy URL
+If you need to specify the complete JarvisPy path (e.g., for custom routing), include it in the URL:
+```
+"args": ["--url", "https://api.prometheux.ai/jarvispy/myorg/myuser"]
+```
+:::
 
   </TabItem>
   <TabItem value="debug" label="With Debug Mode">
@@ -236,13 +244,18 @@ Executes a concept to derive new knowledge through reasoning.
 
 ### "Server disconnected" error (macOS)
 
-This usually means Claude Desktop can't access the installed package.
+This usually means Claude Desktop can't find the `prometheux-mcp` command.
 
 **Solution:**
-1. Uninstall: `pip uninstall prometheux-mcp`
-2. Install with pipx: `pipx install prometheux-mcp`
-3. Update your config with either `"command": "prometheux-mcp"` or the full path from `which prometheux-mcp`
-4. Restart Claude Desktop completely (Cmd+Q, then reopen)
+1. **Use the full path** in your config: Run `which prometheux-mcp` and use that exact path
+2. If installed with pip instead of pipx:
+   - Uninstall: `pip uninstall prometheux-mcp`
+   - Install with pipx: `pipx install prometheux-mcp`
+3. Restart Claude Desktop completely (Cmd+Q, then reopen)
+
+:::tip
+GUI applications like Claude Desktop don't inherit your terminal's PATH on macOS. The short command `"prometheux-mcp"` typically doesn't work - use the full path instead (see Configuration tab "Recommended (Full Path)").
+:::
 
 ### "Connection refused" error
 
@@ -266,13 +279,10 @@ Your credentials are incorrect or expired.
 
 ### "command not found" error
 
-The `prometheux-mcp` command isn't in your PATH.
+Claude Desktop cannot find the `prometheux-mcp` command.
 
 **Solution:**
-1. Run `pipx ensurepath` to add pipx binaries to your PATH
-2. Restart your terminal or log out and back in
-3. Restart Claude Desktop
-4. Alternatively, use the full path: `which prometheux-mcp` and update your config
+Use the full path in your config. Run `which prometheux-mcp` in your terminal to get the exact path (usually `/Users/YOUR_USERNAME/.local/bin/prometheux-mcp`) and use that in your Claude Desktop config.
 
 ### Claude doesn't use the tools
 

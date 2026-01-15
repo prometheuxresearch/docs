@@ -218,6 +218,7 @@ munion(expression, varList?)   % Incremental union
 mmax(expression)               % Incremental maximum
 mmin(expression)               % Incremental minimum
 mavg(expression)               % Incremental average
+mmedian(expression, "variant") % Incremental median (exact/p2_algorithm/reservoir_sampling)
 ```
 
 ### Standard Aggregations
@@ -244,6 +245,16 @@ dept_avg_age(Dept, AvgAge) :-
     employee(Name, Dept, Age), 
     AvgAge = mavg(Age).
 
+% Median salary by department (robust to outliers)
+dept_median_salary(Dept, Median) :- 
+    employee(Name, Dept, Salary), 
+    Median = mmedian(Salary, "exact").
+
+% Approximate median for large datasets
+dept_approx_median(Dept, Median) :- 
+    employee(Name, Dept, Salary), 
+    Median = mmedian(Salary, "reservoir_sampling").
+
 % Count employees per department (Dept is the grouping variable)
 dept_count(Dept, Count) :- 
     employee(Name, Dept), 
@@ -258,6 +269,7 @@ total_employees(Count) :-
 % The aggregation function takes ONLY the expression to aggregate
 % ❌ WRONG: mavg(Age, [Dept]) 
 % ✅ CORRECT: avg_age(Dept, Avg) :- employee(_, Dept, Age), Avg = mavg(Age).
+% ✅ CORRECT: median_age(Dept, Med) :- employee(_, Dept, Age), Med = mmedian(Age, "exact").
 ```
 
 ---

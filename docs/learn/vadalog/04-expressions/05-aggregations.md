@@ -17,6 +17,7 @@ The functions are:
 - `mmax(X, [K1, …, Kn])` for the incremental computation of maximal
 - `munion(X, [K1, …, Kn])` for the incremental union of sets
 - `mavg(X)` for the incremental computation of averages
+- `mmedian(X, "variant")` for the incremental computation of medians
 
 Upon invocation, all functions return the currently accumulated value for the
 respective aggregate. All functions, except `mcount`, take as first argument the
@@ -62,6 +63,7 @@ pmax(X, Sum) :- a(X, Y, Z, U), Sum = mmax(Y).
 ccount(X, Sum) :- a(X, Y, Z, U), Sum = mcount(X).
 ccount_other(X, Sum) :- a(X, Y, Z, U), Sum = mcount(X).
 aavg(X, AVG) :- a(X, Y, Z, U), AVG = mavg(Y).
+mmedian_result(X, Median) :- a(X, Y, Z, U), Median = mmedian(Y, "exact").
 
 @output("ssum").
 @output("pprod").
@@ -70,6 +72,7 @@ aavg(X, AVG) :- a(X, Y, Z, U), AVG = mavg(Y).
 @output("ccount").
 @output("ccount_other").
 @output("aavg").
+@output("mmedian_result").
 ```
 
 After execution, the relation `ssum` contains the following tuples:
@@ -119,6 +122,13 @@ The relation `aavg` contains the following tuples:
 ```prolog
 aavg("one", 3.0)
 aavg("two", 4.0)
+```
+
+The relation `mmedian_result` contains the following tuples:
+
+```prolog
+mmedian_result("one", 3.0)
+mmedian_result("two", 3.0)
 ```
 
 
@@ -361,6 +371,118 @@ c(15552,"Alternative").
 
 synonyms(Id, NewSynonyms) :- c(Id,Synonym), NewSynonyms = munion({}|Synonym).
 ```
+
+## Median Aggregation
+
+The aggregate `mmedian` computes the median (middle value) of a dataset. Unlike mean/average, median is robust to outliers and provides a better measure of central tendency for skewed distributions.
+
+Vadalog Parallel provides three variants of median computation:
+
+1. **`mmedian(X, "exact")`** - Exact median computation
+   - Stores all values and computes precise median
+   - Best for small to medium datasets (< 10,000 values)
+   - 100% accuracy
+
+2. **`mmedian(X, "p2_algorithm")`** - P² algorithm approximation
+   - Uses only 5 markers regardless of dataset size
+   - Best for very large datasets (millions+ of values)
+   - Typical accuracy: 95-99%
+   - Minimal memory footprint (40 bytes)
+
+3. **`mmedian(X, "reservoir_sampling")`** - Reservoir sampling approximation
+   - Maintains a sample of 1000 values
+   - Best for large datasets (10,000 - 1,000,000+ values)
+   - High accuracy with constant memory (8KB)
+
+### Example: Basic Median Computation
+
+```prolog
+mark("Alice", "Math", 85.0).
+mark("Alice", "Math", 90.0).
+mark("Alice", "Math", 78.0).
+mark("Alice", "Math", 92.0).
+mark("Alice", "Math", 88.0).
+
+mark("Bob", "Math", 70.0).
+mark("Bob", "Math", 75.0).
+mark("Bob", "Math", 72.0).
+
+% Exact median by student
+median_exact(Student, Median) :- 
+    mark(Student, _, Score), 
+    Median = mmedian(Score, "exact").
+
+% Approximate median using P² algorithm
+median_approx(Student, Median) :- 
+    mark(Student, _, Score), 
+    Median = mmedian(Score, "p2_algorithm").
+
+% Approximate median using reservoir sampling
+median_reservoir(Student, Median) :- 
+    mark(Student, _, Score), 
+    Median = mmedian(Score, "reservoir_sampling").
+
+@output("median_exact").
+@output("median_approx").
+@output("median_reservoir").
+```
+
+The expected output for exact median is:
+
+```prolog
+median_exact("Alice", 88.0).  % Sorted: [78, 85, 88, 90, 92] → middle value
+median_exact("Bob", 72.0).    % Sorted: [70, 72, 75] → middle value
+```
+
+### Example: Median vs Average with Outliers
+
+Median is particularly useful when dealing with outliers:
+
+```prolog
+salary("Engineering", "Alice", 80000).
+salary("Engineering", "Bob", 85000).
+salary("Engineering", "Charlie", 82000).
+salary("Engineering", "CEO", 500000).  % Outlier
+
+% Average is affected by outliers
+avg_salary(Dept, Avg) :- 
+    salary(Dept, _, Amount), 
+    Avg = mavg(Amount).
+
+% Median is robust to outliers
+median_salary(Dept, Median) :- 
+    salary(Dept, _, Amount), 
+    Median = mmedian(Amount, "exact").
+
+@output("avg_salary").
+@output("median_salary").
+```
+
+Expected output:
+
+```prolog
+avg_salary("Engineering", 186750).      % Skewed by CEO salary
+median_salary("Engineering", 83500).    % Better representation: (82000+85000)/2
+```
+
+### Choosing the Right Variant
+
+- **Use "exact"** when:
+  - Dataset is small (< 10,000 values)
+  - 100% accuracy is required
+  - Memory is not a constraint
+
+- **Use "p2_algorithm"** when:
+  - Dataset is very large (millions+ of values)
+  - Memory is extremely limited
+  - ~95-99% accuracy is acceptable
+
+- **Use "reservoir_sampling"** when:
+  - Dataset is large (10,000+ values)
+  - Good balance between accuracy and performance needed
+  - Consistent memory usage is important
+
+---
 
 The aggregate `maxcount` returns the key tuple with the highest frequency
 

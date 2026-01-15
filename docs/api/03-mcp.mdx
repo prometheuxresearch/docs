@@ -84,39 +84,7 @@ Edit the Claude Desktop configuration file:
 - **Linux:** `~/.config/Claude/claude_desktop_config.json`
 
 <Tabs>
-  <TabItem value="simple" label="Standard Configuration" default>
-
-```json
-{
-  "mcpServers": {
-    "prometheux": {
-      "command": "prometheux-mcp",
-      "args": ["--url", "https://api.prometheux.ai"],
-      "env": {
-        "PROMETHEUX_TOKEN": "your_token_here",
-        "PROMETHEUX_USERNAME": "your_username",
-        "PROMETHEUX_ORGANIZATION": "your_organization"
-      }
-    }
-  }
-}
-```
-
-:::tip Automatic URL Construction
-The full path is automatically constructed from your username and organization. No need to include it in the URL.
-:::
-
-:::tip Custom or On-Premise URLs
-For on-premise deployments or custom URLs, replace `https://api.prometheux.ai` with your own server URL:
-```
-"args": ["--url", "https://your-custom-domain.com"]
-```
-:::
-
-  </TabItem>
-  <TabItem value="fullpath" label="Full Path (For Troubleshooting)">
-
-If you get "command not found" or "Server disconnected" errors, use the full path:
+  <TabItem value="standard" label="Configuration" default>
 
 ```json
 {
@@ -135,13 +103,27 @@ If you get "command not found" or "Server disconnected" errors, use the full pat
 ```
 
 :::tip Finding Your Path
-- **macOS/Linux:** Run `which prometheux-mcp` in your terminal
-- **Windows:** Run `where prometheux-mcp` in PowerShell or Command Prompt
+Run this in your terminal to find the full path:
+- **macOS/Linux:** `which prometheux-mcp`
+- **Windows:** `where prometheux-mcp` (in PowerShell or Command Prompt)
 
-**Windows example:** `C:\\Users\\YOUR_USERNAME\\AppData\\Local\\Programs\\Python\\Python310\\Scripts\\prometheux-mcp.exe`  
-**macOS example:** `/Users/YOUR_USERNAME/.local/bin/prometheux-mcp`
+**Common paths:**
+- **macOS:** `/Users/YOUR_USERNAME/.local/bin/prometheux-mcp`
+- **Windows:** `C:\\Users\\YOUR_USERNAME\\AppData\\Local\\Programs\\Python\\Python310\\Scripts\\prometheux-mcp.exe`
+- **Linux:** `/home/YOUR_USERNAME/.local/bin/prometheux-mcp`
 
 Use double backslashes (`\\`) for Windows paths in JSON.
+:::
+
+:::tip Automatic URL Construction
+The full path is automatically constructed from your username and organization. No need to include it in the URL.
+:::
+
+:::tip Custom or On-Premise URLs
+For on-premise deployments or custom URLs, replace `https://api.prometheux.ai` with your own server URL:
+```
+"args": ["--url", "https://your-custom-domain.com"]
+```
 :::
 
   </TabItem>
@@ -153,7 +135,7 @@ Add `--debug` flag to see detailed logs in Claude Desktop's console:
 {
   "mcpServers": {
     "prometheux": {
-      "command": "prometheux-mcp",
+      "command": "/Users/YOUR_USERNAME/.local/bin/prometheux-mcp",
       "args": ["--url", "https://api.prometheux.ai", "--debug"],
       "env": {
         "PROMETHEUX_TOKEN": "your_token_here",
@@ -164,6 +146,8 @@ Add `--debug` flag to see detailed logs in Claude Desktop's console:
   }
 }
 ```
+
+Replace the command path with your actual path (see previous tab for how to find it).
 
   </TabItem>
 </Tabs>

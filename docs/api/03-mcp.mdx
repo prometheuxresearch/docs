@@ -29,36 +29,36 @@ With Prometheux's MCP integration, you can use natural language to interact with
 
 ### Installation
 
-<Tabs>
-  <TabItem value="pipx" label="pipx (Recommended)" default>
+**Using pipx**
 
-**macOS:**
+pipx installs the package in an isolated environment and works reliably with Claude Desktop on all platforms.
+
+<Tabs>
+  <TabItem value="macos" label="macOS" default>
+
 ```bash
 brew install pipx
 pipx ensurepath
 pipx install prometheux-mcp
 ```
 
-**Windows/Linux:**
+  </TabItem>
+  <TabItem value="windows" label="Windows">
+
 ```bash
 pip install pipx
+pipx ensurepath
 pipx install prometheux-mcp
 ```
 
-:::info Why pipx?
-pipx installs the package in an isolated environment and makes the command available globally. This works reliably with Claude Desktop on all platforms, especially macOS where GUI apps may have PATH issues.
-:::
-
   </TabItem>
-  <TabItem value="pip" label="pip (Windows/Linux Only)">
+  <TabItem value="linux" label="Linux">
 
 ```bash
-pip install prometheux-mcp
+pip install pipx
+pipx ensurepath
+pipx install prometheux-mcp
 ```
-
-:::warning Not Recommended for macOS
-On macOS, Claude Desktop may have permission issues accessing pip-installed packages. Use pipx instead (see previous tab).
-:::
 
   </TabItem>
 </Tabs>
@@ -107,9 +107,9 @@ Run this in your terminal to find the full path:
 - **macOS/Linux:** `which prometheux-mcp`
 - **Windows:** `where prometheux-mcp` (in PowerShell or Command Prompt)
 
-**Common paths:**
+**Common paths after pipx install:**
 - **macOS:** `/Users/YOUR_USERNAME/.local/bin/prometheux-mcp`
-- **Windows:** `C:\\Users\\YOUR_USERNAME\\AppData\\Local\\Programs\\Python\\Python310\\Scripts\\prometheux-mcp.exe`
+- **Windows:** `C:\\Users\\YOUR_USERNAME\\.local\\bin\\prometheux-mcp.exe`
 - **Linux:** `/home/YOUR_USERNAME/.local/bin/prometheux-mcp`
 
 Use double backslashes (`\\`) for Windows paths in JSON.
@@ -232,12 +232,16 @@ Claude Desktop can't find the `prometheux-mcp` command.
 *macOS:*
 1. Find the full path: `which prometheux-mcp`
 2. Use that full path in your config (usually `/Users/YOUR_USERNAME/.local/bin/prometheux-mcp`)
-3. If still having issues, try pipx: `pipx install prometheux-mcp`
-4. Restart Claude Desktop completely (Cmd+Q, then reopen)
+3. Restart Claude Desktop completely (Cmd+Q, then reopen)
 
 *Windows:*
 1. Find the full path: `where prometheux-mcp` (in PowerShell or Command Prompt)
-2. Use that full path in your config with double backslashes (e.g., `C:\\Python310\\Scripts\\prometheux-mcp.exe`)
+2. Use that full path in your config with double backslashes (e.g., `C:\\Users\\YOUR_USERNAME\\.local\\bin\\prometheux-mcp.exe`)
+3. Restart Claude Desktop
+
+*Linux:*
+1. Find the full path: `which prometheux-mcp`
+2. Use that full path in your config (usually `/home/YOUR_USERNAME/.local/bin/prometheux-mcp`)
 3. Restart Claude Desktop
 
 :::tip

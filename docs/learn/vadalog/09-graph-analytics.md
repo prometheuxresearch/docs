@@ -29,11 +29,12 @@ Variables on the head of the rule with the function receive the algorithm’s re
 | `#ASP(P)` | **All‑Shortest Paths** (weighted). | `P/3` `edge(U,V,W)` | `(X,Y,Z)` | Parallel multi‑source Dijkstra. Can include self-loops from cycles. |
 | `#SSSP(P,Src)` | **Single‑Source Shortest Path**. | same as `#ASP` plus constant `Src` | `(Y,Dist)` | |
 | `#BFS(P)` | **Breadth‑First Levels**. | `P/2` | `(X,Level)` | Unweighted tiers. |
-| `#PR(P[,d])` | **PageRank** scores. | `P/2` | `(X,Score)` | Optional damping `d` (default 0.85). |
 | `#CC(P[,options])` | **Connected Components** with optional sorting and ID. | `P/2` `edge(U,V)` + optional string | `(X,Comp)` or `(X,ID,Comp)` | Optional parameters: `sort_component=true/false` (default `false`), `component_id=true/false` (default `false`). Format: `"sort_component=true,component_id=true"`. For undirected graphs (assumes edges are symmetric). |
 | `#WCC(P)` | **Weakly Connected Components**. | `P/2` | `(X,Comp)` | For directed graphs – ignores edge direction. |
 | `#TRI(P)` | **Triangle Enumeration**. | `P/2` | `(X,Y,Z)` | Unordered triangles. |
-| `#BC(P)` | **Betweenness Centrality** (approx.). | `P/2` | `(X,Score)` | Brandes with sampling. |
+| `#DC(P[,options])` | **Degree Centrality** | `P/2` `edge(U,V)` | `(X,Score)` | Normalized by (N-1). Optional parameters: `type=in/out/total` (default `total`). Format: `"type=in"`. Scores range 0.0–1.0. |
+| `#BC(P[,options])` | **Betweenness Centrality** | `P/2` `edge(U,V)` | `(X,Score)` | Optional sampling for large graphs. Normalized by (N-1)(N-2). Optional parameters: `sample=K` for approximate BC using K random sources. Format: `"sample=500"`. Scores range 0.0–1.0. |
+| `#PR(P[,options])` | **PageRank** | `P/2` `edge(U,V)` | `(X,Score)` | Optional parameters: `damping=d` (default 0.85), `tolerance=t` (default 0.0001). Format: `"damping=0.85,tolerance=0.0001"`. Scores sum to 1.0. |
 
 ## Examples
 
@@ -406,6 +407,153 @@ cc(Node, ComponentId, Component) :-
 - **Memory efficient**: ~50% savings vs storing full edges in adjacency lists
 - **Type validation**: Both source and destination must be the same type (both structs or both simple)
 
+## Centrality Measures
+
+Centrality measures quantify the importance of nodes in a graph. Vadalog provides multiple centrality algorithms, all optimized for distributed computation.
+
+### 6  Degree Centrality
+
+**Degree Centrality** measures node importance by counting connections, normalized by the maximum possible degree.
+
+```prolog
+edge("a","b").
+edge("a","e").
+edge("a","f").
+edge("b","d").
+edge("c","b").
+edge("c","e").
+edge("d","c").
+edge("d","h").
+edge("f","g").
+
+% Total degree (in + out, normalized)
+dc_total(N, DC) :- #DC(edge).
+
+% In-degree only (incoming edges)
+dc_in(N, DC) :- #DC(edge, "type=in").
+
+% Out-degree only (outgoing edges)
+dc_out(N, DC) :- #DC(edge, "type=out").
+
+@output("dc_total").
+@output("dc_in").
+@output("dc_out").
+```
+
+**Output**: Normalized scores between 0.0 and 1.0. For `dc_total`:
+```
+(a, 0.375)  % 3 connections / 8 nodes = 3/8
+(b, 0.375)
+(c, 0.375)
+(d, 0.375)
+(e, 0.25)
+(f, 0.25)
+(g, 0.125)
+(h, 0.125)
+```
+
+**Features**:
+- Always normalized by (N-1) where N is total nodes
+- Three degree types: `in`, `out`, `total` (default)
+
+### 7  Betweenness Centrality
+
+**Betweenness Centrality** measures how often a node lies on shortest paths between other nodes. High betweenness indicates "bridge" nodes.
+
+```prolog
+% Simple chain: 1 -> 2 -> 3 -> 4 -> 5 -> 6
+edge(1,2).
+edge(2,3).
+edge(3,4).
+edge(4,5).
+edge(5,6).
+
+% Exact betweenness (all sources)
+bc_exact(N, BC) :- #BC(edge).
+
+% Approximate betweenness (sample 100 sources for large graphs)
+bc_approx(N, BC) :- #BC(edge, "sample=100").
+
+@output("bc_exact").
+@output("bc_approx").
+```
+
+**Output** for `bc_exact` (linear chain):
+```
+(1, 0.0)    % Endpoints have zero betweenness
+(2, 0.2)    % Node 2 is on 20% of shortest paths
+(3, 0.3)    % Node 3 is on 30% of shortest paths
+(4, 0.3)
+(5, 0.2)
+(6, 0.0)
+```
+
+**Features**:
+- Normalized by (N-1)(N-2)
+- **Sampling support**: Use `sample=K` for approximate results on large graphs
+  - `sample=500`: Compute from 500 random sources instead of all N
+  - Provides unbiased estimates with significant speedup
+  - Recommended for graphs >10M edges
+
+### 8  PageRank
+
+**PageRank** computes node importance using link structure. Originally used by Google for web search ranking.
+
+```prolog
+% Directed cycle: 1 -> 2 -> 3 -> 4 -> 1
+edge(1,2).
+edge(2,3).
+edge(3,4).
+edge(4,1).
+
+% Default PageRank (damping=0.85, tolerance=0.0001)
+pr_default(N, PR) :- #PR(edge).
+
+% Custom damping factor
+pr_custom(N, PR) :- #PR(edge, "damping=0.9").
+
+% High precision
+pr_precise(N, PR) :- #PR(edge, "damping=0.85,tolerance=0.00001").
+
+@output("pr_default").
+@output("pr_custom").
+@output("pr_precise").
+```
+
+**Output** for `pr_default` (cycle):
+```
+(1, 0.25)  % All nodes equal in symmetric cycle
+(2, 0.25)
+(3, 0.25)
+(4, 0.25)
+```
+
+**Features**:
+- Scores always sum to 1.0 (probability distribution)
+- Handles dangling nodes (no outgoing edges) correctly
+- Parameters:
+  - `damping`: Probability of following a link (default 0.85)
+  - `tolerance`: Convergence threshold (default 0.0001)
+
+### 9  Centrality Comparison Example
+
+```prolog
+% Same graph for all three measures
+edge(1,2).
+edge(2,3).
+edge(3,4).
+edge(1,3).
+
+% Compute all centralities
+dc(N, Score) :- #DC(edge).
+bc(N, Score) :- #BC(edge).
+pr(N, Score) :- #PR(edge).
+
+@output("dc").
+@output("bc").
+@output("pr").
+```
+
 ## Reasoning + Graph Analytics
 
 ```prolog
@@ -425,14 +573,4 @@ edge(X,Y,1) :- unweighted_edge(X,Y). % We assign a default distance = 1
 asp_function(X,Y,Z) :- #ASP(edge).
 max_asp(X,Y,M) :- asp_function(X,Y,Z), M = mmax(Z).
 @output("max_asp").
-```
-
-
-```prolog
-highly_connected(Z) :-
-      vertex(Z),
-      #PR(edge)(Z,Score),
-      Score > 0.02.
-
-@output("highly_connected").
 ```

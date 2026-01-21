@@ -11,10 +11,10 @@ Prometheux supports **native SQL queries** embedded directly within Vadalog rule
 - **Leverage existing SQL skills** – write familiar SQL SELECT statements alongside Datalog rules
 - **Use SQL's expressive power** – complex JOINs, aggregations, window functions, and CTEs
 - **Query across data sources** – seamlessly combine PostgreSQL, MariaDB, CSV files, and in-memory facts in a single SQL query
-- **Integrate with Spark SQL** – benefit from Spark's distributed SQL engine for large-scale data processing
+- **Scale to large datasets** – benefit from distributed query execution for large-scale data processing
 - **Simplify data transformation** – use SQL for data manipulation while keeping Datalog for logical reasoning
 
-SQL queries in Prometheux are automatically parallelized and optimized while preserving the declarative nature of your program.
+Prometheux automatically parallelizes and optimizes SQL queries across distributed compute resources while maintaining the declarative semantics of your program.
 
 ---
 
@@ -598,7 +598,7 @@ result() <- SELECT employees_1 FROM employees JOIN departments ...
 
 **Cause:** SQL query contains syntax errors.
 
-**Solution:** Validate your SQL query using standard SQL syntax. Remember that Vadalog uses Spark SQL, which supports most ANSI SQL features.
+**Solution:** Validate your SQL query using standard SQL syntax. Vadalog supports most ANSI SQL features including window functions, CTEs, and complex aggregations.
 
 ---
 
@@ -610,7 +610,7 @@ SQL integration in Vadalog provides a powerful bridge between declarative logic 
 ✅ **Pass SQL queries** to graph analytics functions  
 ✅ **Query across data sources** – PostgreSQL, MariaDB, CSV, facts, and more  
 ✅ **Use full SQL expressiveness** – JOINs, aggregations, CTEs, window functions  
-✅ **Automatic parallelization** via Spark SQL  
+✅ **Automatic parallelization and optimization** across distributed compute resources  
 ✅ **Seamless integration** with Datalog rules and reasoning  
 
 This hybrid approach lets you use the best tool for each task: SQL for data manipulation and Datalog for logical reasoning.

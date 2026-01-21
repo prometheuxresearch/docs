@@ -8,11 +8,11 @@ slug: /learn/vadalog/sql-integration
 
 Prometheux supports **native SQL queries** embedded directly within Vadalog rules. This powerful feature allows you to:
 
-- **Leverage existing SQL skills** – write familiar SQL SELECT statements alongside Datalog rules
+- **Leverage existing SQL skills** – write familiar SQL SELECT statements alongside Vadalog rules
 - **Use SQL's expressive power** – complex JOINs, aggregations, window functions, and CTEs
 - **Query across data sources** – seamlessly combine PostgreSQL, MariaDB, CSV files, and in-memory facts in a single SQL query
 - **Scale to large datasets** – benefit from distributed query execution for large-scale data processing
-- **Simplify data transformation** – use SQL for data manipulation while keeping Datalog for logical reasoning
+- **Simplify data transformation** – use SQL for data manipulation while keeping Vadalog for logical reasoning
 
 Prometheux automatically parallelizes and optimizes SQL queries across distributed compute resources while maintaining the declarative semantics of your program.
 
@@ -22,7 +22,7 @@ Prometheux automatically parallelizes and optimizes SQL queries across distribut
 
 ### 1. SQL in Rule Bodies (Simple Approach)
 
-You can replace the traditional Datalog body with a SQL `SELECT` statement using the `<-` operator:
+You can replace the traditional Vadalog body with a SQL `SELECT` statement using the `<-` operator:
 
 ```prolog
 result_predicate() <- SELECT column1, column2 FROM table WHERE condition.
@@ -410,9 +410,9 @@ tc(Company1, Company2) :- #TC("SELECT companyfrom, companyto
 
 ## Advanced Features
 
-### Mixing SQL Rules and Datalog Rules
+### Mixing SQL Rules and Vadalog Rules
 
-You can freely mix SQL-based rules with traditional Datalog rules:
+You can freely mix SQL-based rules with traditional Vadalog rules:
 
 ```prolog
 @bind("employees", "csv useHeaders=true", "data", "employees.csv").
@@ -422,10 +422,10 @@ high_earners() <- SELECT name, salary
                   FROM employees 
                   WHERE salary > 100000.
 
-% Traditional Datalog rule using SQL rule result
+% Traditional Vadalog rule using SQL rule result
 very_high_earner(Name) :- high_earners(Name, Salary), Salary > 150000.
 
-% Another SQL rule referencing Datalog-derived predicate
+% Another SQL rule referencing Vadalog-derived predicate
 top_earners() <- SELECT high_earners_0, high_earners_1 
                  FROM high_earners 
                  ORDER BY high_earners_1 DESC 
@@ -494,7 +494,7 @@ dept_summary() <- WITH dept_avg AS (
 - You're joining data from multiple sources
 - The logic is naturally expressed in SQL
 
-**Use traditional Datalog when:**
+**Use traditional Vadalog when:**
 - You need recursion or fixpoint computation
 - The logic involves complex logical rules
 - You're doing rule-based reasoning or inference
@@ -611,7 +611,7 @@ SQL integration in Vadalog provides a powerful bridge between declarative logic 
 ✅ **Query across data sources** – PostgreSQL, MariaDB, CSV, facts, and more  
 ✅ **Use full SQL expressiveness** – JOINs, aggregations, CTEs, window functions  
 ✅ **Automatic parallelization and optimization** across distributed compute resources  
-✅ **Seamless integration** with Datalog rules and reasoning  
+✅ **Seamless integration** with Vadalog rules and reasoning  
 
-This hybrid approach lets you use the best tool for each task: SQL for data manipulation and Datalog for logical reasoning.
+This hybrid approach lets you use the best tool for each task: SQL for data manipulation and Vadalog for logical reasoning.
 

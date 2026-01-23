@@ -532,19 +532,15 @@ combined() <- SELECT pg_data_0, csv_data_1, maria_data_2
               JOIN maria_data ON csv_data_1 = maria_data_1.
 ```
 
-### 4. Optimize with Filters
+### 4. Filter Data in SQL Queries
 
-Push filters down into SQL queries for better performance:
+You can filter data directly within SQL queries passed to graph functions:
 
 ```prolog
-% Good - filter in SQL
+% Filter edges with SQL before computing transitive closure
 filtered_tc(X, Y) :- #TC("SELECT edge_0, edge_1 
                           FROM edge 
                           WHERE weight > 100").
-
-% Less efficient - filter after TC
-all_tc(X, Y) :- #TC(edge).
-filtered_tc(X, Y) :- all_tc(X, Y), edge(X, Y, W), W > 100.
 ```
 
 ### 5. Validate Table References
@@ -613,5 +609,5 @@ SQL integration in Vadalog provides a powerful bridge between declarative logic 
 ✅ **Automatic parallelization and optimization** across distributed compute resources  
 ✅ **Seamless integration** with Vadalog rules and reasoning  
 
-This hybrid approach lets you use the best tool for each task: SQL for data manipulation and Vadalog for logical reasoning.
+This hybrid approach combines the strengths of both paradigms: use SQL when you need its familiar syntax and expressive power, and use Vadalog for recursion, reasoning, and complex logical rules.
 

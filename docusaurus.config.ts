@@ -123,7 +123,7 @@ const config: Config = {
         },
         {
           href: "https://www.prometheux.ai",
-          label: "Back to homepage",
+          label: "Prometheux Website",
           position: "right",
         },
       ],

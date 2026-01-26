@@ -104,6 +104,10 @@ The difference is that functions like `#TC` compute results (transitive closure)
 
 Vadalog uses specific column naming conventions depending on the data source and query type.
 
+:::important Column Naming Rules
+When all tables in a SQL query are from the **same database**, you can use actual column names. For queries across **different data sources**, use `predicateName_columnIndex` notation.
+:::
+
 ### For In-Memory Facts
 
 Facts use the pattern `predicateName_columnIndex` (zero-based):
@@ -131,13 +135,13 @@ high_earners() <- SELECT name, salary
                   WHERE salary > 100000.
 ```
 
-**Multi-table queries** must use `predicateName_columnIndex`:
+**Multi-table queries across different sources** must use `predicateName_columnIndex`:
 
 ```prolog
 @bind("employees", "csv useHeaders=true", "data", "employees.csv").
 @bind("departments", "csv useHeaders=true", "data", "departments.csv").
 
-% MUST use predicateName_columnIndex for JOINs
+% Different CSV files - MUST use predicateName_columnIndex
 emp_dept() <- SELECT employees_1, departments_1 
               FROM employees 
               JOIN departments ON employees_2 = departments_0.
@@ -156,13 +160,26 @@ high_earners() <- SELECT name, salary
                   WHERE salary > 100000.
 ```
 
-**Multi-table queries** must use `predicateName_columnIndex`:
+**Multi-table queries from the same database** can use actual column names:
 
 ```prolog
 @bind("employees", "postgresql", "company_db", "employees").
 @bind("departments", "postgresql", "company_db", "departments").
 
-% MUST use predicateName_columnIndex for JOINs
+% Both tables are in the same PostgreSQL database
+% Can use actual column names
+emp_dept() <- SELECT e.name, e.salary, d.dept_name, d.location
+              FROM employees e
+              JOIN departments d ON e.dept_id = d.dept_id.
+```
+
+**Multi-table queries across different databases** must use `predicateName_columnIndex`:
+
+```prolog
+@bind("employees", "postgresql", "company_db", "employees").
+@bind("departments", "mariadb", "other_db", "departments").
+
+% Different databases - MUST use predicateName_columnIndex
 % employees_0 (id), employees_1 (name), employees_2 (dept_id), employees_3 (salary)
 % departments_0 (dept_id), departments_1 (dept_name), departments_2 (location)
 emp_dept() <- SELECT employees_1, employees_3, departments_1 
@@ -170,10 +187,63 @@ emp_dept() <- SELECT employees_1, employees_3, departments_1
               JOIN departments ON employees_2 = departments_0.
 ```
 
-:::tip Column Naming Rule
+:::tip Column Naming Rules
 - **Single table** → Use actual column names (CSV headers or DB column names)
-- **Multiple tables** → Use `predicateName_columnIndex` for all tables
+- **Multiple tables from same database** → Use actual column names
+- **Multiple tables from different sources** → Use `predicateName_columnIndex` notation
 :::
+
+---
+
+## Case-Sensitive Identifiers
+
+Some databases (e.g., PostgreSQL, Oracle) are case-sensitive and require quoted identifiers for mixed-case column or table names. Vadalog supports **universal backtick notation** that automatically converts to database-specific quotes.
+
+### Using Backticks for Case-Sensitive Identifiers
+
+```prolog
+@bind("inventory", "postgresql", "warehouse_db", "inventory_case").
+
+% Use backticks for case-sensitive columns
+% Backticks are converted to double quotes for PostgreSQL
+high_stock() <- SELECT `ItemId`, `ProductName`, `StockLevel`
+                FROM `inventory_case`
+                WHERE `StockLevel` > 100.
+```
+
+### Database-Specific Conversion
+
+Vadalog automatically converts backticks to the appropriate quote character for each database:
+
+| Database | Quote Character | Example |
+|----------|----------------|---------|
+| PostgreSQL | `"` (double quotes) | `SELECT "ItemId" FROM "inventory"` |
+| Oracle | `"` (double quotes) | `SELECT "ItemId" FROM "inventory"` |
+| Snowflake | `"` (double quotes) | `SELECT "ItemId" FROM "inventory"` |
+| DB2 | `"` (double quotes) | `SELECT "ItemId" FROM "inventory"` |
+| SQL Server | `"` (double quotes) | `SELECT "ItemId" FROM "inventory"` |
+| MySQL | `` ` `` (backticks) | ``SELECT `ItemId` FROM `inventory` `` |
+| MariaDB | `` ` `` (backticks) | ``SELECT `ItemId` FROM `inventory` `` |
+| Databricks | `` ` `` (backticks) | ``SELECT `ItemId` FROM `inventory` `` |
+| Neo4j | `` ` `` (backticks) | ``SELECT `ItemId` FROM `inventory` `` |
+
+:::tip Universal Backtick Notation
+Always use backticks (`` ` ``) for case-sensitive identifiers in your Vadalog code. The system will automatically convert them to the correct syntax for your target database. This ensures your code is portable across different database systems.
+:::
+
+### Example: Case-Sensitive JOIN
+
+```prolog
+@bind("inventory", "postgresql", "warehouse_db", "inventory_case").
+@bind("transactions", "postgresql", "warehouse_db", "transactions_case").
+
+% Both tables in same PostgreSQL database with case-sensitive columns
+% Backticks are converted to double quotes
+sales_report() <- SELECT i.`ProductName`, t.`Quantity`, t.`TotalAmount`
+                  FROM `inventory_case` i
+                  JOIN `transactions_case` t ON i.`ItemId` = t.`ItemId`
+                  WHERE t.`Quantity` >= 5.
+```
 
 ---
 
@@ -213,13 +283,31 @@ high_earners() <- SELECT name, salary
 @output("high_earners").
 ```
 
-### Example 3: Multi-Table JOIN with CSVs
+### Example 3: Same-Database JOIN
+
+```prolog
+@bind("employees", "postgresql", "company_db", "employees").
+@bind("departments", "postgresql", "company_db", "departments").
+
+% Both tables in same database - use actual column names
+emp_dept() <- SELECT e.name as emp_name,
+                     e.salary,
+                     d.dept_name,
+                     d.location
+              FROM employees e
+              JOIN departments d ON e.dept_id = d.dept_id
+              WHERE e.salary > 50000.
+
+@output("emp_dept").
+```
+
+### Example 4: Cross-Source JOIN with CSVs
 
 ```prolog
 @bind("employees", "csv useHeaders=true", "data", "employees.csv").
 @bind("departments", "csv useHeaders=true", "data", "departments.csv").
 
-% Multi-table - use predicateName_columnIndex
+% Different CSV files - MUST use predicateName_columnIndex
 emp_dept() <- SELECT employees_1 as emp_name, 
                      departments_1 as dept_name, 
                      departments_2 as location
@@ -229,7 +317,7 @@ emp_dept() <- SELECT employees_1 as emp_name,
 @output("emp_dept").
 ```
 
-### Example 4: Mixing Facts and CSV
+### Example 5: Mixing Facts and CSV
 
 ```prolog
 @bind("departments", "csv useHeaders=true", "data", "departments.csv").
@@ -246,24 +334,25 @@ emp_with_dept() <- SELECT employees_1, employees_3, departments_1
 @output("emp_with_dept").
 ```
 
-### Example 5: SQL Aggregation
+### Example 6: SQL Aggregation with Same-Database Tables
 
 ```prolog
-@bind("employees", "csv useHeaders=true", "data", "employees.csv").
-@bind("departments", "csv useHeaders=true", "data", "departments.csv").
+@bind("employees", "mariadb", "company_db", "employees").
+@bind("departments", "mariadb", "company_db", "departments").
 
-dept_stats() <- SELECT departments_1 as dept_name,
+% Both tables in same MariaDB database - use actual column names
+dept_stats() <- SELECT d.dept_name,
                        COUNT(*) as emp_count,
-                       SUM(employees_3) as total_salary,
-                       AVG(employees_3) as avg_salary
-                FROM employees 
-                JOIN departments ON employees_2 = departments_0 
-                GROUP BY departments_1.
+                       SUM(e.salary) as total_salary,
+                       AVG(e.salary) as avg_salary
+                FROM employees e
+                JOIN departments d ON e.dept_id = d.dept_id
+                GROUP BY d.dept_name.
 
 @output("dept_stats").
 ```
 
-### Example 6: SQL with UNION
+### Example 7: SQL with UNION
 
 ```prolog
 us_employees("Alice", "USA").
@@ -281,13 +370,13 @@ all_employees() <- SELECT us_employees_0 as name, us_employees_1 as country
 @output("all_employees").
 ```
 
-### Example 7: Cross-Database Queries (PostgreSQL + MariaDB)
+### Example 8: Cross-Database Queries (PostgreSQL + MariaDB)
 
 ```prolog
 @bind("employees", "postgresql", "company_db", "employees").
 @bind("orders", "mariadb", "sales_db", "orders").
 
-% Join across PostgreSQL and MariaDB
+% Different databases - MUST use predicateName_columnIndex
 employee_orders() <- SELECT employees_1, orders_1, orders_2 
                      FROM employees 
                      JOIN orders ON employees_1 = orders_3.
@@ -295,7 +384,7 @@ employee_orders() <- SELECT employees_1, orders_1, orders_2
 @output("employee_orders").
 ```
 
-### Example 8: Hybrid Queries (PostgreSQL + CSV + Facts)
+### Example 9: Hybrid Queries (PostgreSQL + CSV + Facts)
 
 ```prolog
 @bind("pg_departments", "postgresql", "company_db", "departments").
@@ -321,7 +410,7 @@ dept_budget() <- SELECT pg_departments_1 as dept_name,
 
 All graph analytics functions (`#TC`, `#ASP`, `#PATHS`, `#CC`, etc.) can accept SQL queries instead of predicate atoms.
 
-### Example 9: Transitive Closure with SQL
+### Example 10: Transitive Closure with SQL
 
 ```prolog
 edge(1, 2).
@@ -337,7 +426,7 @@ tc(X, Y) :- #TC("SELECT edge_0, edge_1 FROM edge").
 **Result:**  
 All reachable pairs including transitive paths (1→2, 2→3, 3→4, 1→3, 2→4, 1→4)
 
-### Example 10: All-Shortest Paths with SQL
+### Example 11: All-Shortest Paths with SQL
 
 ```prolog
 edge(1, 2, 10).
@@ -350,7 +439,7 @@ asp(X, Y, Dist) :- #ASP("SELECT edge_0, edge_1, edge_2 FROM edge").
 @output("asp").
 ```
 
-### Example 11: PATHS Function with SQL and Options
+### Example 12: PATHS Function with SQL and Options
 
 ```prolog
 edge(1, 2).
@@ -365,7 +454,7 @@ paths(X, Y, V) :- #PATHS("SELECT edge_0, edge_1 FROM edge",
 @output("paths").
 ```
 
-### Example 12: Connected Components with SQL
+### Example 13: Connected Components with SQL
 
 ```prolog
 edge(1, 2).
@@ -380,7 +469,7 @@ cc(Node, ComponentId, Component) :- #CC("SELECT edge_0, edge_1 FROM edge",
 @output("cc").
 ```
 
-### Example 13: SQL Function with Filtering and JOIN
+### Example 14: SQL Function with Filtering and JOIN
 
 ```prolog
 @bind("employees", "postgresql", "company_db", "employees").
@@ -393,7 +482,7 @@ tc(X, Y) :- #TC("SELECT name, dept_id
 @output("tc").
 ```
 
-### Example 14: SQL Function from CSV
+### Example 15: SQL Function from CSV
 
 ```prolog
 @bind("ownerships", "csv useHeaders=true", "data", "ownerships.csv").
@@ -499,16 +588,35 @@ dept_summary() <- WITH dept_avg AS (
 - The logic involves complex logical rules
 - You're doing rule-based reasoning or inference
 
-### 2. Column Naming Clarity
+### 2. Use Appropriate Column Naming
+
+**When querying tables from the same database**, use actual column names for cleaner, more readable queries:
+
+```prolog
+@bind("employees", "postgresql", "company_db", "employees").
+@bind("departments", "postgresql", "company_db", "departments").
+
+% Good - actual column names (same database)
+readable() <- SELECT e.name, d.dept_name
+              FROM employees e
+              JOIN departments d ON e.dept_id = d.dept_id.
+
+% Required for cross-source queries
+cross_source() <- SELECT employees_1, departments_1
+                  FROM employees
+                  JOIN departments ON employees_2 = departments_0.
+```
+
+### 3. Column Naming Clarity
 
 Always use aliases to make your output schema clear:
 
 ```prolog
 % Good - clear aliases
-result() <- SELECT employees_1 as employee_name,
-                   departments_1 as dept_name
-            FROM employees JOIN departments 
-            ON employees_2 = departments_0.
+result() <- SELECT e.name as employee_name,
+                   d.dept_name
+            FROM employees e
+            JOIN departments d ON e.dept_id = d.dept_id.
 
 % Avoid - unclear column names in output
 result() <- SELECT employees_1, departments_1
@@ -516,7 +624,25 @@ result() <- SELECT employees_1, departments_1
             ON employees_2 = departments_0.
 ```
 
-### 3. Leverage Data Source Bindings
+### 4. Use Backticks for Case-Sensitive Identifiers
+
+For databases with case-sensitive columns, use backticks for portability:
+
+```prolog
+@bind("inventory", "postgresql", "warehouse_db", "inventory_case").
+
+% Good - backticks are converted to database-specific quotes
+portable() <- SELECT `ItemId`, `ProductName`
+              FROM `inventory_case`
+              WHERE `StockLevel` > 100.
+
+% Avoid - hard-coding database-specific quotes
+not_portable() <- SELECT "ItemId", "ProductName"
+                  FROM "inventory_case"
+                  WHERE "StockLevel" > 100.
+```
+
+### 6. Leverage Data Source Bindings
 
 Use `@bind` annotations to connect to diverse data sources, then query them uniformly with SQL:
 
@@ -532,7 +658,7 @@ combined() <- SELECT pg_data_0, csv_data_1, maria_data_2
               JOIN maria_data ON csv_data_1 = maria_data_1.
 ```
 
-### 4. Filter Data in SQL Queries
+### 7. Filter Data in SQL Queries
 
 You can filter data directly within SQL queries passed to graph functions:
 
@@ -543,7 +669,7 @@ filtered_tc(X, Y) :- #TC("SELECT edge_0, edge_1
                           WHERE weight > 100").
 ```
 
-### 5. Validate Table References
+### 8. Validate Table References
 
 Ensure all tables in your SQL queries are either:
 - Bound via `@bind` annotations
@@ -606,6 +732,8 @@ SQL integration in Vadalog provides a powerful bridge between declarative logic 
 ✅ **Pass SQL queries** to graph analytics functions  
 ✅ **Query across data sources** – PostgreSQL, MariaDB, CSV, facts, and more  
 ✅ **Use full SQL expressiveness** – JOINs, aggregations, CTEs, window functions  
+✅ **Flexible column naming** – use actual column names for same-database queries, or `predicateName_i` for cross-source queries  
+✅ **Universal backtick notation** – write portable queries with automatic quote conversion  
 ✅ **Automatic parallelization and optimization** across distributed compute resources  
 ✅ **Seamless integration** with Vadalog rules and reasoning  
 

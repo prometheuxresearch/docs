@@ -106,15 +106,30 @@ To update an existing installation of Prometheux Chain follow these steps:
   </TabItem>
   <TabItem value="mcp" label="MCP (AI Agents)">
 
-### Installation
+### Automated Installation (Recommended)
+
+**macOS/Linux:**
+```bash
+curl -sSL https://raw.githubusercontent.com/prometheuxresearch/px-mcp-server/main/install.sh -o install.sh
+chmod +x install.sh
+./install.sh
+```
+
+**Windows (PowerShell):**
+```powershell
+Invoke-WebRequest -Uri "https://raw.githubusercontent.com/prometheuxresearch/px-mcp-server/main/install.ps1" -OutFile "install.ps1"
+.\install.ps1
+```
+
+The script will install everything and configure Claude Desktop automatically.
+
+### Manual Installation
 
 ```bash
 pipx install prometheux-mcp
 ```
 
-### Configuration
-
-Add to Claude Desktop config (`~/Library/Application Support/Claude/claude_desktop_config.json`):
+Then add to Claude Desktop config (`~/Library/Application Support/Claude/claude_desktop_config.json`):
 
 ```json
 {

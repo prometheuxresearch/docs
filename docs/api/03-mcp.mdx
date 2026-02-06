@@ -29,41 +29,73 @@ With Prometheux's MCP integration, you can use natural language to interact with
 
 ### Installation
 
-**Using pipx**
+<Tabs>
+  <TabItem value="automated" label="Automated (Recommended)" default>
+
+**Easiest method** - download and run our installation script:
+
+**macOS/Linux:**
+```bash
+curl -sSL https://raw.githubusercontent.com/prometheuxresearch/px-mcp-server/main/install.sh -o install.sh
+chmod +x install.sh
+./install.sh
+```
+
+**Windows (PowerShell):**
+```powershell
+Invoke-WebRequest -Uri "https://raw.githubusercontent.com/prometheuxresearch/px-mcp-server/main/install.ps1" -OutFile "install.ps1"
+.\install.ps1
+```
+
+The script will:
+- ✅ Install `pipx` (if not already installed)
+- ✅ Install `prometheux-mcp` package from PyPI
+- ✅ Prompt for your credentials (URL, token, username, organization)
+- ✅ Automatically configure Claude Desktop
+- ✅ Create backups of existing configuration
+
+Then just restart Claude Desktop and you're ready!
+
+  </TabItem>
+  <TabItem value="manual" label="Manual Install">
+
+**Manual installation using pipx:**
 
 pipx installs the package in an isolated environment and works reliably with Claude Desktop on all platforms.
 
-<Tabs>
-  <TabItem value="macos" label="macOS" default>
-
+**macOS:**
 ```bash
 brew install pipx
 pipx ensurepath
 pipx install prometheux-mcp
 ```
 
-  </TabItem>
-  <TabItem value="windows" label="Windows">
-
+**Windows:**
 ```bash
 pip install pipx
 pipx ensurepath
 pipx install prometheux-mcp
 ```
 
-  </TabItem>
-  <TabItem value="linux" label="Linux">
-
+**Linux:**
 ```bash
 pip install pipx
 pipx ensurepath
 pipx install prometheux-mcp
 ```
+
+After installation, you'll need to manually configure Claude Desktop (see Configuration section below).
 
   </TabItem>
 </Tabs>
 
 ### Configuration
+
+:::info Automated Installation
+If you used the automated installation script, configuration was done automatically. Skip to the [Usage](#usage) section below.
+:::
+
+**For manual installations only:**
 
 #### 1. Get Your Credentials
 
@@ -115,8 +147,8 @@ Run this in your terminal to find the full path:
 Use double backslashes (`\\`) for Windows paths in JSON.
 :::
 
-:::tip Automatic URL Construction
-The full path is automatically constructed from your username and organization. No need to include it in the URL.
+:::tip URL Routing
+The server automatically constructs the full API path using your username and organization: `{url}/jarvispy/{organization}/{username}/mcp/messages`
 :::
 
 :::tip Custom or On-Premise URLs
@@ -228,6 +260,20 @@ Executes a concept to derive new knowledge through reasoning.
 Claude Desktop can't find the `prometheux-mcp` command.
 
 **Solution:**
+
+:::tip Quick Fix
+If you used manual installation, try the automated installation script instead - it handles all path configuration automatically:
+```bash
+# macOS/Linux
+curl -sSL https://raw.githubusercontent.com/prometheuxresearch/px-mcp-server/main/install.sh -o install.sh && chmod +x install.sh && ./install.sh
+```
+```powershell
+# Windows
+Invoke-WebRequest -Uri "https://raw.githubusercontent.com/prometheuxresearch/px-mcp-server/main/install.ps1" -OutFile "install.ps1"; .\install.ps1
+```
+:::
+
+**Manual fix:**
 
 *macOS:*
 1. Find the full path: `which prometheux-mcp`

@@ -10,6 +10,11 @@ import TabItem from '@theme/TabItem';
 
 Connect AI agents like Claude to Prometheux using the [Model Context Protocol (MCP)](https://modelcontextprotocol.io) — an open standard that enables AI assistants to interact with external tools and data sources.
 
+Prometheux offers two MCP integration options:
+
+- **Local MCP Server** (`prometheux-mcp`): Runs on your machine alongside Claude Desktop
+- **Remote MCP Server** (`px-remote-mcp-server`): Cloud-hosted option for Claude Web with OAuth authentication
+
 ## What is MCP?
 
 The Model Context Protocol allows AI agents to:
@@ -17,7 +22,70 @@ The Model Context Protocol allows AI agents to:
 - **Execute** operations through a standardized interface
 - **Access** external data sources and APIs
 
-With Prometheux's MCP integration, you can use natural language to interact with your knowledge graphs, list concepts, and execute reasoning — all directly from Claude Desktop or other MCP-compatible clients.
+With Prometheux's MCP integration, you can use natural language to interact with your ontologies, list concepts, and execute reasoning — all directly from Claude Desktop or Claude Web.
+
+## Which Option Should I Use?
+
+<Tabs>
+  <TabItem value="local" label="Local MCP Server" default>
+
+**Best for:** Claude Desktop users, development environments, on-premise deployments
+
+**Pros:**
+<ul>
+<li>Simple pip install</li>
+<li>Runs locally (no external dependencies)</li>
+<li>Full control over credentials</li>
+<li>Works with any Prometheux instance (cloud or on-premise)</li>
+</ul>
+
+**Cons:**
+<ul>
+<li>Requires Claude Desktop app (not available for Claude Web)</li>
+<li>Needs to be installed on each machine</li>
+</ul>
+
+**Use this when:**
+<ul>
+<li>You're using Claude Desktop</li>
+<li>You want a simple, local installation</li>
+<li>You're developing or testing locally</li>
+</ul>
+
+  </TabItem>
+  <TabItem value="remote" label="Remote MCP Server">
+
+**Best for:** Claude Web users, multi-user deployments, enterprise environments
+
+**Pros:**
+<ul>
+<li>Works with Claude Web (browser-based, no app needed)</li>
+<li>OAuth authentication with browser login flow</li>
+<li>Centralized deployment (one server, many users)</li>
+<li>Handles authentication and session management</li>
+</ul>
+
+**Cons:**
+<ul>
+<li>Requires a deployed server instance</li>
+<li>Suitable for production cloud deployments</li>
+</ul>
+
+**Use this when:**
+<ul>
+<li>You want to use Claude Web and not only Claude Desktop</li>
+<li>You want centralized authentication for multiple users</li>
+<li>You're deploying for an organization</li>
+</ul>
+
+  </TabItem>
+</Tabs>
+
+---
+
+## Local MCP Server
+
+The local MCP server runs on your machine alongside Claude Desktop.
 
 ## Quick Start
 
@@ -381,11 +449,90 @@ To test MCP locally with your development instance:
 }
 ```
 
+---
+
+## Remote MCP Server (Claude Web)
+
+The remote MCP server is a cloud-hosted option that enables Claude Web users to connect to Prometheux via OAuth authentication.
+
+### Prerequisites
+
+- **Claude Web account**
+- **Prometheux credentials** (token, username, organization)
+- **Deployed remote MCP server** at `https://api.prometheux.ai/px-remote-mcp-server`
+
+### Setup
+
+1. **Open Claude Web** in your browser at [claude.ai](https://claude.ai)
+
+2. **Add the MCP Server:**
+   - Click your profile icon → Settings
+   - Navigate to "Developer" → "Model Context Protocol"
+   - Click "Add Server"
+
+3. **Configure the connection:**
+   - **Server Name:** `Prometheux` (or any name you prefer)
+   - **Server URL:** `https://api.prometheux.ai/px-remote-mcp-server`
+   - Click "Add"
+
+4. **Authenticate via OAuth:**
+   - Claude will redirect you to the Prometheux OAuth login page
+   - Enter your credentials:
+     - **Username:** Your Prometheux username
+     - **Organization:** Your Prometheux organization
+     - **API Token:** Your Prometheux authentication token
+   - Click "Connect to Claude"
+
+5. **Start using:** The connection is now active. Claude Web will automatically use the Prometheux tools when relevant to your queries.
+
+### Usage with Claude Web
+
+Once connected, interact naturally with Claude:
+
+**Example queries:**
+> "What concepts are available in my customer-analytics project?"
+
+> "Run the churn_prediction concept in project xyz"
+
+> "Show me the results from the last execution"
+
+Claude Web will call the remote MCP server, which handles authentication and communicates with your Prometheux instance.
+
+### Session Management
+
+- **Sessions persist** until you explicitly disconnect or the pod restarts
+- **Re-authentication:** If your session expires, Claude will automatically prompt you to log in again
+- **Security:** Your Prometheux token remains valid until you revoke it from your Prometheux dashboard
+
+### Troubleshooting Remote MCP
+
+**"Unable to connect" error:**
+- Verify the server URL is correct: `https://api.prometheux.ai/px-remote-mcp-server`
+- Check if your Prometheux credentials are valid
+
+**OAuth login page doesn't load:**
+- Check your browser's popup blocker settings
+- Try the connection flow in an incognito/private window
+- Verify the remote MCP server is running and accessible
+
+**"Authentication required" after login:**
+- Your Prometheux token may have been revoked or expired
+- Re-authenticate through Claude Web settings
+- Contact your Prometheux admin to verify your credentials
+
+**Tools not appearing in Claude:**
+- Ensure you completed the OAuth flow successfully
+- Check Claude Web's developer console (F12) for error messages
+- Try disconnecting and reconnecting the server
+
+---
+
 ## Learn More
 
 - **MCP Protocol Specification:** [modelcontextprotocol.io](https://modelcontextprotocol.io)
-- **GitHub Repository:** [prometheuxresearch/px-mcp-server](https://github.com/prometheuxresearch/px-mcp-server)
-- **PyPI Package:** [prometheux-mcp](https://pypi.org/project/prometheux-mcp/)
+- **Local MCP Server (GitHub):** [prometheuxresearch/px-mcp-server](https://github.com/prometheuxresearch/px-mcp-server)
+- **Local MCP Server (PyPI):** [prometheux-mcp](https://pypi.org/project/prometheux-mcp/)
+- **Remote MCP Server (GitHub):** [prometheuxresearch/px-remote-mcp-server](https://github.com/prometheuxresearch/px-remote-mcp-server)
 - **Python SDK:** See [Python SDK Reference](/api#python-sdk) for alternative integration methods
 - **REST API:** See [REST API Reference](/api#rest-api) for direct HTTP access
 

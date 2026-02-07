@@ -169,11 +169,13 @@ The remote MCP server works with Claude Web (browser-based) and uses OAuth for a
 ### Setup
 
 1. **Open Claude Web** at [claude.ai](https://claude.ai)
-2. **Add Server:**
-   - Settings → Developer → Model Context Protocol → Add Server
-   - **Server URL:** `https://api.prometheux.ai/px-remote-mcp-server`
-3. **Authenticate:**
-   - Claude redirects you to the Prometheux login page
+2. **Add Connector:**
+   - Settings → Connectors → Add custom connector
+   - **Name:** `prometheux`
+   - **Remote MCP Server URL:** `https://api.prometheux.ai/px-remote-mcp-server`
+   - Click "Add"
+3. **Connect:**
+   - Click "Connect" on the Prometheux connector
    - Enter your username, organization, and API token
    - Click "Connect to Claude"
 

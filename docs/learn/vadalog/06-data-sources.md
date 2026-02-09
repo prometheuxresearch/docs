@@ -306,6 +306,283 @@ shipping_excel_sheet_test(OrderId, ShippingDate) :- shipping_excel_sheet(OrderId
 @output("shipping_excel_sheet_test").     
 ```
 
+## JSON Datasource
+
+JSON (JavaScript Object Notation) is a lightweight data interchange format that is widely used for APIs, configuration files, and structured data storage. Prometheux supports reading JSON files and querying their nested structures using two powerful approaches: SQL queries in rule bodies and the `struct:get` function for accessing nested fields.
+
+When Prometheux reads JSON files, nested objects are automatically inferred as struct types, allowing you to access nested fields using dot notation in SQL queries.
+
+### Example JSON Structure
+
+Throughout this section, we'll use examples based on an e-commerce orders JSON file with the following structure:
+
+```json
+[
+  {
+    "order_id": "ORD-2025-001",
+    "order_date": "2025-01-15",
+    "customer": {
+      "customer_id": "CUST-123",
+      "name": "Alice Johnson",
+      "email": "alice@example.com"
+    },
+    "shipping_address": {
+      "street": "123 Main St",
+      "city": "Boston",
+      "state": "MA",
+      "zip": "02101"
+    },
+    "items": [
+      {"product": "Laptop", "quantity": 1, "price": 1299.99},
+      {"product": "Mouse", "quantity": 2, "price": 29.99}
+    ],
+    "total_amount": 1359.97,
+    "status": "shipped"
+  }
+]
+```
+
+### Simple Example: Reading JSON Files
+
+This example demonstrates reading a JSON file without any query:
+
+```prolog
+% Bind the 'orders' concept to a JSON file
+@bind("orders", "json", "data/orders", "orders.json").
+
+% Access the data in Datalog rules
+all_orders(OrderId, CustomerName, Total) :- orders(OrderId, _, CustomerName, _, _, Total, _).
+
+@output("all_orders").
+```
+
+### Accessing Nested Fields with SQL in Rule Bodies
+
+The recommended approach for querying JSON data is to use SQL directly in rule bodies. This allows you to process nested structures using dot notation:
+
+```prolog
+% Bind to a JSON file containing order data
+@bind("orders", "json", "data/orders", "orders.json").
+
+% Use SQL in the rule body to query nested fields
+% Access nested 'customer' struct fields using dot notation
+customer_orders() <- SELECT order_id, 
+                            customer.name AS customer_name, 
+                            customer.email AS email, 
+                            total_amount 
+                     FROM orders 
+                     WHERE status = 'shipped'.
+
+@output("customer_orders").
+```
+
+### SQL Queries with Filtering and Aggregation
+
+JSON datasources support full SQL capabilities including WHERE clauses, aggregations, and grouping:
+
+```prolog
+% Example 1: Filter by specific customer
+@bind("orders", "json", "data/orders", "orders.json").
+
+customer_order_history() <- SELECT order_id, order_date, total_amount 
+                            FROM orders 
+                            WHERE customer.customer_id = 'CUST-123'.
+
+@output("customer_order_history").
+```
+
+```prolog
+% Example 2: Aggregation with GROUP BY
+@bind("orders", "json", "data/orders", "orders.json").
+
+orders_by_city() <- SELECT shipping_address.city AS city, 
+                           COUNT(*) AS order_count,
+                           SUM(total_amount) AS total_revenue
+                    FROM orders 
+                    GROUP BY shipping_address.city.
+
+@output("orders_by_city").
+```
+
+```prolog
+% Example 3: Complex WHERE conditions with multiple nested fields
+@bind("orders", "json", "data/orders", "orders.json").
+
+high_value_orders() <- SELECT order_id, 
+                              customer.name AS customer_name, 
+                              shipping_address.city AS city,
+                              total_amount 
+                       FROM orders 
+                       WHERE total_amount > 1000 
+                         AND status = 'shipped'
+                         AND shipping_address.state = 'MA'.
+
+@output("high_value_orders").
+```
+
+### SQL Queries with Ordering and Distinct
+
+```prolog
+% Example: ORDER BY date
+@bind("orders", "json", "data/orders", "orders.json").
+
+recent_orders() <- SELECT order_id, customer.name AS customer_name, order_date, total_amount 
+                   FROM orders 
+                   ORDER BY order_date DESC.
+
+@output("recent_orders").
+```
+
+```prolog
+% Example: DISTINCT values to find unique cities
+@bind("orders", "json", "data/orders", "orders.json").
+
+shipping_cities() <- SELECT DISTINCT shipping_address.city AS city, 
+                                     shipping_address.state AS state 
+                     FROM orders.
+
+@output("shipping_cities").
+```
+
+### Using Parameters in SQL Queries
+
+You can use `@param` to parameterize your JSON queries:
+
+```prolog
+% Define parameters for filtering
+@param("min_amount", "500").
+@param("target_state", "CA").
+
+@bind("orders", "json", "data/orders", "orders.json").
+
+% Use parameters in the WHERE clause
+filtered_orders() <- SELECT order_id, customer.name AS customer_name, total_amount 
+                     FROM orders 
+                     WHERE total_amount > ${min_amount}
+                       AND shipping_address.state = '${target_state}'.
+
+@output("filtered_orders").
+```
+
+### Alternative: Using struct:get Function
+
+For accessing individual nested fields in Datalog rules (without SQL), you can use the `struct:get` function. Note that the variable must be on the left side of the assignment:
+
+```prolog
+@bind("orders", "json", "data/orders", "orders.json").
+
+% Extract nested fields using struct:get
+% Syntax: Variable = struct:get(StructField, "fieldName")
+order_customers(OrderId, CustomerName, Email) :- 
+    orders(OrderId, _, Customer, _, _, _, _), 
+    CustomerName = struct:get(Customer, "name"), 
+    Email = struct:get(Customer, "email").
+
+@output("order_customers").
+```
+
+### Example: Filtering with struct:get
+
+```prolog
+@bind("orders", "json", "data/orders", "orders.json").
+
+% Filter orders by status using struct:get
+shipped_orders(OrderId, CustomerName) :- 
+    orders(OrderId, _, Customer, _, _, _, Status), 
+    OrderId = struct:get(orders, "order_id"),
+    CustomerName = struct:get(Customer, "name"), 
+    Status = "shipped".
+
+@output("shipped_orders").
+```
+
+### Example: Accessing Multiple Nested Structs
+
+```prolog
+@bind("orders", "json", "data/orders", "orders.json").
+
+% Access both 'customer' and 'shipping_address' structs
+order_shipping_info(OrderId, CustomerName, City, State) :- 
+    orders(_, _, Customer, ShippingAddress, _, _, _), 
+    OrderId = struct:get(orders, "order_id"),
+    CustomerName = struct:get(Customer, "name"), 
+    City = struct:get(ShippingAddress, "city"),
+    State = struct:get(ShippingAddress, "state").
+
+@output("order_shipping_info").
+```
+
+### Using the query Option in @bind
+
+Alternatively, you can specify SQL queries directly in the `@bind` annotation using the `query` option:
+
+```prolog
+% Query specified in the bind annotation
+@bind("high_value_orders", 
+      "json query='SELECT order_id, customer.name AS customer_name, total_amount FROM high_value_orders WHERE total_amount > 1000'", 
+      "data/orders", 
+      "orders.json").
+
+result(OrderId, CustomerName, Amount) :- high_value_orders(OrderId, CustomerName, Amount).
+
+@output("result").
+```
+
+### Real-World Example: E-Commerce Analytics
+
+This example demonstrates a complete analytics workflow for processing order data from JSON files:
+
+```prolog
+% Bind to order data from JSON
+@bind("orders", "json", "data/orders", "orders.json").
+
+% Extract high-value customers with detailed order information
+high_value_customers() <- 
+    SELECT 
+        customer.customer_id AS customer_id,
+        customer.name AS customer_name,
+        customer.email AS email,
+        COUNT(*) AS total_orders,
+        SUM(total_amount) AS total_spent,
+        AVG(total_amount) AS avg_order_value
+    FROM orders
+    WHERE status = 'shipped'
+    GROUP BY customer.customer_id, customer.name, customer.email
+    HAVING SUM(total_amount) > 5000
+    ORDER BY total_spent DESC.
+
+@output("high_value_customers").
+
+% Analyze orders by geographic region
+regional_sales_summary() <- 
+    SELECT 
+        shipping_address.state AS state,
+        shipping_address.city AS city,
+        COUNT(*) AS order_count,
+        SUM(total_amount) AS revenue,
+        AVG(total_amount) AS avg_order_value
+    FROM orders
+    WHERE status IN ('shipped', 'delivered')
+    GROUP BY shipping_address.state, shipping_address.city
+    HAVING COUNT(*) > 10.
+
+@output("regional_sales_summary").
+
+% Identify pending orders that need attention
+pending_orders_alert() <- 
+    SELECT 
+        order_id,
+        customer.name AS customer_name,
+        customer.email AS contact_email,
+        order_date,
+        total_amount
+    FROM orders
+    WHERE status = 'pending'
+      AND order_date < '2025-01-01'.
+
+@output("pending_orders_alert").
+```
+
 ## PostgreSQL Database
 PostgreSQL is a robust open-source relational database that supports a wide range of data types and advanced querying capabilities. In this section, we will explore how to integrate PostgreSQL with Vadalog by first populating a customer table from a CSV file and then reading data from it using two approaches: full table read and a custom query.
 

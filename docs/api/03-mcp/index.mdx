@@ -1,0 +1,154 @@
+---
+title: Model Context Protocol (MCP)
+sidebar_label: Overview
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# AI Agent Integration via MCP
+
+Connect AI agents like Claude to Prometheux using the [Model Context Protocol (MCP)](https://modelcontextprotocol.io) — an open standard that enables AI assistants to interact with external tools and data sources.
+
+Prometheux offers two MCP integration options:
+
+- **[Local MCP Server](/api/mcp/local)** (`prometheux-mcp`): Runs on your machine alongside Claude Desktop
+- **[Remote MCP Server](/api/mcp/remote)** (`px-remote-mcp-server`): Cloud-hosted option that works with both Claude Desktop and Claude Web via OAuth authentication
+
+## What is MCP?
+
+The Model Context Protocol allows AI agents to:
+- **Discover** available tools and resources
+- **Execute** operations through a standardized interface
+- **Access** external data sources and APIs
+
+With Prometheux's MCP integration, you can use natural language to interact with your ontologies, list concepts, and execute reasoning — all directly from Claude Desktop or Claude Web.
+
+## Which Option Should I Use?
+
+<Tabs>
+  <TabItem value="local" label="Local MCP Server" default>
+
+**Best for:** Claude Desktop users, development environments, on-premise deployments
+
+**Pros:**
+<ul>
+<li>Simple pip install</li>
+<li>Runs locally (no external dependencies)</li>
+<li>Full control over credentials</li>
+<li>Works with any Prometheux instance (cloud or on-premise)</li>
+</ul>
+
+**Cons:**
+<ul>
+<li>Requires Claude Desktop app (not available for Claude Web)</li>
+<li>Needs to be installed on each machine</li>
+</ul>
+
+**Use this when:**
+<ul>
+<li>You're using Claude Desktop</li>
+<li>You want a simple, local installation</li>
+<li>You're developing or testing locally</li>
+</ul>
+
+**[Get Started with Local MCP →](/api/mcp/local)**
+
+  </TabItem>
+  <TabItem value="remote" label="Remote MCP Server">
+
+**Best for:** Claude Web users, multi-user deployments, enterprise environments
+
+**Pros:**
+<ul>
+<li>Works with both Claude Desktop and Claude Web</li>
+<li>OAuth authentication with browser login flow</li>
+<li>Centralized deployment (one server, many users)</li>
+<li>Handles authentication and session management</li>
+<li>No local installation required</li>
+</ul>
+
+**Cons:**
+<ul>
+<li>Requires a deployed server instance</li>
+<li>Suitable for production cloud deployments</li>
+</ul>
+
+**Use this when:**
+<ul>
+<li>You want to use Claude Web (browser-based)</li>
+<li>You want centralized authentication for multiple users</li>
+<li>You're deploying for an organization</li>
+<li>You prefer not to install anything locally</li>
+</ul>
+
+**[Get Started with Remote MCP →](/api/mcp/remote)**
+
+  </TabItem>
+</Tabs>
+
+## Available Tools
+
+Both MCP servers expose the following tools to AI agents:
+
+### `list_concepts`
+
+Lists all concepts available in a project.
+
+**Parameters:**
+- `project_id` (string, required): The unique identifier of the project
+- `scope` (string, optional): Search scope - `"user"` or `"organization"`. Default: `"user"`
+
+**Returns:**
+- `concepts`: Array of concept objects with metadata (name, fields, types, descriptions)
+- `count`: Total number of concepts found
+
+### `run_concept`
+
+Executes a concept to derive new knowledge through reasoning.
+
+**Parameters:**
+- `project_id` (string, required): The unique identifier of the project
+- `concept_name` (string, required): Name of the concept to execute
+- `params` (object, optional): Parameters for the reasoning engine
+- `scope` (string, optional): Search scope - `"user"` or `"organization"`. Default: `"user"`
+- `force_rerun` (boolean, optional): Re-execute even if results exist. Default: `true`
+- `persist_outputs` (boolean, optional): Save derived facts to database. Default: `false`
+
+**Returns:**
+- `concept_name`: The executed concept
+- `message`: Status message
+- `evaluation_results`: Reasoning results with derived facts
+- `predicates_populated`: List of populated predicates
+- `total_records`: Number of records derived
+
+## Example Usage
+
+Once configured, just chat naturally with Claude. The AI will automatically use the Prometheux MCP tools when relevant.
+
+**Example queries:**
+> "What concepts are available in my customer-analytics project?"
+
+> "Run the churn_prediction concept in the customer-analytics project"
+
+> "Execute high_value_customers in sales-data with min_value set to 1000"
+
+Claude will automatically:
+- Call the appropriate Prometheux MCP tools
+- Parse the results
+- Present them in a readable format
+- Answer follow-up questions about the data
+
+## Learn More
+
+- **MCP Protocol Specification:** [modelcontextprotocol.io](https://modelcontextprotocol.io)
+- **Local MCP Server (GitHub):** [prometheuxresearch/px-mcp-server](https://github.com/prometheuxresearch/px-mcp-server)
+- **Local MCP Server (PyPI):** [prometheux-mcp](https://pypi.org/project/prometheux-mcp/)
+- **Python SDK:** See [Python SDK Reference](/api#python-sdk) for alternative integration methods
+- **REST API:** See [REST API Reference](/api#rest-api) for direct HTTP access
+
+## Related Resources
+
+- [Concepts API](/api/endpoints/concepts) - Learn about the concept API
+- [Python SDK](/api#python-sdk) - Alternative programmatic access
+- [Chat API](/learn/on-prem/chat-api) - Interactive AI chat interface

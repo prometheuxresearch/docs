@@ -12,8 +12,8 @@ The Prometheux platform provides multiple ways to interact with all platform fea
 - **Python SDK** (`prometheux_chain`): A high-level Python library for seamless integration
 - **REST API**: Direct HTTP endpoints for maximum flexibility and language-agnostic access
 - **MCP Integration**: Connect AI agents like Claude to your ontologies via Model Context Protocol
-  - **Local MCP Server** (`prometheux-mcp`): For Claude Desktop users
-  - **Remote MCP Server** (`px-remote-mcp-server`): For Claude Web users with OAuth
+  - **Local MCP Server** (`prometheux-mcp`): For Claude Desktop with local installation
+  - **Remote MCP Server** (`px-remote-mcp-server`): For Claude Desktop and Web with OAuth
 
 All interfaces provide equivalent functionality—choose the one that best fits your workflow.
 
@@ -157,18 +157,18 @@ Restart Claude Desktop and ask:
 
 > "What concepts are available in my project-name project?"
 
-See the [full MCP documentation](/api/mcp) for detailed setup and usage.
+See the [full MCP documentation](/api/mcp/local) for detailed setup and usage.
 
   </TabItem>
-  <TabItem value="mcp-remote" label="MCP (Claude Web)">
+  <TabItem value="mcp-remote" label="MCP (Remote)">
 
 ### Cloud-Hosted with OAuth
 
-The remote MCP server works with Claude Web (browser-based) and uses OAuth for authentication.
+The remote MCP server works with both Claude Desktop and Claude Web, using OAuth for authentication.
 
 ### Setup
 
-1. **Open Claude Web** at [claude.ai](https://claude.ai)
+1. **Open Claude** (Web at [claude.ai](https://claude.ai) or Desktop app)
 2. **Add Connector:**
    - Settings → Connectors → Add custom connector
    - **Name:** `prometheux`
@@ -187,7 +187,7 @@ Ask Claude:
 
 The remote server handles authentication and communicates with your Prometheux instance.
 
-See the [full MCP documentation](/api/mcp#remote-mcp-server-claude-web) for detailed setup and troubleshooting.
+See the [full MCP documentation](/api/mcp/remote) for detailed setup and troubleshooting.
 
   </TabItem>
   <TabItem value="rest" label="REST API">

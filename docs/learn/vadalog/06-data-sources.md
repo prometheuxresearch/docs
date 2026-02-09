@@ -1143,31 +1143,691 @@ user(X) :- user_s3(X).
 
 ## Consuming Data via API
 
-This example shows how to connect to an external API endpoint that returns data in JSON, XML, CSV format
+Vadalog supports consuming data from REST APIs with flexible authentication and SQL query capabilities. The API reader supports JSON (default), CSV, and XML response formats, with full SQL integration for querying nested data structures.
 
-Below is a full example for ingesting weather data from the Meteomatics API in CSV format.
+**Popular Use Cases:**
+- 📈 **Cryptocurrency Analytics**: Bitcoin, Ethereum, real-time price monitoring
+- ⚽ **Sports Analytics**: Football leagues, team statistics, match predictions
+- 🌍 **Geospatial Data**: Country demographics, weather patterns, mapping
+- 📊 **Monitoring Systems**: Prometheus metrics, Kubernetes clusters, Alertmanager
+- 🔗 **Data Integration**: Combine multiple APIs for comprehensive analytics
 
+### Quick Start Examples
+
+**Get Bitcoin Price (works immediately, no auth):**
 ```prolog
-% Bind the predicate to the API endpoint
-@bind(
-    "meteo",
-    "api delimiter=';', username='my_username', password='my_password', responseFormat='csv'",
-    "https://api.meteomatics.com/",
-    "2025-06-09T00:00:00Z--2025-06-12T00:00:00Z:PT3H/t_2m:C,relative_humidity_2m:p/47.423336,9.377225/csv"
-).
-
-% Declare an output predicate
-@output("meteo_out").
-
-% Map the data to the output predicate
-meteo_out(Valid_Date, T_2m_C, Relative_humidity_2m_p) :- meteo(Valid_Date, T_2m_C, Relative_humidity_2m_p).
+@bind("btc", "api", "https://api.coingecko.com/api/v3/", "coins/bitcoin").
+result() <- SELECT id, symbol, market_data.current_price.usd AS price FROM btc.
+@output("result").
 ```
 
-## Customization
+**Get Football Team Data:**
+```prolog
+@bind("teams", "api", "https://www.thesportsdb.com/api/v1/json/3/", "searchteams.php?t=Arsenal").
+result() <- SELECT SIZE(teams) AS team_count FROM teams.
+@output("result").
+```
 
-* **API format**: The pattern above supports any API providing CSV data. For JSON/XML APIs, adjust the format parameter and data mapping accordingly (e.g. use `json` or `xml` in the `@bind`).
-* **Authentication**: Many APIs support token-based auth (use `token='your_token'` instead of username/password).
-* **Delimiter**: Update the `delimiter` parameter to match your API's CSV format if not using semicolons.
+**Query Prometheus Metrics:**
+```prolog
+@bind("metrics", "api authType=bearer, token=${TOKEN}", "https://prometheus.example.com/api/v1/", "query?query=up").
+result() <- SELECT status, data.resultType FROM metrics.
+@output("result").
+```
+
+### API Configuration Options
+
+The API datasource supports the following configuration options:
+
+- `responseFormat`: Response format - `json` (default), `csv`, or `xml`. If not specified, JSON is assumed.
+- `authType`: Authentication method - `basic`, `bearer`, or `apikey`
+- `username`: Username for basic authentication
+- `password`: Password for basic authentication
+- `token`: Token for bearer authentication
+- `apikey`: API key for API key authentication
+- `headers`: Custom headers in format `header1:value1,header2:value2`
+- `delimiter`: CSV delimiter character (default: `,`)
+
+:::tip Free Public APIs
+Many popular APIs don't require authentication and can be used immediately:
+- **CoinGecko** - Cryptocurrency prices and market data (rate limits apply on free tier)
+- **TheSportsDB** - Football/sports statistics and results
+- **REST Countries** - Country demographics and geospatial data
+- **JSONPlaceholder** - Test data for prototyping
+
+Perfect for getting started with Vadalog API integration!
+:::
+
+:::note API Rate Limits
+Free-tier APIs often have rate limits (e.g., CoinGecko: ~10-30 requests/minute). For production use:
+- Space out requests or use caching
+- Consider upgrading to paid API tiers for higher limits
+- Handle HTTP 429 (Rate Limit Exceeded) errors gracefully
+:::
+
+### Example 1: Simple API Call (JSON - Default Format)
+
+Since JSON is the default response format, you don't need to specify `responseFormat=json`:
+
+```prolog
+% Bind to a public API that returns JSON (no authentication needed)
+% responseFormat defaults to JSON
+@bind("users_api", "api", "https://jsonplaceholder.typicode.com/", "users").
+
+% Use SQL in rule body to query nested fields
+result() <- SELECT name, email, address.city AS city 
+            FROM users_api 
+            WHERE id <= 5.
+
+@output("result").
+```
+
+### Example 2: Querying Nested JSON with SQL
+
+The recommended approach for querying API data is to use SQL directly in rule bodies:
+
+```prolog
+% Bind to GitHub API with authentication
+@bind("github_issues", 
+      "api authType=bearer, token=${GITHUB_TOKEN}", 
+      "https://api.github.com/repos/", "owner/repo/issues").
+
+% Query nested JSON structures with SQL
+open_bugs() <- SELECT title, 
+                      user.login AS author, 
+                      labels[0].name AS primary_label,
+                      created_at
+               FROM github_issues 
+               WHERE state = 'open' 
+                 AND labels[0].name = 'bug'
+               ORDER BY created_at DESC.
+
+@output("open_bugs").
+```
+
+### Example 3: Prometheus Metrics API
+
+Prometheus is a popular monitoring system that exposes metrics via REST API. Here's how to query Prometheus and process the results:
+
+```prolog
+% Query Prometheus instant query endpoint
+% The response format is: {"status":"success","data":{"resultType":"vector","result":[...]}}
+@bind("prom_metrics", 
+      "api authType=bearer, token=${PROMETHEUS_TOKEN}", 
+      "https://prometheus.example.com/api/v1/", 
+      "query?query=up").
+
+% Access top-level response structure
+metrics_status() <- SELECT status, 
+                           data.resultType AS result_type
+                    FROM prom_metrics
+                    WHERE status = 'success'.
+
+@output("metrics_status").
+```
+
+### Example 4: Prometheus Targets Endpoint
+
+Query Prometheus targets to monitor scrape status:
+
+```prolog
+% Query the targets endpoint to get information about monitored services
+@bind("targets", 
+      "api authType=bearer, token=${PROMETHEUS_TOKEN}", 
+      "https://prometheus.example.com/api/v1/", 
+      "targets").
+
+% Extract active targets with aggregation
+target_summary() <- SELECT status, 
+                           SIZE(data.activeTargets) AS active_count,
+                           SIZE(data.droppedTargets) AS dropped_count
+                    FROM targets
+                    WHERE status = 'success'.
+
+@output("target_summary").
+```
+
+### Example 5: Prometheus Query Aggregation
+
+Aggregate and count metrics from Prometheus responses:
+
+```prolog
+% Query Prometheus for goroutine metrics
+@bind("go_metrics", 
+      "api authType=bearer, token=${PROMETHEUS_TOKEN}", 
+      "https://prometheus.example.com/api/v1/", 
+      "query?query=go_goroutines").
+
+% Aggregate response data
+metric_summary() <- SELECT COUNT(*) AS response_count, 
+                           status
+                    FROM go_metrics
+                    WHERE status = 'success'
+                    GROUP BY status.
+
+@output("metric_summary").
+```
+
+### Example 6: Prometheus with Common Table Expressions (CTEs)
+
+Use CTEs to process Prometheus responses in multiple steps:
+
+```prolog
+% Query Prometheus CPU metrics
+@bind("cpu_metrics", 
+      "api authType=bearer, token=${PROMETHEUS_TOKEN}", 
+      "https://prometheus.example.com/api/v1/", 
+      "query?query=process_cpu_seconds_total").
+
+% Multi-step processing with CTE
+processed_metrics() <- WITH metric_data AS (
+                         SELECT status, 
+                                data.resultType AS result_type 
+                         FROM cpu_metrics
+                       ),
+                       filtered_metrics AS (
+                         SELECT status, result_type 
+                         FROM metric_data 
+                         WHERE status = 'success'
+                       )
+                       SELECT status, result_type 
+                       FROM filtered_metrics.
+
+@output("processed_metrics").
+```
+
+### Example 7: Prometheus Alertmanager API
+
+Query active alerts from Prometheus Alertmanager. For deeply nested fields within alert arrays, use the `struct:get` function:
+
+```prolog
+% Get active alerts from Alertmanager
+@bind("alerts_api", 
+      "api authType=bearer, token=${ALERTMANAGER_TOKEN}", 
+      "https://alertmanager.example.com/api/v1/", "alerts").
+
+% Extract nested alert fields using struct:get
+critical_pods(Pod, Namespace, Description) :- 
+    alerts_api(Annotations, EndsAt, Fingerprint, GeneratorURL, Labels, Receivers, StartsAt, Status, UpdatedAt),
+    Pod = struct:get(Labels, "pod"),
+    Namespace = struct:get(Labels, "namespace"),
+    Severity = struct:get(Labels, "severity"),
+    Description = struct:get(Annotations, "description"),
+    Severity = "critical".
+
+@output("critical_pods").
+```
+
+### Example 8: Kubernetes API
+
+Query Kubernetes resources via the API server:
+
+```prolog
+% Get pod information from Kubernetes API
+@bind("pods", 
+      "api authType=bearer, token=${K8S_TOKEN}", 
+      "https://kubernetes.default.svc/api/v1/", "pods").
+
+% Query pod metadata and status (top-level fields work reliably)
+pod_info() <- SELECT metadata.name AS pod_name,
+                     metadata.namespace AS namespace,
+                     status.phase AS phase
+              FROM pods
+              WHERE status.phase != 'Running'.
+
+@output("pod_info").
+```
+
+:::tip Working with Nested Arrays
+When dealing with deeply nested arrays (like `status.containerStatuses[0]`), consider using the `struct:get` function in Datalog rules instead of direct array indexing in SQL. This provides more reliable access to complex nested structures.
+:::
+
+### Example 9: CSV Format API (Weather Data)
+
+For APIs that return CSV format, specify `responseFormat=csv`:
+
+```prolog
+% Bind to weather API that returns CSV
+@bind("meteo",
+      "api delimiter=';', username='my_username', password='my_password', responseFormat=csv",
+      "https://api.meteomatics.com/",
+      "2025-06-09T00:00:00Z--2025-06-12T00:00:00Z:PT3H/t_2m:C,relative_humidity_2m:p/47.423336,9.377225/csv").
+
+% Query CSV data with SQL
+hot_days() <- SELECT Valid_Date, T_2m_C 
+              FROM meteo 
+              WHERE T_2m_C > 25
+              ORDER BY T_2m_C DESC.
+
+@output("hot_days").
+```
+
+### Example 10: Joining Multiple API Sources
+
+You can join data from multiple API endpoints using SQL in rule bodies:
+
+```prolog
+% Bind to JSONPlaceholder users API
+@bind("users_api", "api", "https://jsonplaceholder.typicode.com/", "users").
+
+% Bind to JSONPlaceholder posts API
+@bind("posts_api", "api", "https://jsonplaceholder.typicode.com/", "posts").
+
+% Join users with their posts using renamed column format (users_api_3 = id)
+user_posts() <- SELECT u.users_api_4 AS author_name, 
+                       u.users_api_2 AS email,
+                       p.posts_api_2 AS post_title
+                FROM users_api u 
+                JOIN posts_api p ON u.users_api_3 = p.posts_api_3
+                WHERE u.users_api_3 <= 5
+                LIMIT 20.
+
+@output("user_posts").
+```
+
+### Example 11: Common Table Expressions (CTEs) with API Data
+
+Use CTEs for complex multi-step transformations:
+
+```prolog
+@bind("orders_api", 
+      "api authType=apikey, apikey=${API_KEY}", 
+      "https://api.shop.com/v1/", "orders").
+
+% Use CTE to calculate customer lifetime value
+customer_value() <- WITH customer_orders AS (
+                      SELECT customer.customer_id AS customer_id,
+                             customer.name AS customer_name,
+                             order_id,
+                             total_amount
+                      FROM orders_api
+                      WHERE status = 'completed'
+                    ),
+                    customer_totals AS (
+                      SELECT customer_id,
+                             customer_name,
+                             COUNT(*) AS order_count,
+                             SUM(total_amount) AS lifetime_value
+                      FROM customer_orders
+                      GROUP BY customer_id, customer_name
+                    )
+                    SELECT customer_name, lifetime_value, order_count
+                    FROM customer_totals
+                    WHERE lifetime_value > 5000
+                    ORDER BY lifetime_value DESC.
+
+@output("customer_value").
+```
+
+### Example 12: Using Parameters in API Queries
+
+Combine `@param` with API queries for dynamic filtering:
+
+```prolog
+% Define parameters
+@param("target_status", "success").
+@param("max_results", "100").
+
+@bind("metrics_api", "api authType=bearer, token=${TOKEN}", "https://prometheus.example.com/api/v1/", "query?query=up").
+
+% Use parameters in WHERE clause
+filtered_metrics() <- SELECT status, 
+                             data.resultType AS result_type
+                      FROM metrics_api
+                      WHERE status = '${target_status}'
+                      LIMIT ${max_results}.
+
+@output("filtered_metrics").
+```
+
+### Example 13: Bitcoin & Cryptocurrency Price Analytics
+
+Track and analyze cryptocurrency prices in real-time using the CoinGecko API (no authentication required):
+
+**Basic Bitcoin Data:**
+
+```prolog
+% Get Bitcoin basic information from CoinGecko
+@bind("bitcoin", "api", "https://api.coingecko.com/api/v3/", "coins/bitcoin").
+
+% Extract basic Bitcoin info
+btc_info() <- SELECT id, symbol, name FROM bitcoin.
+
+@output("btc_info").
+```
+
+**Bitcoin Price with Nested Field Access:**
+
+```prolog
+% Get Bitcoin market data
+@bind("bitcoin", "api", "https://api.coingecko.com/api/v3/", "coins/bitcoin").
+
+% Access nested price data
+btc_price() <- SELECT id, 
+                      symbol, 
+                      market_data.current_price.usd AS price_usd
+               FROM bitcoin.
+
+@output("btc_price").
+```
+
+**Real-Time Bitcoin Price Monitoring with Multiple Currencies:**
+
+```prolog
+% Monitor Bitcoin price in multiple currencies (faster endpoint)
+@bind("btc_price", "api", "https://api.coingecko.com/api/v3/", "simple/price?ids=bitcoin&vs_currencies=usd,eur&include_24hr_change=true").
+
+% Extract multi-currency prices
+price_data() <- SELECT bitcoin.usd AS price_usd,
+                       bitcoin.eur AS price_eur
+                FROM btc_price.
+
+@output("price_data").
+```
+
+**Advanced: Bitcoin Price Alerts with Market Signals:**
+
+```prolog
+% Monitor Bitcoin with market signal using CTE and CASE
+@bind("btc_price", "api", "https://api.coingecko.com/api/v3/", "simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true").
+
+% Analyze price changes and create market signals
+price_analysis() <- WITH btc_data AS (
+                      SELECT bitcoin.usd AS price_usd, 
+                             bitcoin.usd_24h_change AS change_pct 
+                      FROM btc_price
+                    )
+                    SELECT price_usd,
+                           change_pct,
+                           CASE 
+                             WHEN change_pct > 5 THEN 'SURGE'
+                             WHEN change_pct < -5 THEN 'DROP'
+                             ELSE 'STABLE'
+                           END AS market_signal
+                    FROM btc_data.
+
+@output("price_analysis").
+```
+
+**Compare Multiple Cryptocurrencies:**
+
+```prolog
+% Get list of all cryptocurrencies
+@bind("crypto_list", "api", "https://api.coingecko.com/api/v3/", "coins/list").
+
+% Filter for major cryptocurrencies
+major_cryptos() <- SELECT id, symbol, name 
+                   FROM crypto_list 
+                   WHERE symbol IN ('btc', 'eth', 'usdt')
+                   LIMIT 10.
+
+@output("major_cryptos").
+```
+
+### Example 14: Football (Soccer) Analytics
+
+Analyze football match data, team statistics, and player performance using TheSportsDB API (no authentication required):
+
+:::note TheSportsDB Response Format
+TheSportsDB wraps response data in arrays (e.g., `table`, `teams`, `results`). Use `SIZE()` to count items or access top-level response structure.
+:::
+
+**Premier League Standings - Count Teams:**
+
+```prolog
+% Get Premier League standings from TheSportsDB
+@bind("premier_league", "api", "https://www.thesportsdb.com/api/v1/json/3/", "lookuptable.php?l=4328&s=2023-2024").
+
+% Count teams in the league
+team_count() <- SELECT SIZE(table) AS team_count 
+                FROM premier_league 
+                WHERE SIZE(table) > 0.
+
+@output("team_count").
+```
+
+**Search for Specific Team:**
+
+```prolog
+% Search for Arsenal team information
+@bind("team_info", "api", "https://www.thesportsdb.com/api/v1/json/3/", "searchteams.php?t=Arsenal").
+
+% Check how many teams match the search
+team_results() <- SELECT SIZE(teams) AS team_count 
+                  FROM team_info 
+                  WHERE SIZE(teams) > 0.
+
+@output("team_results").
+```
+
+**Get Recent Matches:**
+
+```prolog
+% Get last matches for Arsenal (team ID 133604)
+@bind("recent_matches", "api", "https://www.thesportsdb.com/api/v1/json/3/", "eventslast.php?id=133604").
+
+% Count recent matches
+match_count() <- SELECT SIZE(results) AS match_count 
+                 FROM recent_matches 
+                 WHERE SIZE(results) > 0.
+
+@output("match_count").
+```
+
+**Get All Available Leagues:**
+
+```prolog
+% Get all leagues from TheSportsDB
+@bind("all_leagues", "api", "https://www.thesportsdb.com/api/v1/json/3/", "all_leagues.php").
+
+% Count available leagues
+league_data() <- SELECT SIZE(leagues) AS league_count 
+                 FROM all_leagues 
+                 WHERE SIZE(leagues) > 0.
+
+@output("league_data").
+```
+
+**Get All Countries with Sports:**
+
+```prolog
+% Get all countries with sports leagues
+@bind("all_countries", "api", "https://www.thesportsdb.com/api/v1/json/3/", "all_countries.php").
+
+% Count countries
+country_data() <- SELECT SIZE(countries) AS country_count 
+                  FROM all_countries 
+                  WHERE SIZE(countries) > 0.
+
+@output("country_data").
+```
+
+### Example 15: Cross-Domain Analytics - Combining Multiple APIs
+
+Combine data from multiple API sources for comprehensive analysis:
+
+**Bitcoin Price + Multiple Cryptocurrencies:**
+
+```prolog
+% Get Bitcoin price
+@bind("btc_price", "api", "https://api.coingecko.com/api/v3/", "simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true").
+
+% Get list of cryptocurrencies
+@bind("crypto_list", "api", "https://api.coingecko.com/api/v3/", "coins/list").
+
+% Analyze Bitcoin price context
+btc_context() <- WITH btc_data AS (
+                   SELECT bitcoin.usd AS price_usd,
+                          bitcoin.usd_24h_change AS volatility
+                   FROM btc_price
+                 ),
+                 crypto_count AS (
+                   SELECT COUNT(*) AS total_cryptos
+                   FROM crypto_list
+                   WHERE symbol IN ('btc', 'eth', 'usdt')
+                 )
+                 SELECT b.price_usd,
+                        b.volatility,
+                        c.total_cryptos,
+                        CASE 
+                          WHEN ABS(b.volatility) > 5 THEN 'HIGH'
+                          WHEN ABS(b.volatility) > 2 THEN 'MEDIUM'
+                          ELSE 'LOW'
+                        END AS volatility_level
+                 FROM btc_data b
+                 CROSS JOIN crypto_count c.
+
+@output("btc_context").
+```
+
+**Football Leagues + Teams Analysis:**
+
+```prolog
+% Get all available leagues
+@bind("leagues", "api", "https://www.thesportsdb.com/api/v1/json/3/", "all_leagues.php").
+
+% Get Premier League standings
+@bind("premier_league", "api", "https://www.thesportsdb.com/api/v1/json/3/", "lookuptable.php?l=4328&s=2023-2024").
+
+% Combine league and team data
+sports_overview() <- WITH league_data AS (
+                       SELECT SIZE(leagues) AS total_leagues
+                       FROM leagues
+                       WHERE SIZE(leagues) > 0
+                     ),
+                     team_data AS (
+                       SELECT SIZE(table) AS epl_teams
+                       FROM premier_league
+                       WHERE SIZE(table) > 0
+                     )
+                     SELECT l.total_leagues,
+                            t.epl_teams
+                     FROM league_data l
+                     CROSS JOIN team_data t.
+
+@output("sports_overview").
+```
+
+### Example 16: REST Countries API - Public Data
+
+Query public APIs without authentication:
+
+```prolog
+% Query REST Countries API (no authentication required)
+% Note: responseFormat defaults to JSON, so we don't need to specify it
+@bind("countries", "api", "https://restcountries.com/v3.1/", "all?fields=name,region,population").
+
+% Aggregate countries by region
+regional_stats() <- SELECT region,
+                           COUNT(*) AS country_count,
+                           SUM(population) AS total_population,
+                           AVG(population) AS avg_population
+                    FROM countries
+                    GROUP BY region
+                    ORDER BY total_population DESC.
+
+@output("regional_stats").
+```
+
+### API Authentication Methods Summary
+
+| Auth Type | Parameters | Example |
+|-----------|-----------|---------|
+| **Bearer Token** | `authType=bearer, token=<token>` | GitHub, Kubernetes, Prometheus |
+| **Basic Auth** | `authType=basic, username=<user>, password=<pass>` | Private APIs |
+| **API Key** | `authType=apikey, apikey=<key>` | REST APIs with key-based auth |
+| **Custom Headers** | `headers=<key1>:<value1>,<key2>:<value2>` | APIs requiring custom headers |
+| **No Auth** | No authentication parameters | Public APIs |
+
+### Best Practices
+
+1. **Default Format**: JSON is the default `responseFormat`, so you can omit it for JSON APIs
+2. **Use Environment Variables**: Store sensitive tokens in environment variables: `token=${API_TOKEN}`
+3. **SQL in Rule Bodies**: Preferred approach for querying nested API data
+4. **Filter Early**: Apply WHERE clauses to reduce data at the source
+5. **Handle Nested Data**: Use dot notation (`market_data.current_price.usd`) for nested JSON fields
+6. **Array Access**: Use `SIZE()` function for reliable array length checks
+7. **Aggregations**: Use GROUP BY for summarizing API data
+8. **JOINs**: When joining multiple API sources, use renamed column format (`predicate_name_i`)
+9. **Real-Time Data**: Combine CTEs with CASE statements for market signals and alerts
+10. **Rate Limits**: Be mindful of API rate limits; use aggregations to reduce query frequency
+
+### Popular API Use Cases
+
+**Financial & Crypto Analytics:**
+- ✅ Track Bitcoin prices in real-time (tested with CoinGecko API)
+- ✅ Monitor price changes across multiple currencies (USD, EUR)
+- ✅ Set up price alerts using CASE statements and CTEs
+- ✅ Compare multiple cryptocurrencies by symbol
+- ✅ Access nested market data (prices, volumes)
+
+**Sports Analytics:**
+- ✅ Count teams in league standings (tested with TheSportsDB)
+- ✅ Search for specific teams and get team counts
+- ✅ Track recent match history
+- ✅ Query available leagues and countries
+- ✅ Use SIZE() function for array-wrapped responses
+
+**Monitoring & DevOps:**
+- ✅ Query Prometheus for system metrics (tested with testcontainers)
+- ✅ Access Prometheus response structure (status, resultType)
+- ✅ Monitor active targets with SIZE()
+- ✅ Use CTEs for multi-step metric processing
+- ✅ Default JSON format handling
+
+**Recommended Patterns:**
+- Use `SIZE(array_field)` to count array elements
+- Access nested fields with dot notation: `field.subfield.value`
+- Use CTEs for complex multi-step transformations
+- Use CASE statements for conditional logic and alerts
+- Apply WHERE clauses with SIZE() to filter valid responses
+
+### Troubleshooting
+
+**Issue**: `API request failed with status code: 401`  
+**Solution**: Verify authentication credentials and token validity
+
+**Issue**: `responseFormat` not recognized  
+**Solution**: Ensure format is one of: `json`, `csv`, or `xml`
+
+**Issue**: Nested field not found  
+**Solution**: Check the API response structure and use correct dot notation
+
+**Issue**: Column renamed to `predicate_0`, `predicate_1`  
+**Solution**: For JOINs between multiple sources, use renamed column references
+
+**Issue**: Error accessing deeply nested arrays (e.g., `data.result[0].metric.instance`)  
+**Solution**: Array access within deeply nested JSON structures can be unreliable depending on the response format. Use one of these alternatives:
+
+1. **Access top-level fields directly**:
+   ```prolog
+   % Instead of: data.result[0].value[1]
+   % Use: status, data.resultType
+   result() <- SELECT status, data.resultType FROM api_data.
+   ```
+
+2. **Use `struct:get` in Datalog rules**:
+   ```prolog
+   % Access nested fields after binding
+   result(MetricName) :- 
+       api_data(..., MetricStruct, ...),
+       MetricName = struct:get(MetricStruct, "instance").
+   ```
+
+3. **Use `SIZE()` for array lengths**:
+   ```prolog
+   % Instead of accessing individual array elements
+   % Count array sizes
+   result() <- SELECT SIZE(data.activeTargets) AS target_count FROM api_data.
+   ```
+
+**Issue**: Prometheus metrics with complex nested structures  
+**Solution**: For Prometheus API responses, focus on accessing:
+- Top-level response fields: `status`, `data.resultType`
+- Struct sizes: `SIZE(data.activeTargets)`, `SIZE(data.result)`
+- Use CTEs and aggregations on response-level data rather than individual metric arrays
+
+For accessing individual metric labels and values within Prometheus results, consider using the `struct:get` function in Datalog rules after binding the data.
 
 ---
 

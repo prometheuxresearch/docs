@@ -350,7 +350,7 @@ This example demonstrates reading a JSON file without any query:
 % Bind the 'orders' concept to a JSON file
 @bind("orders", "json", "data/orders", "orders.json").
 
-% Access the data in Datalog rules
+% Access the data in Vadalog rules
 all_orders(OrderId, CustomerName, Total) :- orders(OrderId, _, CustomerName, _, _, Total, _).
 
 @output("all_orders").
@@ -466,7 +466,7 @@ filtered_orders() <- SELECT order_id, customer.name AS customer_name, total_amou
 
 ### Alternative: Using struct:get Function
 
-For accessing individual nested fields in Datalog rules (without SQL), you can use the `struct:get` function. Note that the variable must be on the left side of the assignment:
+For accessing individual nested fields in Vadalog rules (without SQL), you can use the `struct:get` function. Note that the variable must be on the left side of the assignment:
 
 ```prolog
 @bind("orders", "json", "data/orders", "orders.json").
@@ -1379,7 +1379,7 @@ pod_info() <- SELECT metadata.name AS pod_name,
 ```
 
 :::tip Working with Nested Arrays
-When dealing with deeply nested arrays (like `status.containerStatuses[0]`), consider using the `struct:get` function in Datalog rules instead of direct array indexing in SQL. This provides more reliable access to complex nested structures.
+When dealing with deeply nested arrays (like `status.containerStatuses[0]`), consider using the `struct:get` function in Vadalog rules instead of direct array indexing in SQL. This provides more reliable access to complex nested structures.
 :::
 
 ### Example 9: CSV Format API (Weather Data)
@@ -1806,7 +1806,7 @@ regional_stats() <- SELECT region,
    result() <- SELECT status, data.resultType FROM api_data.
    ```
 
-2. **Use `struct:get` in Datalog rules**:
+2. **Use `struct:get` in Vadalog rules**:
    ```prolog
    % Access nested fields after binding
    result(MetricName) :- 
@@ -1827,7 +1827,7 @@ regional_stats() <- SELECT region,
 - Struct sizes: `SIZE(data.activeTargets)`, `SIZE(data.result)`
 - Use CTEs and aggregations on response-level data rather than individual metric arrays
 
-For accessing individual metric labels and values within Prometheus results, consider using the `struct:get` function in Datalog rules after binding the data.
+For accessing individual metric labels and values within Prometheus results, consider using the `struct:get` function in Vadalog rules after binding the data.
 
 ---
 

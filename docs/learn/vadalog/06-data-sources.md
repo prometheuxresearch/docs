@@ -1354,29 +1354,195 @@ processed_metrics() <- WITH metric_data AS (
 @output("processed_metrics").
 ```
 
-### Example 7: Prometheus Alertmanager API
+### Example 7: Prometheus - List All Metric Names
 
-Query active alerts from Prometheus Alertmanager. For deeply nested fields within alert arrays, use the `struct:get` function:
+Query Prometheus to get all available metric names:
 
 ```prolog
-% Get active alerts from Alertmanager
-@bind("alerts_api", 
-      "api authType=bearer, token=${ALERTMANAGER_TOKEN}", 
-      "https://alertmanager.example.com/api/v1/", "alerts").
+% Get all metric names from Prometheus
+@bind("metric_names", 
+      "api authType=bearer, token=${PROMETHEUS_TOKEN}", 
+      "https://prometheus.example.com/api/v1/", 
+      "label/__name__/values").
 
-% Extract nested alert fields using struct:get
-critical_pods(Pod, Namespace, Description) :- 
-    alerts_api(Annotations, EndsAt, Fingerprint, GeneratorURL, Labels, Receivers, StartsAt, Status, UpdatedAt),
-    Pod = struct:get(Labels, "pod"),
-    Namespace = struct:get(Labels, "namespace"),
-    Severity = struct:get(Labels, "severity"),
-    Description = struct:get(Annotations, "description"),
-    Severity = "critical".
+% Extract metric names - response is {"status":"success","data":["metric1","metric2",...]}
+metrics_list() <- SELECT status, 
+                         SIZE(data) AS metric_count
+                  FROM metric_names
+                  WHERE status = 'success'.
 
-@output("critical_pods").
+@output("metrics_list").
 ```
 
-### Example 8: Kubernetes API
+If you need to process individual metric names, use `collections:explode`:
+
+```prolog
+% Get all metric names
+@bind("metric_names_api", 
+      "api authType=bearer, token=${PROMETHEUS_TOKEN}", 
+      "https://prometheus.example.com/api/v1/", 
+      "label/__name__/values").
+
+% Explode the data array to get individual metric names
+metric_linear(MetricName) :- metric_names_api(MetricArray, Status),
+                             Status = "success",
+                             MetricName = collections:explode(MetricArray).
+
+% Filter for specific metrics
+filtered_metrics(MetricName) :- metric_linear(MetricName),
+                                 contains(MetricName, "prometheus").
+
+@output("filtered_metrics").
+```
+
+### Example 8: Prometheus - Query Build Information
+
+Query specific metrics like `prometheus_build_info`:
+
+```prolog
+% Query Prometheus build info metric
+@bind("build_info", 
+      "api authType=bearer, token=${PROMETHEUS_TOKEN}", 
+      "https://prometheus.example.com/api/v1/", 
+      "query?query=prometheus_build_info").
+
+% Extract build information from response
+build_details() <- SELECT status,
+                          data.resultType AS result_type,
+                          SIZE(data.result) AS result_count
+                   FROM build_info
+                   WHERE status = 'success'.
+
+@output("build_details").
+```
+
+### Example 9: Prometheus - Range Query
+
+Query metric values over a time range:
+
+```prolog
+% Range query for 'up' metric with 60s step
+% Note: Use epoch timestamps for start/end parameters
+% Example timestamps: Feb 2026 (update to current time for your use)
+@bind("up_range", 
+      "api authType=bearer, token=${PROMETHEUS_TOKEN}", 
+      "https://prometheus.example.com/api/v1/", 
+      "query_range?query=up&start=1770700000&end=1770800000&step=60").
+
+% Analyze the range query response
+range_summary() <- SELECT status,
+                          data.resultType AS result_type,
+                          SIZE(data.result) AS series_count
+                   FROM up_range
+                   WHERE status = 'success'.
+
+@output("range_summary").
+```
+
+**Using Parameters for Dynamic Time Ranges:**
+
+```prolog
+% Define time range parameters (epoch timestamps)
+% Example: Large time range from 2026-2028 for long-term validity
+@param("start_time", "1770700000").  % Feb 10, 2026
+@param("end_time", "1770800000").    % Feb 11, 2026  
+@param("step", "60").
+
+% Range query with parameterized time range
+@bind("metric_range", 
+      "api authType=bearer, token=${PROMETHEUS_TOKEN}", 
+      "https://prometheus.example.com/api/v1/", 
+      "query_range?query=up&start=${start_time}&end=${end_time}&step=${step}").
+
+% Process the time series data
+time_series_data() <- SELECT status, 
+                             data.resultType AS result_type,
+                             SIZE(data.result) AS total_series
+                      FROM metric_range
+                      WHERE status = 'success'.
+
+@output("time_series_data").
+```
+
+:::tip Dynamic Timestamps
+For current data, you can use environment variables or update the parameter values to recent epoch timestamps. Prometheus typically retains metrics for 15 days by default, so use timestamps within your retention period.
+:::
+
+**Working Example Without Authentication:**
+
+If your Prometheus instance doesn't require authentication, you can omit the auth parameters:
+
+```prolog
+% Public Prometheus instance (no authentication needed)
+% Define time range parameters
+@param("start_time", "1770700000").
+@param("end_time", "1770800000").
+@param("step", "60").
+
+% Query the 'up' metric over time range
+@bind("prom_up", 
+      "api", 
+      "http://databases.prometheux.ai:9090/api/v1/", 
+      "query_range?query=up&start=${start_time}&end=${end_time}&step=${step}").
+
+% Extract time series information
+up_metrics() <- SELECT status, 
+                       data.resultType AS result_type,
+                       SIZE(data.result) AS series_count
+                FROM prom_up
+                WHERE status = 'success'.
+
+@output("up_metrics").
+```
+
+### Example 10: Prometheus Alertmanager API
+
+:::note Alertmanager is Optional
+Alertmanager is a **separate service** from Prometheus that handles alert routing and notification. It typically runs on port 9093. If you only have Prometheus running (port 9090), you won't have this endpoint available. This example is for advanced setups with Alertmanager deployed.
+:::
+
+Query active alerts from Prometheus Alertmanager using the v2 API:
+
+```prolog
+% Get active alerts from Alertmanager (requires Alertmanager service running)
+% Note: Use API v2 (v1 was deprecated and removed in version 0.27.0)
+@bind("alerts_api", 
+      "api authType=bearer, token=${ALERTMANAGER_TOKEN}", 
+      "https://alertmanager.example.com/api/v2/", "alerts").
+
+% Count active alerts
+alert_summary() <- SELECT SIZE(alerts_api) AS total_alerts.
+
+@output("alert_summary").
+```
+
+**Working Example Without Authentication:**
+
+```prolog
+% Public Alertmanager instance (no authentication needed)
+@bind("alerts", 
+      "api", 
+      "http://databases.prometheux.ai:9093/api/v2/", "alerts").
+
+% Extract alert information using collections:explode for array processing
+alerts_linear(Alert) :- alerts(AlertsArray),
+                        Alert = collections:explode(AlertsArray).
+
+% Extract fields from each alert using struct:get
+critical_alerts(AlertName, Status, StartsAt) :- 
+    alerts_linear(Alert),
+    Labels = struct:get(Alert, "labels"),
+    AlertName = struct:get(Labels, "alertname"),
+    Severity = struct:get(Labels, "severity"),
+    StatusData = struct:get(Alert, "status"),
+    Status = struct:get(StatusData, "state"),
+    StartsAt = struct:get(Alert, "startsAt"),
+    Severity = "critical".
+
+@output("critical_alerts").
+```
+
+### Example 11: Kubernetes API
 
 Query Kubernetes resources via the API server:
 
@@ -1400,7 +1566,7 @@ pod_info() <- SELECT metadata.name AS pod_name,
 When dealing with deeply nested arrays (like `status.containerStatuses[0]`), consider using the `struct:get` function in Vadalog rules instead of direct array indexing in SQL. This provides more reliable access to complex nested structures.
 :::
 
-### Example 9: CSV Format API (Weather Data)
+### Example 12: CSV Format API (Weather Data)
 
 For APIs that return CSV format, specify `responseFormat=csv`:
 
@@ -1408,7 +1574,7 @@ For APIs that return CSV format, specify `responseFormat=csv`:
 % Bind to weather API that returns CSV
 @bind("meteo",
       "api delimiter=';', username='my_username', password='my_password', responseFormat=csv",
-      "https://api.meteomatics.com/",
+    "https://api.meteomatics.com/",
       "2025-06-09T00:00:00Z--2025-06-12T00:00:00Z:PT3H/t_2m:C,relative_humidity_2m:p/47.423336,9.377225/csv").
 
 % Query CSV data with SQL
@@ -1420,7 +1586,7 @@ hot_days() <- SELECT Valid_Date, T_2m_C
 @output("hot_days").
 ```
 
-### Example 10: Joining Multiple API Sources
+### Example 13: Joining Multiple API Sources
 
 You can join data from multiple API endpoints using SQL in rule bodies:
 
@@ -1443,7 +1609,7 @@ user_posts() <- SELECT u.users_api_4 AS author_name,
 @output("user_posts").
 ```
 
-### Example 11: Common Table Expressions (CTEs) with API Data
+### Example 14: Common Table Expressions (CTEs) with API Data
 
 Use CTEs for complex multi-step transformations:
 
@@ -1477,7 +1643,7 @@ customer_value() <- WITH customer_orders AS (
 @output("customer_value").
 ```
 
-### Example 12: Using Parameters in API Queries
+### Example 15: Using Parameters in API Queries
 
 Combine `@param` with API queries for dynamic filtering:
 
@@ -1498,7 +1664,7 @@ filtered_metrics() <- SELECT status,
 @output("filtered_metrics").
 ```
 
-### Example 13: Bitcoin & Cryptocurrency Price Analytics
+### Example 16: Bitcoin & Cryptocurrency Price Analytics
 
 Track and analyze cryptocurrency prices in real-time using the CoinGecko API (no authentication required):
 
@@ -1582,7 +1748,7 @@ major_cryptos() <- SELECT id, symbol, name
 @output("major_cryptos").
 ```
 
-### Example 14: Football (Soccer) Analytics
+### Example 17: Football (Soccer) Analytics
 
 Analyze football match data, team statistics, and player performance using TheSportsDB API (no authentication required):
 
@@ -1660,7 +1826,7 @@ country_data() <- SELECT SIZE(countries) AS country_count
 @output("country_data").
 ```
 
-### Example 15: Working with Arrays Using Vadalog Collection Functions
+### Example 18: Working with Arrays Using Vadalog Collection Functions
 
 Instead of using SQL queries, you can process arrays directly in Vadalog using collection built-in functions. This is particularly useful when you want to work with arrays in a more functional style.
 
@@ -1759,7 +1925,7 @@ result(CryptoId, Symbol, Name) :-
 Both approaches are valid - choose based on your use case and coding style preference!
 :::
 
-### Example 16: Cross-Domain Analytics - Combining Multiple APIs
+### Example 19: Cross-Domain Analytics - Combining Multiple APIs
 
 Combine data from multiple API sources for comprehensive analysis:
 
@@ -1825,7 +1991,7 @@ sports_overview() <- WITH league_data AS (
 @output("sports_overview").
 ```
 
-### Example 17: REST Countries API - Public Data
+### Example 20: REST Countries API - Public Data
 
 Query public APIs without authentication:
 
@@ -1886,7 +2052,7 @@ regional_stats() <- SELECT region,
 - ✅ Use SIZE() function for array-wrapped responses
 
 **Monitoring & DevOps:**
-- ✅ Query Prometheus for system metrics (tested with testcontainers)
+- ✅ Query Prometheus for system metrics
 - ✅ Access Prometheus response structure (status, resultType)
 - ✅ Monitor active targets with SIZE()
 - ✅ Use CTEs for multi-step metric processing

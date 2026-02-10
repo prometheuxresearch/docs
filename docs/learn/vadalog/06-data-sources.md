@@ -342,6 +342,24 @@ Throughout this section, we'll use examples based on an e-commerce orders JSON f
 ]
 ```
 
+:::tip Understanding JSON Array Handling
+**Root-level arrays vs Nested arrays:**
+
+- **Root-level JSON array** (like the example above): Each array element becomes a separate row automatically. No `collections:explode` needed.
+- **Nested array field** (e.g., `{"data": [item1, item2, ...]}`): The array becomes a single column value. Use `collections:explode` to convert array elements into multiple rows.
+
+**Example of nested array requiring explode:**
+```json
+{
+  "items": [
+    {"product": "Laptop", "price": 1299.99},
+    {"product": "Mouse", "price": 29.99}
+  ]
+}
+```
+This would give you 1 row with `items` as an array column. To get multiple rows (one per product), use `collections:explode`.
+:::
+
 ### Simple Example: Reading JSON Files
 
 This example demonstrates reading a JSON file without any query:
@@ -1642,7 +1660,106 @@ country_data() <- SELECT SIZE(countries) AS country_count
 @output("country_data").
 ```
 
-### Example 15: Cross-Domain Analytics - Combining Multiple APIs
+### Example 15: Working with Arrays Using Vadalog Collection Functions
+
+Instead of using SQL queries, you can process arrays directly in Vadalog using collection built-in functions. This is particularly useful when you want to work with arrays in a more functional style.
+
+:::tip When Do You Need `collections:explode`?
+**API responses have two common structures:**
+
+1. **Root-level array** - Returns `[{item1}, {item2}, ...]`
+   - Each element becomes a separate row automatically
+   - **No explode needed**
+   
+2. **Nested array field** - Returns `{"leagues": [{item1}, {item2}, ...]}`
+   - You get 1 row with the entire array as a single column
+   - **Use `collections:explode` to create multiple rows**
+
+Most public APIs (TheSportsDB, CoinGecko, etc.) return objects with nested array fields, so you'll typically need `collections:explode` to process individual array elements.
+:::
+
+**Using `collections:explode` to Convert Arrays to Rows:**
+
+```prolog
+% Get all football leagues from TheSportsDB
+@bind("leagues_api", "api", "https://www.thesportsdb.com/api/v1/json/3/", "all_leagues.php").
+
+% Explode the leagues array into individual rows
+leagues_linear(League) :- leagues_api(LeaguesArray), 
+                          League = collections:explode(LeaguesArray).
+
+% Extract fields from each league struct using struct:get
+result(LeagueId, LeagueName) :- leagues_linear(League), 
+                                 LeagueId = struct:get(League, "idLeague"), 
+                                 LeagueName = struct:get(League, "strLeague").
+
+@output("result").
+```
+
+**Using `collections:transform` with Lambda Expressions:**
+
+Transform array elements using lambda expressions before exploding:
+
+```prolog
+% Get all football leagues
+@bind("leagues_api", "api", "https://www.thesportsdb.com/api/v1/json/3/", "all_leagues.php").
+
+% Transform each league struct into a simpler array [id, name]
+leagues_transformed(TransformedArray) :- 
+    leagues_api(LeaguesArray), 
+    TransformedArray = collections:transform(LeaguesArray, "x -> array(x.idLeague, x.strLeague)").
+
+% Explode the transformed array into rows
+leagues_linear(LeagueData) :- 
+    leagues_transformed(TransformedArray), 
+    LeagueData = collections:explode(TransformedArray).
+
+% Access array elements using collections:get (1-indexed)
+result(LeagueId, LeagueName) :- 
+    leagues_linear(LeagueData), 
+    LeagueId = collections:get(LeagueData, 1), 
+    LeagueName = collections:get(LeagueData, 2).
+
+@output("result").
+```
+
+**Cryptocurrency List with Collection Functions:**
+
+```prolog
+% Get list of all cryptocurrencies
+@bind("crypto_list", "api", "https://api.coingecko.com/api/v3/", "coins/list").
+
+% Explode cryptocurrency array
+crypto_linear(Crypto) :- crypto_list(CryptoArray), 
+                         Crypto = collections:explode(CryptoArray).
+
+% Extract crypto information
+result(CryptoId, Symbol, Name) :- 
+    crypto_linear(Crypto), 
+    CryptoId = struct:get(Crypto, "id"), 
+    Symbol = struct:get(Crypto, "symbol"), 
+    Name = struct:get(Crypto, "name").
+
+@output("result").
+```
+
+:::tip Collection Functions vs SQL
+**When to use Collection Functions:**
+- You prefer functional programming style
+- Working with simple array transformations
+- Need to combine `struct:get` with array processing
+- Want to leverage lambda expressions for transformations
+
+**When to use SQL:**
+- Complex filtering and aggregations (WHERE, GROUP BY, HAVING)
+- Joining multiple data sources
+- Using SQL-specific functions (COUNT, SUM, AVG)
+- Need DISTINCT, ORDER BY, or LIMIT clauses
+
+Both approaches are valid - choose based on your use case and coding style preference!
+:::
+
+### Example 16: Cross-Domain Analytics - Combining Multiple APIs
 
 Combine data from multiple API sources for comprehensive analysis:
 
@@ -1708,7 +1825,7 @@ sports_overview() <- WITH league_data AS (
 @output("sports_overview").
 ```
 
-### Example 16: REST Countries API - Public Data
+### Example 17: REST Countries API - Public Data
 
 Query public APIs without authentication:
 

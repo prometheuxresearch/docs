@@ -1188,8 +1188,9 @@ result() <- SELECT SIZE(teams) AS team_count FROM teams.
 
 **Query Prometheus Metrics:**
 ```prolog
-@bind("metrics", "api authType=bearer, token=${TOKEN}", "https://prometheus.example.com/api/v1/", "query?query=up").
-result() <- SELECT status, data.resultType FROM metrics.
+@bind("metrics", "api", "http://prometheus-server:9090/api/v1/", "query?query=up").
+result(Status, ResultType) :- metrics(Data, Status), 
+                              ResultType = struct:get(Data, "resultType").
 @output("result").
 ```
 
@@ -1263,157 +1264,194 @@ open_bugs() <- SELECT title,
 @output("open_bugs").
 ```
 
+:::tip Accessing Nested Structures in API Responses
+The following Prometheus examples demonstrate how to work with nested JSON structures using Vadalog collection functions:
+- **`struct:get(struct, "field")`**: Access a field within a struct
+- **`collections:explode(array)`**: Convert an array into multiple rows (one row per element)
+- **`collections:get(array, index)`**: Access a specific element in an array (0-based index)
+- **`SIZE(array)`**: Get the number of elements in an array
+
+These functions allow you to navigate complex API responses without SQL array indexing.
+:::
+
 ### Example 3: Prometheus Metrics API
 
-Prometheus is a popular monitoring system that exposes metrics via REST API. Here's how to query Prometheus and process the results:
+Prometheus is a popular monitoring system that exposes metrics via REST API. Here's how to query Prometheus instant queries and extract metric values:
 
 ```prolog
-% Query Prometheus instant query endpoint
-% The response format is: {"status":"success","data":{"resultType":"vector","result":[...]}}
-@bind("prom_metrics", 
-      "api authType=bearer, token=${PROMETHEUS_TOKEN}", 
-      "https://prometheus.example.com/api/v1/", 
-      "query?query=up").
+% Query Prometheus instant query endpoint for 'up' metric
+@bind("up_metric", "api", "http://prometheus-server:9090/api/v1/", "query?query=up").
 
-% Access top-level response structure
-metrics_status() <- SELECT status, 
-                           data.resultType AS result_type
-                    FROM prom_metrics
-                    WHERE status = 'success'.
+% Explode the results array to process individual metrics
+result_linear(Result) :-
+    up_metric(Data, Status),
+    Status = "success",
+    Results = struct:get(Data, "result"),
+    Result = collections:explode(Results).
 
-@output("metrics_status").
+% Extract metric labels and values
+result(Job, Instance, Timestamp, Value) :-
+    result_linear(Result),
+    Metric = struct:get(Result, "metric"),
+    Job = struct:get(Metric, "job"),
+    Instance = struct:get(Metric, "instance"),
+    ValueArray = struct:get(Result, "value"),
+    Timestamp = collections:get(ValueArray, 0),
+    Value = collections:get(ValueArray, 1).
+
+@output("result").
 ```
 
 ### Example 4: Prometheus Targets Endpoint
 
-Query Prometheus targets to monitor scrape status:
+Query Prometheus targets to get detailed information about scrape targets:
 
 ```prolog
-% Query the targets endpoint to get information about monitored services
-@bind("targets", 
-      "api authType=bearer, token=${PROMETHEUS_TOKEN}", 
-      "https://prometheus.example.com/api/v1/", 
-      "targets").
+% Get information about scrape targets
+@bind("targets", "api", "http://prometheus-server:9090/api/v1/", "targets").
 
-% Extract active targets with aggregation
-target_summary() <- SELECT status, 
-                           SIZE(data.activeTargets) AS active_count,
-                           SIZE(data.droppedTargets) AS dropped_count
-                    FROM targets
-                    WHERE status = 'success'.
+% Explode active targets array
+active_targets_linear(Target) :-
+    targets(Data, Status),
+    Status = "success",
+    ActiveTargets = struct:get(Data, "activeTargets"),
+    Target = collections:explode(ActiveTargets).
 
-@output("target_summary").
+% Extract target details
+result(Job, Address, Health, ScrapeUrl) :-
+    active_targets_linear(Target),
+    DiscoveredLabels = struct:get(Target, "discoveredLabels"),
+    Job = struct:get(DiscoveredLabels, "job"),
+    Address = struct:get(DiscoveredLabels, "__address__"),
+    Health = struct:get(Target, "health"),
+    ScrapeUrl = struct:get(Target, "scrapeUrl").
+
+@output("result").
 ```
 
-### Example 5: Prometheus Query Aggregation
+### Example 5: Prometheus Goroutines Metric
 
-Aggregate and count metrics from Prometheus responses:
+Query and extract goroutine counts from Prometheus:
 
 ```prolog
-% Query Prometheus for goroutine metrics
-@bind("go_metrics", 
-      "api authType=bearer, token=${PROMETHEUS_TOKEN}", 
-      "https://prometheus.example.com/api/v1/", 
-      "query?query=go_goroutines").
+% Query go_goroutines metric
+@bind("goroutines", "api", "http://prometheus-server:9090/api/v1/", "query?query=go_goroutines").
 
-% Aggregate response data
-metric_summary() <- SELECT COUNT(*) AS response_count, 
-                           status
-                    FROM go_metrics
-                    WHERE status = 'success'
-                    GROUP BY status.
+% Explode results to process each metric
+result_linear(Result) :-
+    goroutines(Data, Status),
+    Status = "success",
+    Results = struct:get(Data, "result"),
+    Result = collections:explode(Results).
 
-@output("metric_summary").
+% Extract goroutine count for each instance
+result(Job, Instance, GoroutineCount) :-
+    result_linear(Result),
+    Metric = struct:get(Result, "metric"),
+    Job = struct:get(Metric, "job"),
+    Instance = struct:get(Metric, "instance"),
+    ValueArray = struct:get(Result, "value"),
+    GoroutineCount = collections:get(ValueArray, 1).
+
+@output("result").
 ```
 
-### Example 6: Prometheus with Common Table Expressions (CTEs)
+### Example 6: Prometheus Alert Rules
 
-Use CTEs to process Prometheus responses in multiple steps:
+Query Prometheus alert rule definitions (works even when no alerts are firing):
 
 ```prolog
-% Query Prometheus CPU metrics
-@bind("cpu_metrics", 
-      "api authType=bearer, token=${PROMETHEUS_TOKEN}", 
-      "https://prometheus.example.com/api/v1/", 
-      "query?query=process_cpu_seconds_total").
+% Prometheus alert rules API
+@bind("rules_api", "api", "http://prometheus-server:9090/api/v1/", "rules").
 
-% Multi-step processing with CTE
-processed_metrics() <- WITH metric_data AS (
-                         SELECT status, 
-                                data.resultType AS result_type 
-                         FROM cpu_metrics
-                       ),
-                       filtered_metrics AS (
-                         SELECT status, result_type 
-                         FROM metric_data 
-                         WHERE status = 'success'
-                       )
-                       SELECT status, result_type 
-                       FROM filtered_metrics.
+% Extract alert rule groups
+groups_linear(Group) :- 
+    rules_api(Data, Status),
+    Status = "success",
+    GroupsArray = struct:get(Data, "groups"),
+    Group = collections:explode(GroupsArray).
 
-@output("processed_metrics").
+% Explode rules array within each group
+rules_linear(Rule) :- 
+    groups_linear(Group),
+    Rules = struct:get(Group, "rules"),
+    Rule = collections:explode(Rules).
+
+% Extract alert details
+result(AlertName, State, Query, Severity, Description) :-
+    rules_linear(Rule),
+    AlertName = struct:get(Rule, "name"),
+    State = struct:get(Rule, "state"),
+    Query = struct:get(Rule, "query"),
+    Labels = struct:get(Rule, "labels"),
+    Severity = struct:get(Labels, "severity"),
+    Annotations = struct:get(Rule, "annotations"),
+    Description = struct:get(Annotations, "summary").
+
+@output("result").
 ```
 
 ### Example 7: Prometheus - List All Metric Names
 
-Query Prometheus to get all available metric names:
+Query Prometheus to get all available metric names and filter them:
 
 ```prolog
-% Get all metric names from Prometheus
-@bind("metric_names", 
-      "api authType=bearer, token=${PROMETHEUS_TOKEN}", 
-      "https://prometheus.example.com/api/v1/", 
-      "label/__name__/values").
+% Get all available metric names
+@bind("metric_names", "api", "http://prometheus-server:9090/api/v1/", "label/__name__/values").
 
-% Extract metric names - response is {"status":"success","data":["metric1","metric2",...]}
-metrics_list() <- SELECT status, 
-                         SIZE(data) AS metric_count
-                  FROM metric_names
-                  WHERE status = 'success'.
+% Explode the data array to get individual metric names
+metrics_linear(MetricName) :-
+    metric_names(Data, Status),
+    Status = "success",
+    MetricName = collections:explode(Data).
 
-@output("metrics_list").
+% Filter for metrics containing "prometheus"
+result(MetricName) :-
+    metrics_linear(MetricName),
+    contains(MetricName, "prometheus").
+
+@output("result").
 ```
 
-If you need to process individual metric names, use `collections:explode`:
+You can also count the total number of metrics:
 
 ```prolog
 % Get all metric names
-@bind("metric_names_api", 
-      "api authType=bearer, token=${PROMETHEUS_TOKEN}", 
-      "https://prometheus.example.com/api/v1/", 
-      "label/__name__/values").
+@bind("all_metrics", "api", "http://prometheus-server:9090/api/v1/", "label/__name__/values").
 
-% Explode the data array to get individual metric names
-metric_linear(MetricName) :- metric_names_api(MetricArray, Status),
-                             Status = "success",
-                             MetricName = collections:explode(MetricArray).
+% Count total metrics
+result(TotalCount) :-
+    all_metrics(Data, Status),
+    Status = "success",
+    TotalCount = SIZE(Data).
 
-% Filter for specific metrics
-filtered_metrics(MetricName) :- metric_linear(MetricName),
-                                 contains(MetricName, "prometheus").
-
-@output("filtered_metrics").
+@output("result").
 ```
 
 ### Example 8: Prometheus - Query Build Information
 
-Query specific metrics like `prometheus_build_info`:
+Query Prometheus build information to get version details:
 
 ```prolog
-% Query Prometheus build info metric
-@bind("build_info", 
-      "api authType=bearer, token=${PROMETHEUS_TOKEN}", 
-      "https://prometheus.example.com/api/v1/", 
-      "query?query=prometheus_build_info").
+% Get Prometheus build information
+@bind("build_info", "api", "http://prometheus-server:9090/api/v1/", "query?query=prometheus_build_info").
 
-% Extract build information from response
-build_details() <- SELECT status,
-                          data.resultType AS result_type,
-                          SIZE(data.result) AS result_count
-                   FROM build_info
-                   WHERE status = 'success'.
+% Explode results to access build info
+result_linear(Result) :-
+    build_info(Data, Status),
+    Status = "success",
+    Results = struct:get(Data, "result"),
+    Result = collections:explode(Results).
 
-@output("build_details").
+% Extract version information
+result(Version, GoVersion, Instance) :-
+    result_linear(Result),
+    Metric = struct:get(Result, "metric"),
+    Version = struct:get(Metric, "version"),
+    GoVersion = struct:get(Metric, "goversion"),
+    Instance = struct:get(Metric, "instance").
+
+@output("result").
 ```
 
 ### Example 9: Prometheus - Range Query

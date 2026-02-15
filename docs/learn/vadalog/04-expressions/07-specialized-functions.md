@@ -10,9 +10,7 @@ Vadalog provides a comprehensive library of specialized functions for mathematic
 
 ## Mathematical Functions
 
-### Basic Math
-
-#### `math:mod()`
+### `math:mod()`
 Modulo operation:
 
 ```prolog
@@ -27,7 +25,7 @@ is_even(N) :-
     Remainder == 0.
 ```
 
-#### `math:sqrt()`
+### `math:sqrt()`
 Square root:
 
 ```prolog
@@ -41,7 +39,7 @@ distance(X, Y, Distance) :-
     Distance = math:sqrt(X * X + Y * Y).
 ```
 
-#### `math:abs()`
+### `math:abs()`
 Absolute value:
 
 ```prolog
@@ -56,7 +54,7 @@ price_difference(Item1, Item2, Diff) :-
     Diff = math:abs(P1 - P2).
 ```
 
-#### `math:round()`
+### `math:round()`
 Round to nearest integer or specified decimal places:
 
 ```prolog
@@ -71,7 +69,7 @@ rounded_price(Item, RoundedPrice) :-
     RoundedPrice = math:round(RawPrice, 2).
 ```
 
-#### `math:bround()`
+### `math:bround()`
 Banker's rounding (round to nearest even):
 
 ```prolog
@@ -86,9 +84,7 @@ banker_rounded(Value, Rounded) :-
     Rounded = math:bround(Value, 2).
 ```
 
-### Min/Max Operations
-
-#### `math:min()` / `math:max()`
+### `math:min()` / `math:max()`
 Find minimum or maximum value:
 
 ```prolog
@@ -104,9 +100,7 @@ price_range(Product, MinPrice, MaxPrice) :-
     MaxPrice = math:max(P1, P2, P3, P4).
 ```
 
-### Logarithmic and Exponential
-
-#### `math:log()`
+### `math:log()`
 Natural logarithm:
 
 ```prolog
@@ -120,7 +114,7 @@ log_value(X, LogX) :-
     LogX = math:log(X).
 ```
 
-#### `math:log10()`
+### `math:log10()`
 Base-10 logarithm:
 
 ```prolog
@@ -134,7 +128,7 @@ magnitude(Value, Magnitude) :-
     Magnitude = math:log10(Value).
 ```
 
-#### `math:pow()`
+### `math:pow()`
 Power (exponentiation):
 
 ```prolog
@@ -148,7 +142,7 @@ compound_interest(Principal, Rate, Time, Amount) :-
     Amount = Principal * math:pow(1 + Rate, Time).
 ```
 
-#### `math:exp()`
+### `math:exp()`
 Exponential (e^x):
 
 ```prolog
@@ -162,9 +156,7 @@ exponential_growth(Rate, Time, Growth) :-
     Growth = math:exp(Rate * Time).
 ```
 
-### Ceiling and Floor
-
-#### `math:ceil()` / `math:floor()`
+### `math:ceil()` / `math:floor()`
 Round up or down to nearest integer:
 
 ```prolog
@@ -179,9 +171,7 @@ quantity_boxes(Items, Boxes) :-
     Boxes = math:ceil(Items / 24).  % 24 items per box
 ```
 
-### Trigonometric Functions
-
-#### `math:sin()` / `math:cos()` / `math:tan()`
+### `math:sin()` / `math:cos()` / `math:tan()`
 Trigonometric functions:
 
 ```prolog
@@ -197,9 +187,7 @@ wave_value(Angle, SineWave) :-
     SineWave = math:sin(Angle).
 ```
 
-### Random Numbers and Constants
-
-#### `math:uniform()` / `math:rand()`
+### `math:uniform()` / `math:rand()`
 Generate random numbers:
 
 ```prolog
@@ -214,7 +202,7 @@ random_customer_id(ID) :-
     ID = math:uniform(100000).
 ```
 
-#### `math:PI()` / `math:E()`
+### `math:PI()` / `math:E()`
 Mathematical constants:
 
 ```prolog
@@ -301,9 +289,7 @@ composite_hash(User, Pass, Hash) :-
 
 ## Date and Time Functions
 
-### Current Date/Time
-
-#### `date:current_date()` / `date:current_timestamp()`
+### `date:current_date()` / `date:current_timestamp()`
 Get current date or timestamp:
 
 ```prolog
@@ -318,9 +304,7 @@ record_created(ID, CreatedAt) :-
     CreatedAt = date:current_timestamp().
 ```
 
-### Date Arithmetic
-
-#### `date:next_day()` / `date:prev_day()`
+### `date:next_day()` / `date:prev_day()`
 Add or subtract one day:
 
 ```prolog
@@ -335,7 +319,7 @@ due_date(Task, DueDate) :-
     DueDate = date:next_day(StartDate).
 ```
 
-#### `date:add()` / `date:sub()`
+### `date:add()` / `date:sub()`
 Add or subtract days:
 
 ```prolog
@@ -350,7 +334,7 @@ expiry_date(Product, ExpiryDate) :-
     ExpiryDate = date:add(ManufactureDate, ShelfLife).
 ```
 
-#### `date:diff()`
+### `date:diff()`
 Calculate difference in days:
 
 ```prolog
@@ -366,9 +350,7 @@ employee_tenure(Name, Years) :-
     Years = Days / 365.
 ```
 
-### Date Formatting and Parsing
-
-#### `date:spec_day()`
+### `date:spec_day()`
 Parse date with specific format:
 
 ```prolog
@@ -382,7 +364,7 @@ formatted_date(InvestmentDate, FormattedDate) :-
     FormattedDate = date:spec_day(InvestmentDate).
 ```
 
-#### `date:to_timestamp()`
+### `date:to_timestamp()`
 Parse string to timestamp:
 
 ```prolog
@@ -396,7 +378,7 @@ parsed_timestamp(Raw, Ts) :-
     Ts = date:to_timestamp(Raw, "yy-M-dd HH:mm:ss,SSS Z").
 ```
 
-#### `date:format()`
+### `date:format()`
 Format date or timestamp to string:
 
 ```prolog
@@ -416,9 +398,7 @@ formatted_report(Name, FormattedDate) :-
 
 Convert values between different data types.
 
-### Basic Type Casting
-
-#### `as_string()`
+### `as_string()`
 Cast to string:
 
 ```prolog
@@ -432,7 +412,7 @@ formatted_id(ID) :-
     ID = concat("CUST-", as_string(NumericID)).
 ```
 
-#### `as_int()` / `as_long()`
+### `as_int()` / `as_long()`
 Cast to integer or long:
 
 ```prolog
@@ -447,7 +427,7 @@ numeric_value(Value) :-
     Value = as_int(StringValue).
 ```
 
-#### `as_double()` / `as_float()`
+### `as_double()` / `as_float()`
 Cast to double or float:
 
 ```prolog
@@ -462,7 +442,7 @@ precise_value(Value) :-
     Value = as_double(StringValue).
 ```
 
-#### `as_boolean()`
+### `as_boolean()`
 Cast to boolean:
 
 ```prolog
@@ -476,7 +456,7 @@ is_active(Name, Active) :-
     Active = as_boolean(StatusString).
 ```
 
-#### `as_date()` / `as_timestamp()`
+### `as_date()` / `as_timestamp()`
 Cast to date or timestamp:
 
 ```prolog
@@ -492,7 +472,7 @@ event_date(EventName, ParsedDate) :-
     ParsedDate = as_date(Timestamp).
 ```
 
-#### `as_json()`
+### `as_json()`
 Cast to JSON string:
 
 ```prolog
@@ -506,9 +486,7 @@ json_output(Data, JsonString) :-
     JsonString = as_json(Data).
 ```
 
-### Collection Type Casting
-
-#### `as_list()` / `as_set()` / `as_map()`
+### `as_list()` / `as_set()` / `as_map()`
 Cast to collection types:
 
 ```prolog

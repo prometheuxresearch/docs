@@ -674,7 +674,7 @@ customer_postgres_test(CustomerID, Email) :-
 
 [Supabase](https://supabase.com) is an open-source Firebase alternative that provides a hosted PostgreSQL database. To connect Prometheux to your Supabase database, you can use the **Transaction Pooler** connection method with a **JDBC** URL.
 
-#### How to Retrieve Your Supabase Connection String
+### How to Retrieve Your Supabase Connection String
 
 1. Log in to your [Supabase Dashboard](https://supabase.com/dashboard).
 2. Select your project.
@@ -689,7 +689,7 @@ The connection string will be in the following format:
 jdbc:postgresql://aws-1-eu-west-1.pooler.supabase.com:6543/postgres?user=postgres.[YOUR_PROJECT_ID]&password=[YOUR_PASSWORD]
 ```
 
-#### Example: Connecting to Supabase with JDBC URL
+### Example: Connecting to Supabase with JDBC URL
 
 This example demonstrates how to read data from a Supabase PostgreSQL table using the Transaction Pooler and JDBC connection.
 
@@ -732,7 +732,7 @@ Supabase offers different connection modes:
 For most Prometheux use cases, the **Transaction Pooler** is recommended as it efficiently manages connection pooling.
 :::
 
-#### Creating a Read-Only Database User (Recommended)
+### Creating a Read-Only Database User (Recommended)
 
 For enhanced security, instead of using your main database password, you can create a dedicated read-only user with access limited to specific tables. This follows the principle of least privilege and minimizes security risks.
 
@@ -792,7 +792,7 @@ out(X, Y, Z) :- owns(X, Y, Z).
 @output("out").
 ```
 
-#### Alternative: Connecting via Supabase REST API
+### Alternative: Connecting via Supabase REST API
 
 :::warning Recommendation
 **The JDBC connection method (shown above) is heavily recommended for production use.** It provides full PostgreSQL capabilities, better performance, and more reliable connections. The REST API method below is primarily suitable for one-time access to simple tables or quick prototyping scenarios.
@@ -2294,7 +2294,7 @@ analytics_redshift_test(AnalysisId, Metric, Value) :-
 ## Google BigQuery
 Google BigQuery is a serverless, highly scalable, and cost-effective multi-cloud data warehouse. This example demonstrates configuring and querying data from a BigQuery dataset.
 
-#### Setting up Google Cloud Access
+### Setting up Google Cloud Access
 
 This guide shows how to:
 
@@ -2311,7 +2311,7 @@ This guide shows how to:
 
 ---
 Open a Google Cloud Shell within your Google Project and execute the following commands:
-#### 1  Enable required APIs
+### 1  Enable required APIs
 
 ```bash
 gcloud services enable   compute.googleapis.com   bigquery.googleapis.com   bigquerystorage.googleapis.com   iamcredentials.googleapis.com   --project=project-example-358816
@@ -2319,7 +2319,7 @@ gcloud services enable   compute.googleapis.com   bigquery.googleapis.com   bigq
 
 ---
 
-#### 2  Create the service account
+### 2  Create the service account
 
 ```bash
 PROJECT_ID=project-example-358816
@@ -2333,7 +2333,7 @@ Resulting e‑mail:
 
 ---
 
-#### 3  Grant **minimum BigQuery roles** to the service account
+### 3  Grant **minimum BigQuery roles** to the service account
 
 ```bash
 gcloud projects add-iam-policy-binding "$PROJECT_ID"   --member="serviceAccount:$SA_NAME@$PROJECT_ID.iam.gserviceaccount.com"   --role="roles/bigquery.dataViewer"
@@ -2345,7 +2345,7 @@ gcloud projects add-iam-policy-binding "$PROJECT_ID"   --member="serviceAccount:
 
 ---
 
-#### 4  Allow your user to **impersonate** the service account
+### 4  Allow your user to **impersonate** the service account
 
 ```bash
 gcloud iam service-accounts add-iam-policy-binding   "$SA_NAME@$PROJECT_ID.iam.gserviceaccount.com"   --member="user:example@gmail.com"   --role="roles/iam.serviceAccountTokenCreator"
@@ -2359,7 +2359,7 @@ gcloud iam service-accounts get-iam-policy   "$SA_NAME@$PROJECT_ID.iam.gservicea
 
 ---
 
-#### 5 Create a JSON key file
+### 5 Create a JSON key file
 
 If you prefer file‑based creds:
 
@@ -2381,7 +2381,7 @@ Set the ENV var (in Docker or via `EXPORT`)
 
 ---
 
-#### 6  Generate a one‑hour access token (impersonation)
+### 6  Generate a one‑hour access token (impersonation)
 
 If you prefer token‑based creds:
 
@@ -2481,7 +2481,7 @@ Snowflake supports Programmatic Access Tokens (PAT) as an alternative to passwor
 
 To use PAT instead of password authentication, simply replace the `password` parameter with the PAT token value in your bind configuration.
 
-#### Setting Up PAT in Snowflake
+### Setting Up PAT in Snowflake
 
 First, identify your Snowflake user:
 
@@ -2533,7 +2533,7 @@ SHOW USER PROGRAMMATIC ACCESS TOKENS FOR USER prometheux;
 -- ==================================================
 ```
 
-#### PAT Token Management Commands
+### PAT Token Management Commands
 
 ```sql
 -- Generate a new token

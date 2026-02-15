@@ -45,7 +45,7 @@ tc(X, Z) :- tc(X, Y), edge(Y, Z).
 @explain("console").
 ```
 
-#### Json Explanation Example
+### Json Explanation Example
 ```json
 {
   "fact": "tc(1,4)",
@@ -105,7 +105,7 @@ since there is an edge from 1 to 2, then there is a transitive closure from 1 to
 
 ### Explanation Scenarios and Use Cases
 
-#### Example 1: Linear Rule Explanation without Model Annotations
+### Example 1: Linear Rule Explanation without Model Annotations
 ```prolog
 b(1).
 a(X) :- b(X).
@@ -119,7 +119,7 @@ Prometheux generates a generic explanation:
 since b(1), then a(1).
 ```
 
-#### Example 2: Linear Rule Explanation with Model Annotations
+### Example 2: Linear Rule Explanation with Model Annotations
 
 ```prolog
 @model("employee", "['Name:string']", " [Name] is an employee").
@@ -134,7 +134,7 @@ Prometheux generates the explanation verbalizing facts according to the specifie
 since Alice is an employee, then Alice is a manager.
 ```
 
-#### Example 3: Join Rule Explanation
+### Example 3: Join Rule Explanation
 
 ```prolog
 @model("developer", "['Name:string']", "[Name] is a developer").
@@ -160,7 +160,7 @@ since Bob is a developer and ProjectX is a project, then Bob works on ProjectX.
 since Bob is a developer and ProjectY is a project, then Bob works on ProjectY.
 ```
 
-#### Example 4: Explaining Pre-Materialized Chase Results
+### Example 4: Explaining Pre-Materialized Chase Results
 
 By setting `chase=false`, Prometheux exploits a pre-materialized chase data for explanations, avoiding recomputation.
 Explanations are related to the predicates specified in the @output annotation.
@@ -199,7 +199,7 @@ since there is an edge from 2 to 3, then there is a transitive closure from 1 to
 since there is an edge from 3 to 4, then there is a transitive closure from 1 to 4.
 ```
 
-#### Example 7: Explaining Multiple Connected Chases
+### Example 7: Explaining Multiple Connected Chases
 
 Multiple chases are connected by using the results of the first in the second.
 Model annotations provide detailed descriptions for each predicate.

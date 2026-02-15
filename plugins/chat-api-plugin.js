@@ -74,24 +74,54 @@ module.exports = function chatApiPlugin(context, options) {
                     const client = algoliasearch('DCCC0T0ITC', '870d45e2eaf4483e87c2204607df57c7');
                     const index = client.initIndex('prometheux-co');
                     
-                    const algoliaResults = await index.search(query, {
-                      hitsPerPage: 3,
+                    // Extract key technical terms from natural language queries
+                    const extractKeyTerms = (query) => {
+                      // Remove punctuation and convert to lowercase
+                      const cleaned = query.toLowerCase().replace(/[?.,!;:]/g, '');
+                      
+                      // Expanded stop words including common verbs
+                      const stopWords = ['how', 'do', 'does', 'did', 'i', 'can', 'could', 'would', 'should', 
+                                        'you', 'please', 'show', 'me', 'the', 'a', 'an', 'in', 'to', 'for', 
+                                        'with', 'using', 'use', 'using', 'compute', 'calculate', 'create', 
+                                        'make', 'get', 'find', 'my', 'vadalog', 'prometheux'];
+                      
+                      const words = cleaned.split(/\s+/);
+                      const keyTerms = words.filter(w => !stopWords.includes(w) && w.length > 2);
+                      
+                      // If we filtered out too much, return original (without punctuation)
+                      return keyTerms.length > 0 ? keyTerms.join(' ') : cleaned;
+                    };
+                    
+                    const searchQuery = extractKeyTerms(query) || query;
+                    console.log(`[Algolia] Original query: "${query}"`);
+                    console.log(`[Algolia] Search query: "${searchQuery}"`);
+                    
+                    const algoliaResults = await index.search(searchQuery, {
+                      hitsPerPage: 5,  // Get more results for better coverage
                       attributesToRetrieve: ['content', 'hierarchy', 'url'],
                       attributesToHighlight: [],
+                      removeStopWords: true,  // Let Algolia also remove stop words
                     });
 
                     if (algoliaResults.hits.length > 0) {
-                      relevantDocs = algoliaResults.hits
+                      // Take top 3 most relevant results
+                      const topHits = algoliaResults.hits.slice(0, 3);
+                      
+                      relevantDocs = topHits
                         .map((hit) => `## ${hit.hierarchy?.lvl1 || 'Documentation'}\n${hit.content || ''}`)
                         .join('\n\n');
                       
-                      searchResults = algoliaResults.hits.map(hit => ({
+                      searchResults = topHits.map(hit => ({
                         title: hit.hierarchy?.lvl1 || 'Documentation',
-                        url: `https://docs.prometheux.ai${hit.url || ''}`,
+                        url: hit.url?.startsWith('http') ? hit.url : `https://docs.prometheux.ai${hit.url || ''}`,
                         excerpt: (hit.content || '').substring(0, 200) + '...'
                       }));
                       
-                      console.log('Found relevant docs for:', query);
+                      console.log(`[Algolia] Found ${algoliaResults.nbHits} total docs, using top ${topHits.length}`);
+                      console.log('[Algolia] Retrieved sections:', searchResults.map(r => r.title).join(', '));
+                      console.log(`[Algolia] Total chars injected into prompt: ${relevantDocs.length}`);
+                    } else {
+                      console.warn(`[Algolia] No results found for search query: "${searchQuery}"`);
                     }
                   } catch (error) {
                     console.warn('Algolia search failed:', error);
@@ -100,33 +130,26 @@ module.exports = function chatApiPlugin(context, options) {
                 
                 console.log('Making Azure OpenAI request...');
                 
-                const systemPrompt = `You are a Vadalog code assistant for Prometheux. Your PRIMARY GOAL is to provide complete, copy-pasteable Vadalog code snippets.
+                const systemPrompt = `You are a Vadalog code assistant for Prometheux.
 
-RESPONSE FORMAT REQUIREMENTS:
-1. ALWAYS provide complete Vadalog code blocks
-2. Include ALL necessary annotations (@output, @bind, @model)
-3. Show full working examples, not partial snippets
-4. Make code copy-pasteable and immediately runnable
-5. Include comments explaining each part
+RESPONSE GUIDELINES:
+1. Provide focused, copy-pasteable Vadalog code examples
+2. Include annotations (@output, @bind, @model) only when relevant to the question
+3. Match complexity to the question - simple questions get simple examples
+4. Use % (percent sign) for comments, NOT # (hash)
+5. Follow Vadalog syntax: Rules use ":-" or "<-", facts end with ".", variables are Uppercase
 
-COMMENT SYNTAX (CRITICAL):
-- Comments in Vadalog start with % (percent sign), NOT # (hash)
-- Example: % This is a valid Vadalog comment
-- WRONG: # This is NOT valid (this is for Python/shell)
-- Always use % for comments in Vadalog code
+CRITICAL SYNTAX RULES:
+- Graph functions: Variables go ONLY in rule head, NOT after function
+  ✅ CORRECT: path(X,Y) :- #TC(edge).
+  ❌ WRONG: path(X,Y) :- #TC(edge)(X,Y).
+- Follow documentation syntax EXACTLY - do not add extra parentheses or parameters
+- Both :- and <- work the same way (interchangeable)
 
-LOGICAL OPERATORS:
-Vadalog supports explicit logical operator functions:
-- and(args), or(args), not(expr), xor(expr1, expr2)
-- if(condition, true_val, false_val) for conditional logic
-- Example: IsValid=and(X>2, X<5) assigns result to variable
-These are different from implicit AND/OR in rule bodies.
+${context ? `USER CONTEXT: ${context}\n` : ''}
+${relevantDocs ? `\nRELEVANT DOCUMENTATION:\n${relevantDocs}\n\nUse this documentation as your primary reference for syntax, examples, and best practices.` : ''}
 
-${context ? `CONTEXT: ${context}` : ''}
-
-${relevantDocs ? `\n\nRELEVANT DOCUMENTATION:\n${relevantDocs}\n\nUse this documentation to provide accurate, complete code examples.` : ''}
-
-CRITICAL: Every response should include a complete, working Vadalog code block that users can copy and paste.`;
+Provide accurate, helpful code examples based on the retrieved documentation above.`;
 
                 const response = await fetch(`${process.env.AZURE_OPENAI_ENDPOINT}/openai/deployments/${process.env.AZURE_OPENAI_DEPLOYMENT}/chat/completions?api-version=2024-02-15-preview`, {
                   method: 'POST',
@@ -238,17 +261,49 @@ CRITICAL: Every response should include a complete, working Vadalog code block t
                   const client = algoliasearch('DCCC0T0ITC', '870d45e2eaf4483e87c2204607df57c7');
                   const index = client.initIndex('prometheux-co');
                   
-                  const searchResults = await index.search(userQuery, {
-                    hitsPerPage: 3,
+                  // Extract key technical terms from natural language queries
+                  const extractKeyTerms = (query) => {
+                    // Remove punctuation and convert to lowercase
+                    const cleaned = query.toLowerCase().replace(/[?.,!;:]/g, '');
+                    
+                    // Expanded stop words including common verbs
+                    const stopWords = ['how', 'do', 'does', 'did', 'i', 'can', 'could', 'would', 'should', 
+                                      'you', 'please', 'show', 'me', 'the', 'a', 'an', 'in', 'to', 'for', 
+                                      'with', 'using', 'use', 'using', 'compute', 'calculate', 'create', 
+                                      'make', 'get', 'find', 'my', 'vadalog', 'prometheux'];
+                    
+                    const words = cleaned.split(/\s+/);
+                    const keyTerms = words.filter(w => !stopWords.includes(w) && w.length > 2);
+                    
+                    // If we filtered out too much, return original (without punctuation)
+                    return keyTerms.length > 0 ? keyTerms.join(' ') : cleaned;
+                  };
+                  
+                  const searchQuery = extractKeyTerms(userQuery) || userQuery;
+                  console.log(`[Algolia] Original query: "${userQuery}"`);
+                  console.log(`[Algolia] Search query: "${searchQuery}"`);
+                  
+                  const searchResults = await index.search(searchQuery, {
+                    hitsPerPage: 5,  // Get more results for better coverage
                     attributesToRetrieve: ['content', 'hierarchy', 'url'],
                     attributesToHighlight: [],
+                    removeStopWords: true,  // Let Algolia also remove stop words
                   });
 
                   if (searchResults.hits.length > 0) {
-                    relevantDocs = searchResults.hits
+                    // Take top 3 most relevant results
+                    const topHits = searchResults.hits.slice(0, 3);
+                    
+                    relevantDocs = topHits
                       .map((hit) => `## ${hit.hierarchy?.lvl1 || 'Documentation'}\n${hit.content || ''}`)
                       .join('\n\n');
-                    console.log('Found relevant docs for:', userQuery);
+                    
+                    const sections = topHits.map(hit => hit.hierarchy?.lvl1 || 'Unknown');
+                    console.log(`[Algolia] Found ${searchResults.nbHits} total docs, using top ${topHits.length}`);
+                    console.log('[Algolia] Retrieved sections:', sections.join(', '));
+                    console.log(`[Algolia] Total chars injected into prompt: ${relevantDocs.length}`);
+                  } else {
+                    console.warn(`[Algolia] No results found for search query: "${searchQuery}"`);
                   }
                 } catch (error) {
                   console.warn('Algolia search failed:', error);
@@ -267,108 +322,31 @@ CRITICAL: Every response should include a complete, working Vadalog code block t
                     messages: [
                       {
                         role: 'system',
-                        content: `You are a Vadalog code assistant for Prometheux. Your PRIMARY GOAL is to provide complete, copy-pasteable Vadalog code snippets.
+                        content: `You are a Vadalog code assistant for Prometheux.
 
-RESPONSE FORMAT REQUIREMENTS:
-1. ALWAYS provide complete Vadalog code blocks
-2. Include ALL necessary annotations (@output, @bind, @model)
-3. Show full working examples, not partial snippets
-4. Make code copy-pasteable and immediately runnable
-5. Include comments explaining each part
-
-COMMENT SYNTAX (CRITICAL):
-- Comments in Vadalog start with % (percent sign), NOT # (hash)
-- Example: % This is a valid Vadalog comment
-- WRONG: # This is NOT valid (this is for Python/shell)
-- Always use % for comments in Vadalog code
-
-FOCUS ON:
-- Complete database connection examples with all parameters
-- Full data processing workflows
-- Working rule definitions with proper syntax
-- Real-world use cases with complete code
-
-Vadalog syntax essentials:
-- Rules: head :- body.
-- Facts: fact(arg1, arg2).
-- Variables: Uppercase (X, Y, Name)
-- Constants: lowercase (john, 42)
-- Annotations: @output("concept"), @bind("concept", "type params", "db", "table"), @model("concept", "schema")
-- Common types: postgresql, neo4j, csv, json, excel, parquet, s3, text, binaryfile
-- NOTE: @input annotations are no longer required
-
-LOGICAL OPERATORS (CRITICAL - Vadalog HAS explicit logical operators):
-- and(args) - Logical AND, can take multiple arguments
-- or(args) - Logical OR, can take multiple arguments
-- not(expression) - Logical NOT/negation
-- xor(expr1, expr2) - Exclusive OR
-- nand(expr1, expr2) - NOT AND
-- nor(expr1, expr2) - NOT OR
-- xnor(expr1, expr2) - Exclusive NOR
-- implies(expr1, expr2) - Logical implication
-- iff(expr1, expr2) - If and only if (biconditional)
-- if(condition, true_val, false_val) - Conditional expression
-- Example: IsValid=and(X>2, X<5, X==3) assigns boolean result to IsValid
-- Example: Result=if(Score>80, "pass", "fail") returns conditional value
-- IMPORTANT: These are DIFFERENT from implicit AND/OR in rule bodies
-
-AGGREGATION FUNCTIONS (CRITICAL - use correct syntax):
-- mavg(expression) - average (NO variable list in function!)
-- msum(expression) - sum (NO variable list in function!)
-- mcount() - count (NO arguments!)
-- mmin(expression) - minimum
-- mmax(expression) - maximum
-
-GROUP-BY LOGIC (CRITICAL):
-- Group-by variables appear in BOTH head and body
-- Aggregation function takes ONLY the expression to aggregate
-- Example: avg_salary(Dept, Avg) :- employee(_, Dept, Salary), Avg = mavg(Salary).
-- The grouping happens because Dept appears in both head and body
-
-CORRECT AGGREGATION PATTERNS:
-❌ WRONG: mavg(Age, [City]) - NEVER put variables in aggregation function!
-✅ CORRECT: average_age(City, Avg) :- people(_, Age, City), Avg = mavg(Age).
-
-❌ WRONG: AvgAge = avg(Age) from table(Age)
-✅ CORRECT: global_avg(Avg) :- people(_, Age, _), Avg = mavg(Age).
-
-BUILT-IN FUNCTIONS:
-- Math: math:sqrt(), math:abs(), math:round(), math:pow(), math:mod()
-- String: concat(), substring(), contains(), starts_with(), ends_with(), to_lower(), to_upper()
-- Date: date:current_date(), date:add(), date:diff(), date:format()
-- Collections: collections:size(), collections:contains(), collections:add(), collections:sort(), collections:flatten()
-- Null handling: nullManagement:isnull(), nullManagement:coalesce()
-- Hash: hash:sha1(), hash:md5(), hash:sha2()
-- AI: embeddings:vectorize(), embeddings:cosine_sim(), llm:generate()
-
-${relevantDocs ? `\n\nRELEVANT DOCUMENTATION:\n${relevantDocs}\n\nUse this documentation to provide accurate, complete code examples.` : ''}
+RESPONSE GUIDELINES:
+1. Provide focused, copy-pasteable Vadalog code examples
+2. Include annotations (@output, @bind, @model) only when relevant to the question
+3. Match complexity to the question - simple questions get simple examples
+4. Use % (percent sign) for comments, NOT # (hash)
+5. Follow Vadalog syntax: Rules use ":-" or "<-", facts end with ".", variables are Uppercase
 
 CRITICAL SYNTAX RULES:
-1. ALL annotations must end with a DOT: @bind(...).  @model(...).  @output(...).
-2. @model syntax: @model("concept", "['field:type', 'field:type']").
-3. @bind syntax: @bind("concept", "datasource_type options", "container", "resource").
-4. @bind has 4 arguments: (1)concept_name (2)type_with_options (3)database/path (4)table/filename
+- Graph functions: Variables go ONLY in rule head, NOT after function
+  ✅ CORRECT: path(X,Y) :- #TC(edge).
+  ❌ WRONG: path(X,Y) :- #TC(edge)(X,Y).
+- Follow documentation syntax EXACTLY - do not add extra parentheses or parameters
+- Both :- and <- work the same way (interchangeable)
 
-BIND PATTERNS:
-- Database: @bind("concept", "postgresql host='...', port=5432, username='...', password='...'", "database_name", "table_name").
-- CSV file: @bind("concept", "csv useHeaders='true', delimiter=','", "/file/path", "filename.csv").
-- Parquet: @bind("concept", "parquet", "/file/path", "filename.parquet").
-- Excel: @bind("concept", "excel sheetName='Sheet1'", "/file/path", "filename.xlsx").
+KEY SYNTAX REMINDERS:
+- Annotations must end with a dot: @bind(...).  @model(...).  @output(...).
+- Aggregations: mavg(expr), msum(expr), mcount() - NO variable lists
+- Group-by: variables appear in both head and body
+- Logical operators exist: and(), or(), not(), if(cond, true_val, false_val)
 
-CORRECT ANNOTATION EXAMPLES:
-✅ @bind("employee", "postgresql host='localhost', port=5432, username='myuser', password='mypass'", "mydb", "employee").
-✅ @bind("data", "csv useHeaders='true', delimiter=','", "/path/to/files", "data.csv").
-✅ @bind("records", "parquet", "/path/to/files", "records.parquet").
-✅ @model("employee", "['id:int', 'name:string', 'salary:double']").
-✅ @output("result").
+${relevantDocs ? `\n\nRELEVANT DOCUMENTATION:\n${relevantDocs}\n\nUse this documentation as your primary reference for syntax, examples, and best practices.` : ''}
 
-❌ WRONG: @bind("employee", "postgresql", "host='localhost', port=5432, username='myuser', password='mypass'", "employee") - params split wrong!
-❌ WRONG: @bind("data", "csv file='data.csv'", "local", "data") - filename in wrong place!
-❌ WRONG: @bind("employee", "postgresql host=localhost port=5432 user=myuser password=mypass", "mydb", "employee") - missing commas and quotes!
-❌ WRONG: @model("employee", "id:int, name:string") - missing square brackets!
-❌ WRONG: @output("result") - missing dot!
-
-Every response should include a complete, working Vadalog code block that users can copy and paste.`
+Provide accurate, helpful code examples based on the retrieved documentation above.`
                       },
                       ...messages
                     ],

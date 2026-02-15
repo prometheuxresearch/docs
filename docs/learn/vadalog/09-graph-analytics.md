@@ -27,7 +27,7 @@ Variables on the head of the rule with the function receive the algorithm’s re
 | `#TC(P)` | **Transitive Closure** – reachability. | `P/2` `edge(U,V)` | `(X,Y)` | Directed graph. Includes self-loops from cycles. |
 | `#PATHS(P[,options])` | **All Paths** with configurable options. | `P/2` `edge(U,V)` + optional string | `(X,Y,Visited)` or `(X,Y)` | Optional parameters: `visited=true/false` (default `false`), `self_loops=true/false` (default `false`), `all_paths=true/false` (default `false`), `max_depth=N` (default `-1` = unlimited). Format: `"visited=true,max_depth=5"`. |
 | `#ASP(P)` | **All‑Shortest Paths** (weighted). | `P/3` `edge(U,V,W)` | `(X,Y,Z)` | Parallel multi‑source Dijkstra. Can include self-loops from cycles. |
-| `#SSSP(P,Src)` | **Single‑Source Shortest Path**. | same as `#ASP` plus constant `Src` | `(Y,Dist)` | |
+| `#SSSP(P[,options])` | **Single‑Source Shortest Path**. | `P/3` `edge(U,V,W)` + optional string | `(Y,Dist)` | Required parameter: `source=N` to specify the source node. Format: `"source=1"`. |
 | `#BFS(P)` | **Breadth‑First Levels**. | `P/2` | `(X,Level)` | Unweighted tiers. |
 | `#CC(P[,options])` | **Connected Components** with optional sorting and ID. | `P/2` `edge(U,V)` + optional string | `(X,Comp)` or `(X,ID,Comp)` | Optional parameters: `sort_component=true/false` (default `false`), `component_id=true/false` (default `false`). Format: `"sort_component=true,component_id=true"`. For undirected graphs (assumes edges are symmetric). |
 | `#WCC(P)` | **Weakly Connected Components**. | `P/2` | `(X,Comp)` | For directed graphs – ignores edge direction. |
@@ -104,9 +104,33 @@ asp_function(X,Y,Z) :- #ASP(edge).
 @output("asp_function").
 ```
 
+### 3a  Single-Source Shortest Path
+
+Compute shortest paths from a single source node:
+
+```prolog
+edge(1,2,10).
+edge(1,3,5).
+edge(2,3,2).
+edge(2,4,1).
+edge(3,4,9).
+
+% Find shortest paths from node 1 to all other nodes
+sssp_from_node1(Target, Distance) :- #SSSP(edge, "source=1").
+@output("sssp_from_node1").
+```
+
+**Output:**
+```
+sssp_from_node1(1, 0)    % Distance from 1 to itself
+sssp_from_node1(2, 10)   % Shortest path 1 → 2
+sssp_from_node1(3, 5)    % Shortest path 1 → 3
+sssp_from_node1(4, 11)   % Shortest path 1 → 2 → 4
+```
+
 ### 4  Connected Components
 
-#### 4a. Simple disconnected graph
+### 4a. Simple disconnected graph
 ```prolog
 % Two separate components: {1,2,3} and {4,5}
 edge_raw(1,2).
@@ -143,7 +167,7 @@ cc_full(X,ID,C) :- #CC(edge, "sort_component=true,component_id=true").
 
 **`cc_full` Output**: Both sorted and with ID: `(1, 1, [1,2,3]), (2, 1, [1,2,3]), (3, 1, [1,2,3]), (4, 4, [4,5]), (5, 4, [4,5])`.
 
-#### 4b. Cyclic graph
+### 4b. Cyclic graph
 ```prolog
 % Single component with cycle: {1,2,3,4}
 edge(1,2).
@@ -156,7 +180,7 @@ cc(X,C) :- #CC(edge).
 ```
 **Output**: All nodes in one component: `(1, [1,2,3,4]), (2, [1,2,3,4]), (3, [1,2,3,4]), (4, [1,2,3,4])`.
 
-#### 4c. Multiple disconnected components
+### 4c. Multiple disconnected components
 ```prolog
 % Three separate components
 edge(1,2).
@@ -168,7 +192,7 @@ cc(X,C) :- #CC(edge).
 ```
 **Output**: Three components: `(1, [1,2]), (3, [3,4]), (5, [5,6])`.
 
-#### 4d. Why use `component_id=true`?
+### 4d. Why use `component_id=true`?
 
 The component ID (minimum node) is crucial for **deterministic results** in distributed execution:
 

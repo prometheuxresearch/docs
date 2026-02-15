@@ -50,7 +50,7 @@ Fact,ProvenanceLeft,ProvenanceRight,Rule
 "path(1,3)","arc(1,3)", "","path(X,Y) :- arc(X,Y)"
 ```
 
-#### Handling Aggregations
+### Handling Aggregations
 
 The production of the chase for programs with aggregations requires to introduce
 artificial intermediate chase nodes representing facts with group by values.
@@ -188,7 +188,7 @@ CHASE_NODE(fact: 'path(1,2)') -[DERIVED_BY(rule: path(X,Y) :- arc(X,Y))]->CHASE_
 CHASE_NODE(fact: 'path(1,3)') -[DERIVED_BY(rule: path(X,Y) :- arc(X,Y))]->CHASE_NODE(fact: arc(1,3))
 ```
 
-#### Retrieving the Chase from Neo4j
+### Retrieving the Chase from Neo4j
 
 After storing the chase in Neo4j, it can be retrieved using distributed Neo4j
 Connectors with the following annotations:
@@ -216,7 +216,7 @@ neo4j.authenticationType=basic
 neo4j.partitions=1
 ```
 
-#### Optimize the Chase materialization and retrieval on Neo4j
+### Optimize the Chase materialization and retrieval on Neo4j
 
 Note that to have better performances while materializing and retrieving the
 chase from Neo4j, you can index the `CHASE_NODE` via the following cypher query

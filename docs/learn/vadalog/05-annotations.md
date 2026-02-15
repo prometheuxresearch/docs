@@ -126,7 +126,7 @@ types:
 - third: double
 - fourth: string
 
-#### Workflow
+### Workflow
 
 Assume to have a parquet dataset containing the following row:
 
@@ -198,7 +198,7 @@ enclosed in square brackets `[]` in the description.
        "The probability of a series of states with ID [id] from [startState] to [endState] is [prob].").
 ```
 
-#### Automatic Generation of natural language description
+### Automatic Generation of natural language description
 
 If a model annotation does not include a natural language description for the
 predicate and if an [LLM is available](/api/config#configuring-llms),
@@ -290,7 +290,7 @@ specified as another predicate. This nested predicate must define a primary key
 that identifies its instances uniquely, which is used as the reference key in
 the composite predicate.
 
-#### Example
+### Example
 
 Consider modeling events and states where each event transitions from one state
 to another:
@@ -308,7 +308,7 @@ event uses state for both `Start State` and `End State`, with `state_id` serving
 as the data type for these fields, implied to be string type due to the primary
 key type of state.
 
-#### Vadalog Examples
+### Vadalog Examples
 
 ```prolog {2}
 @model("state","['state_id(ID):string', 'Type:string', 'Balance:double']").
@@ -324,7 +324,7 @@ out_event(StartState, EndState, Prob) :- event(Id, StartState, EndState, Prob).
 @output("out_event").
 ```
 
-#### Typed Collections
+### Typed Collections
 
 Composition also allows you to include a predicate as a data type within a
 Collection. Specifically, the type of elements within the Collection is
@@ -780,7 +780,7 @@ making the rules more flexible and reusable.
 For parameterization via API refer to
 [`evaluateFromRepoWithParams`](https://www.prometheux.co.uk/docs/learn/on-prem/rest-api#evaluatefromrepowithparams).
 
-#### Syntax
+### Syntax
 ```prolog
 @param("parameter_name", value).
 ```
@@ -791,9 +791,9 @@ For parameterization via API refer to
   type in Vadalog (e.g., integer, string, double, list, etc..).
 
 
-#### Vadalog examples
+### Vadalog examples
 
-#### Filtering Paths Within a Specified Distance Range
+### Filtering Paths Within a Specified Distance Range
 
 ```prolog
 @param("max_distance", 15).
@@ -825,7 +825,7 @@ valid_path("D", "E", 5).
 These results reflect only those paths where the distance falls within the
 specified range between 5 and 15.
 
-#### Filtering Connections Based on Priority Levels
+### Filtering Connections Based on Priority Levels
 
 ```prolog
 @param("priority_levels", [1, 2, 3]).

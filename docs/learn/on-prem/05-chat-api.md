@@ -7,11 +7,12 @@ The Prometheux documentation includes an AI-powered chat API that provides Vadal
 ## Overview
 
 The Chat API provides:
-- **Vadalog code generation** with complete, runnable examples
+- **Vadalog code generation** tailored to your specific question
 - **Syntax assistance** and debugging help
 - **Documentation search** integration via Algolia
 - **Context-aware responses** based on Prometheux documentation
 - **Grammar-compliant code** following Vadalog best practices
+- **Intelligent examples** - simple questions get focused snippets, complex questions get full programs
 
 ---
 
@@ -231,17 +232,19 @@ curl -X POST https://chat-docs.prometheux.ai/api/vadalog \
 ## Features
 
 ### **Vadalog Code Generation**
-- Complete, runnable Vadalog programs
-- Proper syntax with all necessary annotations
-- Database connection examples
-- Data processing workflows
+- Focused, relevant code examples matched to your question
+- Proper syntax with appropriate annotations (only when needed)
+- Database connection examples for data source questions
+- Full data processing workflows for integration scenarios
+- Simple syntax examples for concept/logic questions
 - Grammar-compliant code
 
-### **Documentation Integration**
-- Searches Prometheux documentation via Algolia
-- Provides relevant context from actual docs
-- References specific documentation sections
-- Up-to-date with latest features
+### **Documentation Integration (RAG)**
+- Uses Retrieval Augmented Generation (RAG) via Algolia
+- Dynamically searches documentation based on your query
+- Retrieves top 3 most relevant sections
+- Always up-to-date - automatically includes new documentation
+- No manual prompt updates needed when docs change
 
 ### **AI-Powered Assistance**
 - Powered by Azure OpenAI (gpt-4o)
@@ -302,7 +305,9 @@ curl -X POST https://chat-docs.prometheux.ai/api/vadalog \
 
 1. **Use conversation context**: Include previous messages for better responses
 2. **Be specific**: Ask detailed questions about Vadalog syntax
-3. **Request complete examples**: Ask for "complete, runnable code"
+3. **Match question complexity**: 
+   - For syntax questions: "How do I use the and() function?"
+   - For complete programs: "Show me a complete PostgreSQL connection example"
 4. **Handle streaming**: Implement proper streaming for real-time responses
 5. **Error handling**: Implement retry logic for rate limits
 

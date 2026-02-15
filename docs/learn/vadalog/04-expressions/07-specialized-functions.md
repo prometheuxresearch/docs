@@ -780,3 +780,4 @@ Extract values from Kalman filter input:
 ```prolog
 kalmanFilter:extractor(input1: any, input2: any, inputNumber: int) → int
 ```
+

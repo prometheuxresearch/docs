@@ -129,15 +129,40 @@ All parameters are specified as a comma-separated string:
 - `output_type=<type>` - Output type for all prompts (default: `string`)
 - `output_type_1=<type1>,output_type_2=<type2>,...` - Per-prompt output types (overrides `output_type`)
 - `projected_columns=<spec>` - Custom output column ordering (e.g., `arg_1:llm_2:llm_1:arg_3`)
+- `selected_models=<models>` - Semicolon-separated list of models to use (e.g., `gpt-4o;gpt-4o-mini`)
 - `num_partitions=<N>` - Manual partition override
 
 **Supported Output Types:** `string`, `int`, `integer`, `long`, `double`, `float`, `number`, `boolean`, `bool`, `list<string>`, `list<int>`, `list<double>`, `set<string>`
 
 **Prompt Templating:** Use `{arg_1}`, `{arg_2}`, etc. to reference input columns (1-based indexing).
 
+#### Model Selection with `selected_models`
+
+By default, `#LLM` uses all configured LLM endpoints. Use `selected_models` to filter which model types to use:
+
+```prolog
+% Use only gpt-4o endpoints (skip slower/experimental models)
+answer(Q, A) :- 
+    #LLM(question, "prompt=Answer: {arg_1},selected_models=gpt-4o").
+
+% Use multiple model types
+fast_analysis(Q, A) :- 
+    #LLM(question, "prompt=Analyze: {arg_1},selected_models=gpt-4o;gpt-4o-mini").
+```
+
+**Supported models:** `gpt-4o`, `gpt-4o-mini`, `gpt-5-nano`, `gpt-5-mini`, `gpt-4.1-nano`, `gpt-4.1-mini`, and others configured in your environment.
+
+**Use cases:**
+- **Performance optimization:** Route simple queries to faster models (`gpt-4o-mini`)
+- **Quality control:** Use only high-quality models (`gpt-4o`) for critical analysis
+- **Cost optimization:** Balance speed and cost across model tiers
+- **Model testing:** Test specific models without changing configuration
+
+If `selected_models` is not specified, all configured endpoints are used for maximum parallelization.
+
 #### Why `num_partitions` is Optional
 
-Prometheux automatically handles optimal partitioning based on your data source, expecially if it already partitioned
+Prometheux automatically handles optimal partitioning based on your data source, especially if it is already partitioned.
 **Only specify** `num_partitions` if you need to override the automatic behavior for specific performance requirements.
 
 ---
@@ -240,7 +265,42 @@ sentences("Machine learning enables computers to learn from data.").
 
 ---
 
-### Example 5: Processing Large Datasets (Advanced)
+### Example 5: Model Selection for Optimal Performance
+
+Choose specific models based on your quality, speed, and cost requirements:
+
+```prolog
+% High-quality analysis: Use only gpt-4o
+detailed_analysis(Doc, Analysis) :- 
+    #LLM(documents, 
+        "prompt=Provide a detailed analysis of: {arg_1},
+         output_type=string,
+         selected_models=gpt-4o").
+
+% Fast classification: Use faster models for simple tasks
+quick_category(Text, Category) :- 
+    #LLM(items, 
+        "prompt=Classify this into one category: {arg_1},
+         output_type=string,
+         selected_models=gpt-4o-mini").
+
+% Balanced approach: Use multiple model types
+balanced_processing(Data, Result) :- 
+    #LLM(dataset, 
+        "prompt=Process: {arg_1},
+         output_type=string,
+         selected_models=gpt-4o;gpt-4o-mini").
+```
+
+**Why use `selected_models`:**
+- Filter out slower or experimental models (e.g., exclude `gpt-5-nano` preview models)
+- Route high-priority queries to premium models (`gpt-4o`)
+- Route high-volume queries to cost-effective models (`gpt-4o-mini`)
+- Test specific models without changing system configuration
+
+---
+
+### Example 6: Processing Large Datasets (Advanced)
 
 For specific performance tuning on very large datasets, you can override automatic partitioning:
 
@@ -283,16 +343,17 @@ similar_documents(Doc1, Doc2, Score, Summary) :-
 
 ### Content Classification
 
-Classify large volumes of text in parallel:
+Classify large volumes of text in parallel with optimized model selection:
 
 ```prolog
-% Classify customer feedback at scale
+% Classify customer feedback at scale using fast models
 classify_feedback(FeedbackID, Text, Category, IsUrgent) :- 
     #LLM(feedback, 
         "prompt_1=Classify this feedback as positive, neutral, or negative: {arg_2},
          prompt_2=Is this feedback urgent? Answer yes or no: {arg_2},
          output_type_1=string,
-         output_type_2=string").
+         output_type_2=string,
+         selected_models=gpt-4o;gpt-4o-mini").
 
 % Input data:
 feedback(1, "Excellent service, very happy!").
@@ -301,10 +362,10 @@ feedback(2, "URGENT: Product stopped working immediately").
 
 ### Data Enrichment
 
-Generate missing information for entire datasets:
+Generate missing information for entire datasets with quality-focused model selection:
 
 ```prolog
-% Enrich product catalog with AI-generated content
+% Enrich product catalog with AI-generated content using high-quality models
 enrich_product(ProductID, Name, Category, Description, TargetAge, Keywords) :- 
     #LLM(product, 
         "prompt_1=Generate a marketing description for {arg_2} in {arg_3} category,
@@ -312,7 +373,8 @@ enrich_product(ProductID, Name, Category, Description, TargetAge, Keywords) :-
          prompt_3=List 3 keywords for {arg_2},
          output_type_1=string,
          output_type_2=int,
-         output_type_3=string").
+         output_type_3=string,
+         selected_models=gpt-4o").
 
 % Automatically processes entire product catalog in parallel
 product(101, "Smart Watch Pro", "Electronics").
@@ -322,10 +384,10 @@ product(103, "Coffee Maker Deluxe", "Home Appliances").
 
 ### Healthcare Decision Support
 
-Multi-faceted analysis of clinical data:
+Multi-faceted analysis of clinical data using high-quality models for critical healthcare decisions:
 
 ```prolog
-% Analyze patient records with multiple AI insights
+% Analyze patient records with multiple AI insights using only gpt-4o
 patient_analysis(PatientID, Notes, RiskLevel, Recommendations, FollowUpDays) :- 
     #LLM(clinical_notes, 
         "prompt_1=Assess risk level (low/medium/high) for: {arg_2},
@@ -334,8 +396,11 @@ patient_analysis(PatientID, Notes, RiskLevel, Recommendations, FollowUpDays) :-
          output_type_1=string,
          output_type_2=string,
          output_type_3=int,
-         projected_columns=arg_1:arg_2:llm_1:llm_2:llm_3").
+         projected_columns=arg_1:arg_2:llm_1:llm_2:llm_3,
+         selected_models=gpt-4o").
 
 clinical_notes(12345, "Patient presents with elevated blood pressure...").
 ```
+
+**Note:** For healthcare and other critical applications, use `selected_models=gpt-4o` to ensure the highest quality and reliability.
 

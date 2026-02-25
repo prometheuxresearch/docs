@@ -281,6 +281,7 @@ Comprehensive string manipulation functions:
 ```prolog
 substring(string, start, length?)  % Extract substring
 contains(string, substring)        % Check if contains
+rlike(string, pattern)             % Check if matches regex
 starts_with(string, prefix)        % Check if starts with
 ends_with(string, suffix)          % Check if ends with
 concat(str1, str2, ...)           % Concatenate strings

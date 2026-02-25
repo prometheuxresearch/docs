@@ -20,7 +20,7 @@ _multi-facts operators_ (called **aggregation operators**).
 | integer       | (monadic) `-`, `*`, `/`, `+`, `-`, `( )`                                                                |
 | double        | (monadic) `-`, `*`, `/`, `+`, `-`, `( )`                                                                |
 | boolean       | `&&`, `\|\|`, `!`, `not`, `( )` for associativity                                                    |
-| string        | `substring`, `contains`, `starts_with`, `ends_with`, `concat`, `concat_ws`, `replace`, `join`, `index_of`, `string_length`, `to_lower`, `to_upper`, `split`, `is_empty` |
+| string        | `substring`, `contains`, `rlike`, `starts_with`, `ends_with`, `concat`, `concat_ws`, `replace`, `join`, `index_of`, `string_length`, `to_lower`, `to_upper`, `split`, `is_empty` |
 | set           | `\|` (union), `&` (intersection), `( )` for associativity                                                  |
 
 
@@ -424,7 +424,7 @@ b(3).
 
 ## String operators
 
-The String operators are `substring`, `contains`, `contains_any`, `starts_with`, `ends_with`, `concat`, `+`, `index_of`, `string_length`, `to_lower`, `to_upper`, and `split`. These operators allow manipulation and comparison of `String` values.
+The String operators are `substring`, `contains`, `contains_any`, `rlike`, `starts_with`, `ends_with`, `concat`, `+`, `index_of`, `string_length`, `to_lower`, `to_upper`, and `split`. These operators allow manipulation and comparison of `String` values.
 
 ### `substring`
 A rule using `substring` returns a substring from the specified `start` to `end` index, using zero-based indexing:
@@ -515,6 +515,30 @@ Expected output:
 ```prolog
 c(#T).
 d(#F).
+```
+
+### `rlike`
+A rule with `rlike` returns true if the `string` matches the given regular expression `pattern`:
+
+```prolog
+q(K1, K2, Kn, J) :- body, J = rlike(string, pattern).
+```
+
+Example:
+
+```prolog showLineNumbers {4}
+a("foo bar").
+a("the foobar case").
+keyword("foo").
+b(Name, Matches) :- a(Name), keyword(K), Matches = rlike(Name, concat("(^| )", K, "( |$)")).
+@output("b").
+```
+
+Expected output:
+
+```prolog
+b("foo bar", #T).
+b("the foobar case", #F).
 ```
 
 ### `concat`

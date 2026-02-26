@@ -270,4 +270,4 @@ Prometheux fully respects Unity Catalog governance policies:
 | Name              | Email                                    | Role                      |
 |-------------------|------------------------------------------|---------------------------|
 | Eleni Partakki    | eleni@prometheux.co.uk                   | Forward Deployed Engineer |
-| Teodoro Baldazzi  | teodoro.baldazzi@prometheux.co.uk        | Principal Engineer        |
+| Teodoro Baldazzi  | teodoro@prometheux.co.uk        | Principal Engineer        |

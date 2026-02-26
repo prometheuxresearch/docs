@@ -1,7 +1,5 @@
-# Prometheux + Databricks 
-# Deployment & Implementation Guide
+# Prometheux + Databricks: Deployment & Implementation Guide
 
----
 
 ## 1. Overview
 
@@ -11,7 +9,6 @@ This guide covers the architecture of the integration, all configuration options
 
 **Additional information:** https://docs.prometheux.ai/learn/on-prem/databricks-integration
 
----
 
 ## 2. Architecture & Connectivity
 
@@ -46,7 +43,6 @@ Prometheux supports Databricks deployments on all major cloud platforms. The con
 
 **In-Cluster Execution:** Prometheux can also run directly within Databricks notebooks by loading the Prometheux JAR on the cluster. This enables direct access to Spark tables without JDBC overhead, using the `inCluster=true` annotation.
 
----
 
 ## 3. JDBC Configuration
 
@@ -121,7 +117,6 @@ Prometheux provides a user-friendly configuration interface for setting up Datab
 - Azure: `"region": "eastus"`
 - GCP: `"region": "us-central1"`
 
----
 
 ## 4. Data Operations
 
@@ -211,7 +206,6 @@ ORDER BY Distance
 LIMIT 100
 ```
 
----
 
 ## 5. Security & Governance
 
@@ -252,7 +246,6 @@ Prometheux fully respects Unity Catalog governance policies:
 - **Result Caching** — Automatic caching of intermediate query results
 - **Batch Processing** — Optimal batch sizes for JDBC operations
 
----
 
 ## 6. Troubleshooting
 
@@ -264,7 +257,6 @@ Prometheux fully respects Unity Catalog governance policies:
 | JDBC driver not found         | Driver JAR not on classpath                    | Confirm `databricks-jdbc 1.0.10-oss` is declared as a dependency and available on the cluster              |
 | `inCluster=true` not working  | Prometheux JAR not installed on cluster        | Upload Prometheux JAR to cluster libraries and restart cluster                                              |
 
----
 
 ## 7. Prometheux Contacts
 

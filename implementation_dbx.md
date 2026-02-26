@@ -1,4 +1,5 @@
-# Prometheux × Databricks Deployment & Implementation Guide
+# Prometheux + Databricks 
+# Deployment & Implementation Guide
 
 ---
 

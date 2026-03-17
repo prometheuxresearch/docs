@@ -158,3 +158,31 @@ main[class*="docMainContainer"] {
 .container.padding-top--md.padding-bottom--lg {
   background-color: transparent;
 }
+
+/* Hide docs-specific elements on homepage */
+.homepage-wrapper .theme-doc-breadcrumbs,
+.homepage-wrapper .theme-doc-version-badge,
+.homepage-wrapper .theme-doc-toc-mobile,
+.homepage-wrapper aside.theme-doc-sidebar-container,
+.homepage-wrapper .pagination-nav,
+.homepage-wrapper .theme-doc-footer {
+  display: none !important;
+}
+
+.homepage-wrapper .docMainContainer {
+  max-width: 100% !important;
+  padding: 0 !important;
+}
+
+.homepage-wrapper article {
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+.homepage-wrapper .container {
+  max-width: 100% !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}

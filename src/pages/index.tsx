@@ -116,7 +116,7 @@ export default function Home(): JSX.Element {
           <div className="mt-20 w-full max-w-4xl">
             <div className="grid md:grid-cols-3 gap-6">
               <Link
-                to="/getting-started"
+                to="/docs/getting-started"
                 className="group bg-white border-2 border-[#212020] rounded-lg p-6 shadow-[3px_3px_0_0_#212020] hover:shadow-[1px_1px_0_0_#212020] hover:translate-x-[2px] hover:translate-y-[2px] transition-all duration-200"
                 style={{ backgroundColor: 'white' }}
               >
@@ -132,7 +132,7 @@ export default function Home(): JSX.Element {
               </Link>
 
               <Link
-                to="/api"
+                to="/docs/api"
                 className="group bg-white border-2 border-[#212020] rounded-lg p-6 shadow-[3px_3px_0_0_#212020] hover:shadow-[1px_1px_0_0_#212020] hover:translate-x-[2px] hover:translate-y-[2px] transition-all duration-200"
                 style={{ backgroundColor: 'white' }}
               >
@@ -148,7 +148,7 @@ export default function Home(): JSX.Element {
               </Link>
 
               <Link
-                to="/examples"
+                to="/docs/examples"
                 className="group bg-white border-2 border-[#212020] rounded-lg p-6 shadow-[3px_3px_0_0_#212020] hover:shadow-[1px_1px_0_0_#212020] hover:translate-x-[2px] hover:translate-y-[2px] transition-all duration-200"
                 style={{ backgroundColor: 'white' }}
               >

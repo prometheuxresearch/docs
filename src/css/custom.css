@@ -9,28 +9,39 @@
 
 /* You can override the default Infima variables here. */
 :root {
-  --ifm-color-primary: #2e8555;
-  --ifm-color-primary-dark: #29784c;
-  --ifm-color-primary-darker: #277148;
-  --ifm-color-primary-darkest: #205d3b;
-  --ifm-color-primary-light: #33925d;
-  --ifm-color-primary-lighter: #359962;
-  --ifm-color-primary-lightest: #3cad6e;
+  --ifm-color-primary: #00e382;
+  --ifm-color-primary-dark: #00c96f;
+  --ifm-color-primary-darker: #00b864;
+  --ifm-color-primary-darkest: #009e56;
+  --ifm-color-primary-light: #26e695;
+  --ifm-color-primary-lighter: #40e9a0;
+  --ifm-color-primary-lightest: #66edae;
   --ifm-code-font-size: 95%;
   --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
+  --ifm-font-color-base: #212020;
+  --ifm-background-color: #f2f2f2;
+  --ifm-navbar-background-color: #ffffff;
+  --ifm-footer-background-color: #f2f2f2;
+  --ifm-background-surface-color: #ffffff;
+  --ifm-toc-border-color: #e0e0e0;
+  --ifm-color-emphasis-300: #e0e0e0;
 }
 
-/* For readability concerns, you should choose a lighter palette in dark mode. */
-[data-theme="dark"] {
-  --ifm-color-primary: #25c2a0;
-  --ifm-color-primary-dark: #21af90;
-  --ifm-color-primary-darker: #1fa588;
-  --ifm-color-primary-darkest: #1a8870;
-  --ifm-color-primary-light: #29d5b0;
-  --ifm-color-primary-lighter: #32d8b4;
-  --ifm-color-primary-lightest: #4fddbf;
+/* Dark mode disabled - not needed for this design */
+/* [data-theme="dark"] {
+  --ifm-color-primary: #00e382;
+  --ifm-color-primary-dark: #00c96f;
+  --ifm-color-primary-darker: #00b864;
+  --ifm-color-primary-darkest: #009e56;
+  --ifm-color-primary-light: #26e695;
+  --ifm-color-primary-lighter: #40e9a0;
+  --ifm-color-primary-lightest: #66edae;
   --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
-}
+  --ifm-font-color-base: #ffffff;
+  --ifm-background-color: #212020;
+  --ifm-navbar-background-color: #212020;
+  --ifm-footer-background-color: #212020;
+} */
 
 .navbar__logo {
   height: 1rem;
@@ -49,22 +60,101 @@
   max-height: 700px !important;
 }
 
+/* Clean minimal navbar styling */
+.navbar {
+  box-shadow: none;
+  border-bottom: 1px solid #f0f0f0;
+  padding: 0.75rem 1rem;
+}
+
+.navbar__inner {
+  max-width: 100%;
+}
+
+/* Hide navbar on homepage for cleaner look */
+.homepage-hide-navbar .navbar {
+  background: transparent;
+  border: none;
+}
+
+/* Clean input styling */
+input[type="text"], input[type="search"] {
+  font-family: inherit;
+}
+
+/* Remove default Docusaurus search bar on homepage */
+body:has(.homepage-layout) .navbar__search {
+  display: none;
+}
+
+/* Animations for background icons */
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+}
+
 /* Make the chat modal content area scrollable */
 [role="dialog"][data-state="open"] > div > div {
   overflow-y: auto !important;
   max-height: calc(70vh - 80px) !important;
 }
 
-/* Fix chat input text visibility in dark mode */
-[data-theme="dark"] [role="dialog"] textarea,
+/* Dark mode specific rules - commented out as dark mode is disabled */
+/* [data-theme="dark"] [role="dialog"] textarea,
 [data-theme="dark"] [role="dialog"] input {
   color: var(--ifm-font-color-base) !important;
   background-color: var(--ifm-background-surface-color) !important;
 }
 
-/* Ensure placeholder text is visible in dark mode */
 [data-theme="dark"] [role="dialog"] textarea::placeholder,
 [data-theme="dark"] [role="dialog"] input::placeholder {
   color: var(--ifm-color-emphasis-600) !important;
-  opacity: 0.6;
+} */
+
+/* Apply grey background to all pages */
+.main-wrapper {
+  background-color: #f2f2f2 !important;
+  min-height: 100vh;
+}
+
+/* Keep documentation content area white */
+.docMainContainer_node_modules-\@docusaurus-theme-classic-lib-theme-DocPage-Layout-Main-styles-module,
+.container {
+  background-color: transparent;
+}
+
+article {
+  background-color: #ffffff;
+  border-radius: 8px;
+  padding: 2rem;
+  margin: 1rem 0;
+}
+
+/* Ensure docs sidebar has proper background */
+.theme-doc-sidebar-container {
+  background-color: #ffffff !important;
+  border-right: 1px solid #e0e0e0;
+}
+
+/* API pages styling */
+.markdown > h1:first-child {
+  margin-top: 0;
+}
+
+/* Ensure proper background for blog and other pages */
+main[class*="docMainContainer"] {
+  background-color: #f2f2f2;
+}
+
+.container.padding-top--md.padding-bottom--lg {
+  background-color: transparent;
 }

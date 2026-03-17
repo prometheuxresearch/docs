@@ -62,6 +62,11 @@ const config: Config = {
   themeConfig: {
     // Replace with your project's social card
     image: "img/docusaurus-social-card.jpg",
+    colorMode: {
+      defaultMode: 'light',
+      disableSwitch: true,
+      respectPrefersColorScheme: false,
+    },
     algolia: {
       // The application ID provided by Algolia
       appId: "DCCC0T0ITC",
@@ -99,8 +104,8 @@ const config: Config = {
       title: "",
       logo: {
         alt: "Prometheux Logo",
-        src: "img/logotype.svg",
-        srcDark: "img/logotype-dark.svg",
+        src: "img/prometheux-logo.png",
+        srcDark: "img/prometheux-logo.png",
       },
       items: [
         {
@@ -119,7 +124,7 @@ const config: Config = {
           type: "docSidebar",
           sidebarId: "api",
           position: "left",
-          label: "API Reference",
+          label: "PX APIs",
         },
         {
           href: "https://www.prometheux.ai",
@@ -129,44 +134,7 @@ const config: Config = {
       ],
     },
     footer: {
-      style: "dark",
-      links: [
-        {
-          title: "Docs",
-          items: [
-            {
-              label: "Learn",
-              to: "/getting-started",
-            },
-            {
-              label: "Examples",
-              to: "/examples",
-            },
-            {
-              label: "API Reference",
-              to: "/api",
-            },
-          ],
-        },
-
-        {
-          title: "More",
-          items: [
-            {
-              label: "Home",
-              to: "https://docs.prometheux.ai",
-            },
-            {
-              label: "Research",
-              to: "https://docs.prometheux.ai/#research-section",
-            },
-            {
-              label: "LinkedIn",
-              to: "https://www.linkedin.com/company/prometheux",
-            },
-          ],
-        },
-      ],
+      style: "light",
       copyright: `Copyright © ${new Date().getFullYear()} Prometheux. All rights reserved.`,
     },
     prism: {

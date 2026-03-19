@@ -1,4 +1,4 @@
-# Prometheux on Databricks
+# Installing PX on Databricks
 
 Prometheux integrates with Databricks through JDBC connectivity across all major cloud platforms (AWS, Azure, and Google Cloud), allowing you to execute Vadalog rules against Unity Catalog tables and SQL warehouses. This integration provides secure, governed access to your lakehouse data while maintaining performance and scalability regardless of your cloud provider.
 

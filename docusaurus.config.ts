@@ -110,9 +110,15 @@ const config: Config = {
       items: [
         {
           type: "docSidebar",
-          sidebarId: "learn",
+          sidebarId: "gettingStarted",
           position: "left",
-          label: "Learn",
+          label: "Get Started",
+        },
+        {
+          type: "docSidebar",
+          sidebarId: "api",
+          position: "left",
+          label: "PX APIs",
         },
         {
           type: "docSidebar",
@@ -122,9 +128,10 @@ const config: Config = {
         },
         {
           type: "docSidebar",
-          sidebarId: "api",
+          sidebarId: "community",
           position: "left",
-          label: "PX APIs",
+          label: "Developer Community",
+          className: "navbar-community-item",
         },
         {
           href: "https://www.prometheux.ai",

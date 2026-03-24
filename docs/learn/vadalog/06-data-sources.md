@@ -490,11 +490,11 @@ For accessing individual nested fields in Vadalog rules (without SQL), you can u
 @bind("orders", "json", "data/orders", "orders.json").
 
 % Extract nested fields using struct:get
-% Syntax: Variable = struct:get(StructField, "fieldName")
+% Syntax: Variable = struct:get("fieldName", StructField)
 order_customers(OrderId, CustomerName, Email) :- 
     orders(OrderId, _, Customer, _, _, _, _), 
-    CustomerName = struct:get(Customer, "name"), 
-    Email = struct:get(Customer, "email").
+    CustomerName = struct:get("name", Customer), 
+    Email = struct:get("email", Customer).
 
 @output("order_customers").
 ```
@@ -507,8 +507,8 @@ order_customers(OrderId, CustomerName, Email) :-
 % Filter orders by status using struct:get
 shipped_orders(OrderId, CustomerName) :- 
     orders(OrderId, _, Customer, _, _, _, Status), 
-    OrderId = struct:get(orders, "order_id"),
-    CustomerName = struct:get(Customer, "name"), 
+    OrderId = struct:get("order_id", orders),
+    CustomerName = struct:get("name", Customer), 
     Status = "shipped".
 
 @output("shipped_orders").
@@ -522,10 +522,10 @@ shipped_orders(OrderId, CustomerName) :-
 % Access both 'customer' and 'shipping_address' structs
 order_shipping_info(OrderId, CustomerName, City, State) :- 
     orders(_, _, Customer, ShippingAddress, _, _, _), 
-    OrderId = struct:get(orders, "order_id"),
-    CustomerName = struct:get(Customer, "name"), 
-    City = struct:get(ShippingAddress, "city"),
-    State = struct:get(ShippingAddress, "state").
+    OrderId = struct:get("order_id", orders),
+    CustomerName = struct:get("name", Customer), 
+    City = struct:get("city", ShippingAddress),
+    State = struct:get("state", ShippingAddress).
 
 @output("order_shipping_info").
 ```
@@ -1190,7 +1190,7 @@ result() <- SELECT SIZE(teams) AS team_count FROM teams.
 ```prolog
 @bind("metrics", "api", "http://prometheus-server:9090/api/v1/", "query?query=up").
 result(Status, ResultType) :- metrics(Data, Status), 
-                              ResultType = struct:get(Data, "resultType").
+                              ResultType = struct:get("resultType", Data).
 @output("result").
 ```
 
@@ -1266,7 +1266,7 @@ open_bugs() <- SELECT title,
 
 :::tip Accessing Nested Structures in API Responses
 The following Prometheus examples demonstrate how to work with nested JSON structures using Vadalog collection functions:
-- **`struct:get(struct, "field")`**: Access a field within a struct
+- **`struct:get("field", struct)`**: Access a field within a struct
 - **`collections:explode(array)`**: Convert an array into multiple rows (one row per element)
 - **`collections:get(array, index)`**: Access a specific element in an array (0-based index)
 - **`SIZE(array)`**: Get the number of elements in an array
@@ -1286,16 +1286,16 @@ Prometheus is a popular monitoring system that exposes metrics via REST API. Her
 result_linear(Result) :-
     up_metric(Data, Status),
     Status = "success",
-    Results = struct:get(Data, "result"),
+    Results = struct:get("result", Data),
     Result = collections:explode(Results).
 
 % Extract metric labels and values
 result(Job, Instance, Timestamp, Value) :-
     result_linear(Result),
-    Metric = struct:get(Result, "metric"),
-    Job = struct:get(Metric, "job"),
-    Instance = struct:get(Metric, "instance"),
-    ValueArray = struct:get(Result, "value"),
+    Metric = struct:get("metric", Result),
+    Job = struct:get("job", Metric),
+    Instance = struct:get("instance", Metric),
+    ValueArray = struct:get("value", Result),
     Timestamp = collections:get(ValueArray, 0),
     Value = collections:get(ValueArray, 1).
 
@@ -1314,17 +1314,17 @@ Query Prometheus targets to get detailed information about scrape targets:
 active_targets_linear(Target) :-
     targets(Data, Status),
     Status = "success",
-    ActiveTargets = struct:get(Data, "activeTargets"),
+    ActiveTargets = struct:get("activeTargets", Data),
     Target = collections:explode(ActiveTargets).
 
 % Extract target details
 result(Job, Address, Health, ScrapeUrl) :-
     active_targets_linear(Target),
-    DiscoveredLabels = struct:get(Target, "discoveredLabels"),
-    Job = struct:get(DiscoveredLabels, "job"),
-    Address = struct:get(DiscoveredLabels, "__address__"),
-    Health = struct:get(Target, "health"),
-    ScrapeUrl = struct:get(Target, "scrapeUrl").
+    DiscoveredLabels = struct:get("discoveredLabels", Target),
+    Job = struct:get("job", DiscoveredLabels),
+    Address = struct:get("__address__", DiscoveredLabels),
+    Health = struct:get("health", Target),
+    ScrapeUrl = struct:get("scrapeUrl", Target).
 
 @output("result").
 ```
@@ -1341,16 +1341,16 @@ Query and extract goroutine counts from Prometheus:
 result_linear(Result) :-
     goroutines(Data, Status),
     Status = "success",
-    Results = struct:get(Data, "result"),
+    Results = struct:get("result", Data),
     Result = collections:explode(Results).
 
 % Extract goroutine count for each instance
 result(Job, Instance, GoroutineCount) :-
     result_linear(Result),
-    Metric = struct:get(Result, "metric"),
-    Job = struct:get(Metric, "job"),
-    Instance = struct:get(Metric, "instance"),
-    ValueArray = struct:get(Result, "value"),
+    Metric = struct:get("metric", Result),
+    Job = struct:get("job", Metric),
+    Instance = struct:get("instance", Metric),
+    ValueArray = struct:get("value", Result),
     GoroutineCount = collections:get(ValueArray, 1).
 
 @output("result").
@@ -1368,25 +1368,25 @@ Query Prometheus alert rule definitions (works even when no alerts are firing):
 groups_linear(Group) :- 
     rules_api(Data, Status),
     Status = "success",
-    GroupsArray = struct:get(Data, "groups"),
+    GroupsArray = struct:get("groups", Data),
     Group = collections:explode(GroupsArray).
 
 % Explode rules array within each group
 rules_linear(Rule) :- 
     groups_linear(Group),
-    Rules = struct:get(Group, "rules"),
+    Rules = struct:get("rules", Group),
     Rule = collections:explode(Rules).
 
 % Extract alert details
 result(AlertName, State, Query, Severity, Description) :-
     rules_linear(Rule),
-    AlertName = struct:get(Rule, "name"),
-    State = struct:get(Rule, "state"),
-    Query = struct:get(Rule, "query"),
-    Labels = struct:get(Rule, "labels"),
-    Severity = struct:get(Labels, "severity"),
-    Annotations = struct:get(Rule, "annotations"),
-    Description = struct:get(Annotations, "summary").
+    AlertName = struct:get("name", Rule),
+    State = struct:get("state", Rule),
+    Query = struct:get("query", Rule),
+    Labels = struct:get("labels", Rule),
+    Severity = struct:get("severity", Labels),
+    Annotations = struct:get("annotations", Rule),
+    Description = struct:get("summary", Annotations).
 
 @output("result").
 ```
@@ -1440,16 +1440,16 @@ Query Prometheus build information to get version details:
 result_linear(Result) :-
     build_info(Data, Status),
     Status = "success",
-    Results = struct:get(Data, "result"),
+    Results = struct:get("result", Data),
     Result = collections:explode(Results).
 
 % Extract version information
 result(Version, GoVersion, Instance) :-
     result_linear(Result),
-    Metric = struct:get(Result, "metric"),
-    Version = struct:get(Metric, "version"),
-    GoVersion = struct:get(Metric, "goversion"),
-    Instance = struct:get(Metric, "instance").
+    Metric = struct:get("metric", Result),
+    Version = struct:get("version", Metric),
+    GoVersion = struct:get("goversion", Metric),
+    Instance = struct:get("instance", Metric).
 
 @output("result").
 ```
@@ -1569,12 +1569,12 @@ alerts_linear(Alert) :- alerts(AlertsArray),
 % Extract fields from each alert using struct:get
 critical_alerts(AlertName, Status, StartsAt) :- 
     alerts_linear(Alert),
-    Labels = struct:get(Alert, "labels"),
-    AlertName = struct:get(Labels, "alertname"),
-    Severity = struct:get(Labels, "severity"),
-    StatusData = struct:get(Alert, "status"),
-    Status = struct:get(StatusData, "state"),
-    StartsAt = struct:get(Alert, "startsAt"),
+    Labels = struct:get("labels", Alert),
+    AlertName = struct:get("alertname", Labels),
+    Severity = struct:get("severity", Labels),
+    StatusData = struct:get("status", Alert),
+    Status = struct:get("state", StatusData),
+    StartsAt = struct:get("startsAt", Alert),
     Severity = "critical".
 
 @output("critical_alerts").
@@ -1894,8 +1894,8 @@ leagues_linear(League) :- leagues_api(LeaguesArray),
 
 % Extract fields from each league struct using struct:get
 result(LeagueId, LeagueName) :- leagues_linear(League), 
-                                 LeagueId = struct:get(League, "idLeague"), 
-                                 LeagueName = struct:get(League, "strLeague").
+                                 LeagueId = struct:get("idLeague", League), 
+                                 LeagueName = struct:get("strLeague", League).
 
 @output("result").
 ```
@@ -1940,9 +1940,9 @@ crypto_linear(Crypto) :- crypto_list(CryptoArray),
 % Extract crypto information
 result(CryptoId, Symbol, Name) :- 
     crypto_linear(Crypto), 
-    CryptoId = struct:get(Crypto, "id"), 
-    Symbol = struct:get(Crypto, "symbol"), 
-    Name = struct:get(Crypto, "name").
+    CryptoId = struct:get("id", Crypto), 
+    Symbol = struct:get("symbol", Crypto), 
+    Name = struct:get("name", Crypto).
 
 @output("result").
 ```
@@ -2132,7 +2132,7 @@ regional_stats() <- SELECT region,
    % Access nested fields after binding
    result(MetricName) :- 
        api_data(..., MetricStruct, ...),
-       MetricName = struct:get(MetricStruct, "instance").
+       MetricName = struct:get("instance", MetricStruct).
    ```
 
 3. **Use `SIZE()` for array lengths**:

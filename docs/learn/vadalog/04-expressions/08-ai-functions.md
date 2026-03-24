@@ -42,44 +42,91 @@ Generate dynamic content using large language models. Prometheux provides two ap
 
 ### Approach 1: `llm:generate`
 
-Traditional generation for straightforward use cases:
+Traditional UDF for straightforward use cases with automatic LLM pool support:
 
 ```prolog
-llm:generate(prompt: string, outputType: string) → typed
-llm:generate(prompt: string, outputType: string, arg1: any, arg2: any, ...) → typed
+llm:generate(prompt: string) → string
+llm:generate(prompt: string, options: string) → typed
+llm:generate(prompt: string, options: string, arg1: any, arg2: any, ...) → typed
 ```
 
-**Supported output types**: `string`, `int`, `double`, `boolean`, `list<string>`, `list<int>`, `list<double>`, `list<boolean>`
+**Options Format** (second argument, optional, comma-separated):
+- `"output_type=string"` - Specify output type (default: `string`)
+- `"selected_models=gpt-4o"` - Filter to single model type
+- `"selected_models=gpt-4o;gpt-4o-mini;gpt-4.1"` - Filter to multiple model types (semicolon-separated)
+- `"output_type=int,selected_models=gpt-4o;gpt-4o-mini"` - Combine output type with multiple models
+
+**Flexible Second Argument**: Can be omitted or used as:
+1. **Omitted** → `llm:generate(prompt, dataArg1, ...)` - Defaults to string output, all models
+2. **Options string** → `llm:generate(prompt, "output_type=int,selected_models=...")` - Parse as configuration
+3. **Data argument** → `llm:generate(prompt, dataArg1, dataArg2)` - If not an options string, treated as first data arg
+
+**Supported Output Types**: `string`, `int`, `double`, `boolean`, `list<string>`, `list<int>`, `list<double>`, `list<boolean>`
 
 **Prompt Templating**: Use `${Variable}` for direct variable interpolation or `${arg_1}`, `${arg_2}`, etc. for positional arguments.
 
+**Model Selection**: Use semicolon-separated list in `selected_models` to filter which models to use:
+- Single model: `"selected_models=gpt-4o"`
+- Multiple models: `"selected_models=gpt-4o;gpt-4o-mini;gpt-4.1;gpt-4.1-nano"`
+- If not specified, all configured pools are used automatically for load balancing.
+
 **Examples:**
 
-**Direct variable interpolation:**
+**Simplest usage (defaults to string output):**
 ```prolog
-% Generate boolean classification
-diagnose_patient(PatientID, HasDiagnosis) :- 
-    clinical_notes(PatientID, Notes), 
-    HasDiagnosis = llm:generate(
-        "Review the clinical notes for patient ${PatientID}: ${Notes}. Determine if there is a specific diagnosis.",
-        "boolean"
-    ).
+% Ask a question with default string output
+answer(Q, A) :- 
+    question(Q), 
+    A = llm:generate(Q).
+
+% Generate description with variable interpolation
+product_summary(Name, Price, Summary) :- 
+    product(Name, Price), 
+    Summary = llm:generate("Describe ${Name} priced at ${Price}").
 ```
 
-**Using positional arguments:**
+**Using options:**
 ```prolog
-% Generate with arg_1, arg_2 placeholders
+% Specify output type only
+count(Data, Num) :- 
+    data(Data), 
+    Num = llm:generate("Count items in: ${Data}", "output_type=int").
+
+% Specify model selection only (defaults to string)
+fast_answer(Q, A) :- 
+    question(Q), 
+    A = llm:generate(Q, "selected_models=gpt-4o-mini").
+
+% Combine both options
+analysis(Data, Result) :- 
+    data(Data), 
+    Result = llm:generate("Analyze: ${Data}", "output_type=boolean,selected_models=gpt-4o").
+
+% Use multiple models for load balancing
+balanced_query(Q, A) :- 
+    question(Q), 
+    A = llm:generate(Q, "selected_models=gpt-4o;gpt-4o-mini;gpt-4.1").
+
+% Skip options entirely and pass data args directly (defaults to string, all models)
+description(Name, Age, Desc) :- 
+    person(Name, Age), 
+    Desc = llm:generate("Describe {arg_1} aged {arg_2}", Name, Age).
+```
+
+**Using positional arguments with options format:**
+```prolog
+% Generate with arg_1, arg_2 placeholders and explicit output types
 diagnose_with_args(PatientID, HasDiagnosis, Explanation) :- 
     clinical_notes(PatientID, Notes), 
     HasDiagnosis = llm:generate(
         "Review the clinical notes for patient ${arg_1}: ${arg_2}. Determine if there is a diagnosis.",
-        "boolean",
+        "output_type=boolean",
         PatientID,
         Notes
     ),
     Explanation = llm:generate(
         "Analyze the notes for patient ${arg_1}: ${arg_2}. Provide a brief rationale.",
-        "string",
+        "output_type=string",
         PatientID,
         Notes
     ).
@@ -87,12 +134,11 @@ diagnose_with_args(PatientID, HasDiagnosis, Explanation) :-
 
 **Multiple output types:**
 ```prolog
-% String output for descriptions
+% String output for descriptions (default)
 product_description(Product, Description) :- 
     product(Product, Features, Price), 
     Description = llm:generate(
-        "Create a marketing description for ${Product} with features ${Features} priced at ${Price}", 
-        "string"
+        "Create a marketing description for ${Product} with features ${Features} priced at ${Price}"
     ).
 
 % Boolean output for classification
@@ -100,9 +146,63 @@ is_positive_feedback(FeedbackID, IsPositive) :-
     feedback(FeedbackID, Text), 
     IsPositive = llm:generate(
         "Is this feedback positive? ${Text}",
-        "boolean"
+        "output_type=boolean"
     ).
 ```
+
+**Model selection for load balancing and quality control:**
+```prolog
+% Use only gpt-4o models for critical analysis (comma-separated options)
+critical_analysis(PatientID, Diagnosis) :- 
+    patient(PatientID, Symptoms), 
+    Diagnosis = llm:generate(
+        "Based on symptoms ${arg_1}, provide a preliminary diagnosis.",
+        "output_type=string,selected_models=gpt-4o",
+        Symptoms
+    ).
+
+% Use fast models only (defaults to string output)
+quick_category(Doc, Category) :- 
+    document(Doc, Text), 
+    Category = llm:generate(
+        "Classify this document into one category: ${Text}",
+        "selected_models=gpt-4o-mini"
+    ).
+
+% Specify both output type and models explicitly
+urgent_check(Text, IsUrgent) :- 
+    feedback(Text), 
+    IsUrgent = llm:generate(
+        "Is this urgent? ${Text}",
+        "output_type=boolean,selected_models=gpt-4o"
+    ).
+
+% Balance across multiple model types with data arguments
+balanced_processing(Item, Result) :- 
+    items(Item, Data), 
+    Result = llm:generate(
+        "Process this item: ${arg_1}",
+        "selected_models=gpt-4o;gpt-4o-mini;gpt-4.1",
+        Data
+    ).
+
+% Large-scale processing with many model types
+large_scale(Data, Analysis) :- 
+    dataset(Data), 
+    Analysis = llm:generate(
+        "Analyze: ${Data}",
+        "selected_models=gpt-4o;gpt-4o-mini;gpt-4.1;gpt-4.1-nano;gpt-4o-nano"
+    ).
+```
+
+**When to use `selected_models` with `llm:generate`:**
+- **Quality control:** Route critical queries to premium models (`gpt-5-nano`)
+- **Performance optimization:** Use faster models (`gpt-4o-mini`,`gpt-4o`,`gpt-4.1`,`gpt-4.1-nano`,`gpt-4.1-mini`) for simple tasks
+- **Cost optimization:** Balance cost and quality across model tiers
+- **Load balancing:** Distribute work across specific model types
+- **Model testing:** Test specific models without changing system configuration
+
+If `selected_models` is not specified, all configured LLM pools are used automatically for optimal load distribution.
 
 ---
 

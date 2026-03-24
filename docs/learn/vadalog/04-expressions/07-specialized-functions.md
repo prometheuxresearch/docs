@@ -593,14 +593,14 @@ record_with_metadata(X, S) :-
 Extract a field value from a struct by its field name:
 
 ```prolog
-struct:get(struct: struct, fieldName: string) → any
+struct:get(fieldName: string, struct: struct) → any
 ```
 
 **Example:**
 ```prolog
 a(10, 20).
 b(S) :- a(X, Y), S = struct("field1", X, "field2", Y).
-c(F1, F2) :- b(S), F1 = struct:get(S, "field1"), F2 = struct:get(S, "field2").
+c(F1, F2) :- b(S), F1 = struct:get("field1", S), F2 = struct:get("field2", S).
 @output("c").
 ```
 

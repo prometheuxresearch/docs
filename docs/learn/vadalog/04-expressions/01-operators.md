@@ -20,7 +20,7 @@ _multi-facts operators_ (called **aggregation operators**).
 | integer       | (monadic) `-`, `*`, `/`, `+`, `-`, `( )`                                                                |
 | double        | (monadic) `-`, `*`, `/`, `+`, `-`, `( )`                                                                |
 | boolean       | `&&`, `\|\|`, `!`, `not`, `( )` for associativity                                                    |
-| string        | `substring`, `contains`, `rlike`, `starts_with`, `ends_with`, `concat`, `concat_ws`, `replace`, `join`, `index_of`, `string_length`, `to_lower`, `to_upper`, `split`, `is_empty`, `strip` |
+| string        | `substring`, `contains`, `contains_any`, `rlike`, `starts_with`, `ends_with`, `concat`, `concat_ws`, `replace`, `join`, `index_of`, `string_length`, `to_lower`, `to_upper`, `split`, `is_empty`, `strip` |
 | set           | `\|` (union), `&` (intersection), `( )` for associativity                                                  |
 
 
@@ -424,7 +424,7 @@ b(3).
 
 ## String operators
 
-The String operators are `substring`, `contains`, `contains_any`, `rlike`, `starts_with`, `ends_with`, `concat`, `+`, `index_of`, `string_length`, `to_lower`, `to_upper`, `split`, and `strip`. These operators allow manipulation and comparison of `String` values.
+The String operators are `substring`, `contains`, `contains_any`, `rlike`, `starts_with`, `ends_with`, `concat`, `concat_ws`, `+`, `index_of`, `string_length`, `to_lower`, `to_upper`, `split`, `replace`, `join`, `is_empty`, and `strip`. These operators allow manipulation and comparison of `String` values.
 
 ### `substring`
 A rule using `substring` returns a substring from the specified `start` to `end` index, using zero-based indexing:
@@ -447,6 +447,30 @@ Expected output:
 ```prolog
 q("oxford", "metheux").
 ```
+
+### `contains`
+A rule with `contains` returns true if the `string` contains `substring`:
+
+```prolog
+q(K1, K2, Kn, J) :- body, J = contains(string, substring).
+```
+
+Example:
+
+```prolog showLineNumbers {3}
+a("prometheux engine").
+b("engine").
+q(X, Y, J) :- a(X), b(Y), J = contains(X, Y).
+@output("q").
+```
+
+Expected output:
+
+```prolog
+q("prometheux engine", "engine", #T).
+```
+
+`contains` can also be used directly as a boolean condition in the rule body (see [Implicit Boolean Conditions](#implicit-boolean-conditions)).
 
 ### `starts_with`
 A rule with `starts_with` returns true if the `string` starts with `start_string`:

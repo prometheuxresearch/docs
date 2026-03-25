@@ -281,6 +281,7 @@ Comprehensive string manipulation functions:
 ```prolog
 substring(string, start, length?)  % Extract substring
 contains(string, substring)        % Check if contains
+contains_any(string, keywords_array) % Check if contains any keyword
 rlike(string, pattern)             % Check if matches regex
 starts_with(string, prefix)        % Check if starts with
 ends_with(string, suffix)          % Check if ends with
@@ -382,6 +383,8 @@ Handle null values explicitly:
 ```prolog
 is_null(expression)        % Check if null
 is_not_null(expression)    % Check if not null
+nullManagement:ifnull(expression, valueIfNull, valueIfNotNull)  % Conditional null handling
+nullManagement:coalesce(expr1, expr2, ...)  % First non-null value
 ```
 
 ---

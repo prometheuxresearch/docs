@@ -573,6 +573,90 @@ adult_customers(Name, Age) :-
 
 ---
 
+## Null Handling Functions
+
+### `is_null()`
+Check if a value is null:
+
+```prolog
+is_null(expression: any) → boolean
+```
+
+**Example:**
+```prolog
+@output("b").
+a("hello").
+b(El, State) :- a(El), State = is_null(El).
+```
+
+**Expected output:**
+
+```prolog
+b("hello", #F).
+```
+
+### `is_not_null()`
+Check if a value is not null:
+
+```prolog
+is_not_null(expression: any) → boolean
+```
+
+**Example:**
+```prolog
+@output("b").
+a("hello").
+b(El, State) :- a(El), State = is_not_null(El).
+```
+
+**Expected output:**
+
+```prolog
+b("hello", #T).
+```
+
+### `nullManagement:ifnull()`
+Return a fallback value when an expression is null, or a different value when it is not null:
+
+```prolog
+nullManagement:ifnull(expression: any, valueIfNull: any, valueIfNotNull: any) → any
+```
+
+**Example:**
+```prolog
+@output("b").
+a("hello").
+b(El, Result) :- a(El), Result = nullManagement:ifnull(El, "was_null", "was_not_null").
+```
+
+**Expected output:**
+
+```prolog
+b("hello", "was_not_null").
+```
+
+### `nullManagement:coalesce()`
+Return the first non-null value from a list of expressions:
+
+```prolog
+nullManagement:coalesce(expr1: any, expr2: any, ...) → any
+```
+
+**Example:**
+```prolog
+@output("b").
+a("hello").
+b(Result) :- a(El), Result = nullManagement:coalesce(El, "fallback").
+```
+
+**Expected output:**
+
+```prolog
+b("hello").
+```
+
+---
+
 ## Utility Functions
 
 ### `struct()`

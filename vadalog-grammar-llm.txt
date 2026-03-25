@@ -113,6 +113,7 @@ Some require a **library prefix** when used in assignments (e.g., math:, collect
   - substring(string, start, end) or substring(string, start)
   - contains(string, substring) : returns #T/#F
   - contains_any(string, keywords_array) : returns #T if string contains any keyword from array
+  - rlike(string, pattern) : returns #T if string matches the given regular expression pattern
   - starts_with(string, prefix) : returns #T/#F
   - ends_with(string, suffix) : returns #T/#F
   - concat(string1, string2) or use '+' for concatenation
@@ -255,7 +256,10 @@ Check if value falls within range:
   - uuid(arg1, arg2, ...) : generate deterministic UUID
   - monotonically_increasing_id() : generate increasing ID
   - utils:phone_number(phone) or utils:phone_number(phone, region) : format phone
+  - is_null(value) : check if value is null
   - is_not_null(value) : check if value is not null
+  - nullManagement:ifnull(expression, valueIfNull, valueIfNotNull) : return valueIfNull when null, valueIfNotNull otherwise
+  - nullManagement:coalesce(expr1, expr2, ...) : return first non-null value
 
 ## Anonymization Functions (prefix: anonymization:)
 

@@ -125,6 +125,7 @@ Some require a **library prefix** when used in assignments (e.g., math:, collect
   - to_upper(string) : convert to uppercase
   - split(string, delimiter) : returns array of substrings
   - is_empty(string) : checks if empty or whitespace only
+  - strip(string) : removes leading and trailing whitespace
 
 ## Set Operators (on arrays)
 

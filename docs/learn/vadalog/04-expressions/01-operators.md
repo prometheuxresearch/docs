@@ -20,7 +20,7 @@ _multi-facts operators_ (called **aggregation operators**).
 | integer       | (monadic) `-`, `*`, `/`, `+`, `-`, `( )`                                                                |
 | double        | (monadic) `-`, `*`, `/`, `+`, `-`, `( )`                                                                |
 | boolean       | `&&`, `\|\|`, `!`, `not`, `( )` for associativity                                                    |
-| string        | `substring`, `contains`, `rlike`, `starts_with`, `ends_with`, `concat`, `concat_ws`, `replace`, `join`, `index_of`, `string_length`, `to_lower`, `to_upper`, `split`, `is_empty` |
+| string        | `substring`, `contains`, `rlike`, `starts_with`, `ends_with`, `concat`, `concat_ws`, `replace`, `join`, `index_of`, `string_length`, `to_lower`, `to_upper`, `split`, `is_empty`, `strip` |
 | set           | `\|` (union), `&` (intersection), `( )` for associativity                                                  |
 
 
@@ -424,7 +424,7 @@ b(3).
 
 ## String operators
 
-The String operators are `substring`, `contains`, `contains_any`, `rlike`, `starts_with`, `ends_with`, `concat`, `+`, `index_of`, `string_length`, `to_lower`, `to_upper`, and `split`. These operators allow manipulation and comparison of `String` values.
+The String operators are `substring`, `contains`, `contains_any`, `rlike`, `starts_with`, `ends_with`, `concat`, `+`, `index_of`, `string_length`, `to_lower`, `to_upper`, `split`, and `strip`. These operators allow manipulation and comparison of `String` values.
 
 ### `substring`
 A rule using `substring` returns a substring from the specified `start` to `end` index, using zero-based indexing:
@@ -776,6 +776,29 @@ Expected output:
 b("", #T).
 b("NonEmpty", #F).
 b(" ", #T).
+```
+
+### `strip`
+A rule with `strip` removes leading and trailing whitespace from a `string`:
+
+```prolog
+q(K1, K2, Kn, J) :- body, J = strip(string).
+```
+
+Example:
+
+```prolog showLineNumbers {3}
+a("  hello world  ").
+a("no_spaces").
+b(Original, Stripped) :- a(Original), Stripped = strip(Original).
+@output("b").
+```
+
+Expected output:
+
+```prolog
+b("  hello world  ", "hello world").
+b("no_spaces", "no_spaces").
 ```
 
 ## Set operators

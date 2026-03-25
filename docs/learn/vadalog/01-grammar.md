@@ -294,6 +294,7 @@ split(string, delimiter)           % Split string
 index_of(string, substring)        % Find substring index
 replace(string, old, new)          % Replace substring
 join(array, separator)             % Join array elements
+strip(string)                      % Remove leading/trailing whitespace
 ```
 
 **Examples:**

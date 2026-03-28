@@ -164,8 +164,11 @@ function extractKeyTerms(query) {
 
 async function searchAlgolia(query) {
   const algoliasearch = (await import('algoliasearch')).default;
-  const client = algoliasearch('DCCC0T0ITC', '870d45e2eaf4483e87c2204607df57c7');
-  const index = client.initIndex('prometheux-co');
+  const appId = process.env.ALGOLIA_APP_ID || 'DCCC0T0ITC';
+  const apiKey = process.env.ALGOLIA_API_KEY || '870d45e2eaf4483e87c2204607df57c7';
+  const indexName = process.env.ALGOLIA_INDEX_NAME || 'prometheux-co';
+  const client = algoliasearch(appId, apiKey);
+  const index = client.initIndex(indexName);
 
   const searchQuery = extractKeyTerms(query) || query;
   console.log(`[Algolia] Original query: "${query}"`);

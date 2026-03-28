@@ -44,28 +44,6 @@ In all the syntaxes above, `annotationName` indicates the specific annotation
 and each of them accepts a specific list of parameters. In the following
 sections we present the supported annotations.
 
-## @input
-
-It specifies that the facts for an atom of the program are imported from an
-external data source, for example a relational database.
-
-The syntax is the following:
-
-```
-@input("atomName").
-```
-
-where `atomName` is the atom for which the facts have to be imported from an
-external data source.
-
-It is assumed that an atom annotated with `@input`:
-
-1. never appears as the head of any rule
-2. it is never used within an `@output` annotation.
-
-The full details of the external source must be specified with the `@bind`,
-`@mapping` and `@qbind` annotations.
-
 ## @output
 
 It specifies that the facts for an atom of the program will be exported to an
@@ -82,8 +60,7 @@ external target.
 
 It is assumed that an atom annotated with `@output`:
 
-1. does not have any explicit facts in the program,
-2. is never used within an `@input` annotation.
+1. does not have any explicit facts in the program.
 
 If the `@output` annotation is used without any `@bind` annotation, it is
 assumed that the default target is the standard output. Annotations `@model`,
@@ -138,7 +115,6 @@ Assume to have a parquet dataset containing the following row:
 
    ```prolog
    @model("b", "['first:int', 'second:string', 'third:double', 'fourth:string']").
-   @input("b").
    ```
 
    This ensures that predicate `b` adheres to the specified schema.
@@ -364,7 +340,7 @@ risk_path_prob(RiskId, StartStateId, EndStateId, NumStepsNew, Events, ProbNew) :
 ## Bind, Mappings and Qbind
 
 These annotations (`@bind`, `@mapping`, `@qbind`) allow to customize the data
-sources for the `@input` annotation or the targets for the `@output` annotation.
+sources and targets for the `@output` annotation.
 
 ### @bind
 
@@ -384,8 +360,6 @@ relational database).
 Let's take a look at this example:
 
 ```prolog showLineNumbers
-@input("m").
-@input("q").
 @output("m").
 @bind("m","postgres","doctors_source","Medprescriptions").
 @bind("q","sqlite","doctors_source","Medprescriptions").
@@ -404,14 +378,11 @@ file and a postgres database and we bind them to the predicate `edge`. As a
 result the facts from the two sources are merged into `edge`.
 
 ```prolog showLineNumbers
-@input("edge").
 @output("path").
 path(X,Y) :- edge(X,Y).
 path(X,Z) :- edge(X,Y),path(Y,Z).
 @bind("edge","csv","path/to/myCsv1/","graph_partition_1.csv").
 @bind("edge","postgres","graph_source_db","graph_partition_2_table").
-
-@output("path").
 ```
 
 ### @mapping
@@ -435,7 +406,6 @@ be specified: _string_, _int_, _double_, _boolean_ and _date_.
 In this example, we map the columns of the `Medprescriptions` table:
 
 ```
-@input("m").
 @bind("m","postgres","doctors_source","Medprescriptions").
 @mapping("m",0,"id","int").
 @mapping("m",1,"patient","string").
@@ -445,14 +415,14 @@ In this example, we map the columns of the `Medprescriptions` table:
 @mapping("m",5,"conf","int").
 ```
 
-Observe that _mappings can be omitted_ for both `@input` and `@output` atoms. In
-such case they are automatically inferred from the source (target); the result
-can be however unsatisfactory depending on the sources, since some of them do
-not support positional reference to the attributes.
+Observe that _mappings can be omitted_. In such case they are automatically
+inferred from the source (target); the result can be however unsatisfactory
+depending on the sources, since some of them do not support positional
+reference to the attributes.
 
 ### @qbind
 
-`@qbind` binds an input atom to a source, generating the facts for the atom as
+`@qbind` binds an atom to a source, generating the facts for the atom as
 the result of a query executed on the source.
 
 The syntax is the following:

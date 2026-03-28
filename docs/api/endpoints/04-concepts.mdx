@@ -88,7 +88,7 @@ curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/concepts/
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
   -d '{
-    "concept_logic": "@input(\"products\").\n@output(\"ordered_products\").\nordered_products(Product, Price) :- products(Product, Price), Price > 100.",
+    "concept_logic": "@output(\"ordered_products\").\nordered_products(Product, Price) :- products(Product, Price), Price > 100.",
     "scope": "user",
     "python_scripts": {
       "data_processor": "def process_data(df):\n    return df.sort_values(\"price\")"

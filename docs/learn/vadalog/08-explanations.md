@@ -181,7 +181,6 @@ tc(X, Z) :- tc(X, Y), edge(Y, Z).
 **Explanation of Pre-Materialized Data:**
 
 ```prolog
-@input("chase_results").
 @bind("chase_results", "csv useHeaders=true", "datasets", "chase_results").
 @model("tc", "['From:string', 'To:string']", "there is a transitive closure from [From] to [To]").
 @model("edge", "['From:string', 'To:string']", "there is an edge from [From] to [To]").
@@ -229,7 +228,6 @@ tc(X, Z) :- tc(X, Y), edge(Y, Z).
 arc(1, 2).
 arc(2, 3).
 arc(3, 4).
-@input("tc").
 @bind("tc", "csv", "path/to/datasets", "tc").
 path(X, Y) :- tc(X, Y).
 path(X, Z) :- path(X, Y), arc(Y, Z).
@@ -244,7 +242,6 @@ path(X, Z) :- path(X, Y), arc(Y, Z).
 @model("arc", "['From:string', 'To:string']", "There is an arc from [From] to [To]").
 @model("path", "['From:string', 'To:string']", "There is a path from [From] to [To]").
 @model("tc", "['From:string', 'To:string']", "There is a transitive closure from [From] to [To]").
-@input("chase").
 @bind("chase", "csv useHeaders=true", "path/to/datasets", "chase").
 explain(Fact, ProvenanceLeft, ProvenanceRight, RuleDescription) :- 
     chase(Fact, ProvenanceLeft, ProvenanceRight, RuleDescription).

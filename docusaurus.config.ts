@@ -153,12 +153,8 @@ const config: Config = {
   } satisfies Preset.ThemeConfig,
   customFields: {
     docsChatUrl: process.env.NODE_ENV === 'production' 
-      ? "https://chat-docs.prometheux.ai/api/docsChat"  // EC2 deployment with chat API
-      : "/api/docsChat",  // Use local API in development
-    // Azure OpenAI configuration (safe to commit - endpoint is public, key is handled server-side)
-    azureOpenAIEndpoint: process.env.AZURE_OPENAI_ENDPOINT || "https://davbe-mdg4jzfa-eastus2.cognitiveservices.azure.com/",
-    azureOpenAIDeployment: process.env.AZURE_OPENAI_DEPLOYMENT || "gpt-4o",
-    useAzureOpenAI: process.env.USE_AZURE_OPENAI === "true",
+      ? "https://chat-docs.prometheux.ai/api/docsChat"
+      : "/api/docsChat",
   },
 };
 

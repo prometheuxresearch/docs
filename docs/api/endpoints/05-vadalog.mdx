@@ -22,7 +22,6 @@ Execute a Vadalog program with specified parameters.
 import prometheux_chain as px
 
 program = """
-@input("products").
 @output("expensive_products").
 expensive_products(Product, Price) :- products(Product, Price), Price > ?threshold.
 """
@@ -111,7 +110,7 @@ curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/vadalog/e
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
   -d '{
-    "program": "@input(\"products\").\n@output(\"expensive_products\").\nexpensive_products(Product, Price) :- products(Product, Price), Price > 100.",
+    "program": "@output(\"expensive_products\").\nexpensive_products(Product, Price) :- products(Product, Price), Price > 100.",
     "parameters": {
       "price_threshold": 100
     },
@@ -203,7 +202,6 @@ Validate a Vadalog program syntax without executing it.
 import prometheux_chain as px
 
 program = """
-@input("products").
 @output("expensive_products").
 expensive_products(Product, Price) :- products(Product, Price), Price > 100.
 """
@@ -252,7 +250,7 @@ curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/vadalog/v
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
   -d '{
-    "program": "@input(\"products\").\n@output(\"expensive_products\").\nexpensive_products(Product, Price) :- products(Product, Price), Price > 100.",
+    "program": "@output(\"expensive_products\").\nexpensive_products(Product, Price) :- products(Product, Price), Price > 100.",
     "strict_mode": true
   }'
 ```
@@ -386,7 +384,6 @@ Get an explanation of how a Vadalog program works.
 import prometheux_chain as px
 
 program = """
-@input("products").
 @output("expensive_products").
 expensive_products(Product, Price) :- products(Product, Price), Price > 100.
 """
@@ -445,7 +442,7 @@ curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/vadalog/e
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
   -d '{
-    "program": "@input(\"products\").\n@output(\"expensive_products\").\nexpensive_products(Product, Price) :- products(Product, Price), Price > 100.",
+    "program": "@output(\"expensive_products\").\nexpensive_products(Product, Price) :- products(Product, Price), Price > 100.",
     "explanation_type": "detailed",
     "include_examples": true
   }'
@@ -471,7 +468,6 @@ px.config.set('JARVISPY_URL', "https://api.prometheux.ai/jarvispy/my-org/my-user
 
 # Define a Vadalog program
 program = """
-@input("products").
 @output("expensive_products").
 expensive_products(Product, Price) :- products(Product, Price), Price > ?threshold.
 """
@@ -508,7 +504,7 @@ curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/vadalog/v
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
   -d '{
-    "program": "@input(\"products\").\n@output(\"expensive_products\").\nexpensive_products(Product, Price) :- products(Product, Price), Price > 100.",
+    "program": "@output(\"expensive_products\").\nexpensive_products(Product, Price) :- products(Product, Price), Price > 100.",
     "strict_mode": true
   }'
 
@@ -517,7 +513,7 @@ curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/vadalog/e
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
   -d '{
-    "program": "@input(\"products\").\n@output(\"expensive_products\").\nexpensive_products(Product, Price) :- products(Product, Price), Price > 100.",
+    "program": "@output(\"expensive_products\").\nexpensive_products(Product, Price) :- products(Product, Price), Price > 100.",
     "explanation_type": "overview"
   }'
 
@@ -526,7 +522,7 @@ curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/vadalog/e
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
   -d '{
-    "program": "@input(\"products\").\n@output(\"expensive_products\").\nexpensive_products(Product, Price) :- products(Product, Price), Price > 100.",
+    "program": "@output(\"expensive_products\").\nexpensive_products(Product, Price) :- products(Product, Price), Price > 100.",
     "parameters": {"threshold": 100},
     "execution_options": {"materialize_intermediate": true}
   }'

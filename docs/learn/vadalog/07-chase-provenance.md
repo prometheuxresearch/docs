@@ -194,7 +194,6 @@ After storing the chase in Neo4j, it can be retrieved using distributed Neo4j
 Connectors with the following annotations:
 
 ```prolog showLineNumbers
-@input("chase_neo4j").
 @qbind("chase_neo4j", "neo4j", "\", "MATCH(n:CHASE_NODE) -[r:DERIVED_BY]->(m:CHASE_NODE) RETURN n.fact, m.fact, r.rule").
 chase_edge(X,Y,R) :- chase_neo4j(X,Y,R).
 @output("chase_edge").
@@ -232,7 +231,6 @@ The query below demonstrates how to retrieve specific chase data related to the
 fact 'a(1,2)':
 
 ```prolog showLineNumbers
-@input("chase_neo4j").
 @qbind("chase_neo4j", "neo4j", "\", "MATCH (root:CHASE_NODE {fact: 'a(1,2)' }) CALL apoc.path.subgraphNodes(root, {relationshipFilter: 'DERIVED_BY>', limit: 1000}) YIELD node MATCH (node)-[r]->(m) RETURN node.fact, m.fact, r.rule").
 
 chase_edge(X,Y,R) :- chase_neo4j(X,Y,R).

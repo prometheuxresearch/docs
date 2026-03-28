@@ -131,19 +131,7 @@ The options that are available are
   - `none`: Never quotes fields.
 - `nullString`: Value can be any string, which replaces null values in the csv
   file.
-- `selectedColumns`: Value is a list of the form `[c1;…;cn]` to select only the
-  columns `c1, …,cn` from the csv file.
-  - Each value in the list is either a column name (enclosed with single quotes
-    'column name') which is present in the csv's header, or is an integer
-    starting from 0 denoting the column index.
-  - It is also possible to specify ranges; e.g. `selectedColumns=[0:4]` reads
-    only the five columns `0,1,2,3,4`.
-  - It is allowed to mix the values in the list, e.g. `selectedColumns=[0:3;Column_5]` would select columns `0,1,2,3` and the column with the name
-    `Column_5`.
-  - Note that in order to select columns by name, a header line in the csv must
-    be present.
 - `multiline`: Handles multi-line fields. When multiline is set to true it handles fields that span multiple lines correctly
-- `query`: perform a `SELECT` query over a CSV file. If you are familiar with SQL syntax, you can leverage that to query the CSV file. The fields of the select are the one of the first line of the CSV file.
 - `coalesce`: Unifies the output in one partition. The output will be a single CSV file instead of partitioned CSV files. Supported only in standalone environments. 
  
 
@@ -153,8 +141,7 @@ example for a csv bind command with configuration would be the following:
 
 ```prolog
 @bind("relation",
-      "csv useHeaders=false, delimiter='\t', recordSeparator='\n',
-      query='select Name from users'",
+      "csv useHeaders=true, delimiter='\t', recordSeparator='\n'",
       "filepath",
       "filename").
 ```
@@ -188,39 +175,28 @@ myAtom(X,Y,Z) :- myCsv(X,Y,Z).
 @output("myAtom").
 ```
 
-**Example for `selectedColumns`**
+**Selecting columns and filtering with SQL body rules**
 
-The following reads only the the four columns with indices `0,1,2,4` from the
-CSV file, excluding the column `3`.
+To select specific columns or filter rows, bind the full CSV with `useHeaders=true` and use a SQL body rule over the bound predicate. The SQL query can reference column names directly from the CSV header:
 
 ```prolog showLineNumbers
-@bind("myCsv", "csv selectedColumns=[0:2; 4]", "/path_to_csv/folder", "csv_name.csv").
+@bind("users", "csv useHeaders=true", "/path_to_csv/folder", "users.csv").
 
-withoutThree(W, X,Y,Z) :- myCsv(W, X,Y,Z).
-@output("withoutThree").
+% Select only Name, Surname and Age where Age > 10
+filtered_users() <- SELECT Name, Surname, Age FROM users WHERE Age > 10.
+@output("filtered_users").
 ```
 
-To store results into another CSV file, you must bind the entry
-point. In this example, we read a CSV file, perform a SQL query to select Name, Surname and Age of users without mapping annotations and write
-the output into another CSV file:
+To store results into another CSV file, bind the output predicate:
 
 ```prolog
-% Define the data source as a CSV file named "users.csv" located in "/path_to_csv/folder"
-% The file contains columns "Name", "Surname", "Age" and potentially other fields. Perform a `select` query over the CSV file and filter and only records where "Age > 10", which are loaded into the "user" relation.
-@bind("user", "csv query='select Name,Surname,Age from user where Age > 10'", "/path_to_csv/folder", "users.csv").
+@bind("users", "csv useHeaders=true", "/path_to_csv/folder", "users.csv").
 
-% Define a new relation "user_name_surname" that selects users from the "user" relation
-% with an additional condition that their "Age" is less than 5. This relation returns the
-% "Name", "Surname", and "Age" of users.
-user_name_surname(X,Y,Z) :- user(Name,Surname,Age), Age < 5.
+% Filter users using a SQL body rule
+young_users() <- SELECT Name, Surname, Age FROM users WHERE Age < 25.
 
-% Declare that the results of "user_name_surname" will be written to an output.
-@output("user_name_surname").
-
-% Bind the "user_name_surname" relation to output partitioned CSV files in a folder named "new_users" 
-% in the folder "/another_csv_path/folder/output".
-@bind("user_name_surname", "csv", "/another_csv_path/folder/output", "new_users").
-
+@output("young_users").
+@bind("young_users", "csv", "/another_csv_path/folder/output", "young_users").
 ```
 
 ## Parquet Datasource
@@ -229,9 +205,6 @@ user_name_surname(X,Y,Z) :- user(Name,Surname,Age), Age < 5.
  In this section, we'll explore how Parquet files can be integrated into Vadalog workflows, using the provided example:
 
 ```prolog
-% Declare the input concept 'shipping_parquet' that will be used to refer to the data
-@input("shipping_parquet").
-
 % Bind the 'shipping_parquet' concept to a Parquet file located in the specified directory
 % The data source type is 'parquet', and the file is 'shipping.parquet' in the 'disk/data/input_files' folder
 @bind("shipping_parquet", "parquet", "disk/data/input_files", "shipping.parquet").
@@ -250,9 +223,6 @@ Excel files are widely used for tabular data storage and exchange in business an
 In this example, we will read data from a CSV file and populate an Excel file with the extracted data.
 
 ```prolog
-% Declare the input concept 'shipping_excel_csv' to read data from a CSV file
-@input("shipping_excel_csv").
-
 % Bind the 'shipping_excel_csv' concept to the CSV file 'shipping_data_excel.csv' located in the 'disk/data/generated_data' directory
 % Use 'useHeaders=true' to indicate that the first row contains column headers
 @bind("shipping_excel_csv", "csv useHeaders=true", "disk/data/generated_data", "shipping_data_excel.csv").
@@ -274,9 +244,6 @@ shipping_excel(OrderId, ShippingDate) :- shipping_excel_csv(OrderId, ShippingDat
 In this example, we will read data from the previously populated Excel file.
 
 ```prolog
-% Declare the input concept 'shipping_excel' to read from the Excel file
-@input("shipping_excel").
-
 % Bind the 'shipping_excel' concept to the Excel file 'shipping.xls' located in 'disk/data/input_files'
 % Use 'useHeaders=true' to indicate that the first row contains column headers
 @bind("shipping_excel", "excel useHeaders=true", "disk/data/input_files", "shipping.xls").
@@ -292,9 +259,6 @@ shipping_excel_test(OrderId, ShippingDate) :- shipping_excel(OrderId, ShippingDa
 In this example, we will read data from a specific sheet of an Excel file.
 
 ```prolog
-% Declare the input concept 'shipping_excel_sheet' to read data from a specific sheet of an Excel file
-@input("shipping_excel_sheet").
-
 % Bind the 'shipping_excel_sheet' concept to the Excel file 'shipping.xls' located in 'disk/data/input_files'
 % Use 'useHeaders=true' to indicate that the first row contains column headers
 @bind("shipping_excel_sheet", "excel useHeaders=true, dataAddress=''Sheet1'!A1'", "disk/data/input_files", "shipping.xls").      
@@ -607,9 +571,6 @@ PostgreSQL is a robust open-source relational database that supports a wide rang
 In this example, we read data from a CSV file and populate the customer table in a PostgreSQL database.
 
 ```prolog
-% Declare the input concept 'customer_postgres_csv' to read from the CSV file
-@input("customer_postgres_csv").
-
 % Bind the 'customer_postgres_csv' concept to the CSV file located in 'disk/data/generated_data/customer_postgres.csv'
 % The option 'useHeaders=true' indicates the CSV file contains headers
 @bind("customer_postgres_csv", "csv useHeaders=true", "disk/data/generated_data", "customer_postgres.csv").
@@ -634,9 +595,6 @@ customer_postgres(CustomerID, Name, Surname, Email) :-
 This example demonstrates reading the full customer table from PostgreSQL.
 
 ```prolog
-% Declare the input concept 'customer_postgres' to read data from the 'customer' table in PostgreSQL
-@input("customer_postgres").
-
 % Bind the 'customer_postgres' concept to the PostgreSQL table 'customer' in the 'prometheux' database
 @bind("customer_postgres", "postgresql host='postgres-host', port=5432, username='prometheux', password='myPassw'", 
       "prometheux", "customer").
@@ -653,9 +611,6 @@ customer_postgres_test(CustomerID, Name, Surname, Email) :-
 In this example, we read specific columns and filter data using a SQL query.
 
 ```prolog
-% Declare the input concept 'customer_postgres' to read data using a custom SQL query
-@input("customer_postgres").
-
 % Bind the 'customer_postgres' concept to PostgreSQL using a SQL query
 % The query filters for CustomerID > 0 and selects CustomerID and Email
 @qbind("customer_postgres", "postgresql host='postgres-host', port=5432, username='prometheux', password='myPassw', database='prometheux'", 
@@ -834,9 +789,6 @@ out(X, Y, Z) :- owns(X, Y, Z).
 MariaDB is a popular open-source relational database, highly compatible with MySQL. It supports various SQL features and is commonly used in web applications and data platforms. In this example, we will explore how to interact with a MariaDB database in Prometheux, focusing on reading data from the order_customer table to test if the data has been populated correctly.
 
 ```prolog
-% Declare the input concept 'order_mariadb' to read data from the 'order_customer' table in MariaDB
-@input("order_mariadb").
-
 % Bind the 'order_mariadb' concept to the 'order_customer' table in MariaDB
 % The connection details (host, port, username, and password) are specified
 @bind("order_mariadb", "mariadb host='mariadb-host', port=3306, username='prometheux', password='myPassw'", 
@@ -856,9 +808,6 @@ Neo4j is a graph database designed for efficiently storing and querying highly c
 This example shows how to read data from a CSV file, populate Neo4j with Person and Order nodes, and create a relationship between them.
 
 ```prolog
-% Declare the input concept 'persons_order_neo4j_csv' to read data from the CSV file
-@input("persons_order_neo4j_csv").
-
 % Bind the 'persons_order_neo4j_csv' concept to the CSV file located in 'disk/data/generated_data/persons_order_neo4j.csv'
 @bind("persons_order_neo4j_csv", "csv useHeaders=true", "disk/data/generated_data", "persons_order_neo4j.csv").
 
@@ -901,9 +850,6 @@ order_person_rel_neo4j(OrderId, CustomerId) :-
 In this example, we query Neo4j to retrieve the relationship between Person and Order nodes.
 
 ```prolog
-% Declare the input concept 'persons_order_neo4j' for querying Neo4j
-@input("persons_order_neo4j").
-
 % Use @qbind to execute a Cypher query that retrieves OrderId and CustomerId from related Order and Person nodes
 @qbind("persons_order_neo4j", "neo4j username='neo4j', password='myPassw', host='neo4j-host', port=7680", "", 
        "MATCH (o:Order)-[r:IS_RELATED_TO]->(p:Person) RETURN o.orderId, p.customerId").
@@ -946,9 +892,6 @@ The DynamoDB connector supports the following configuration options:
 This example shows how to read data from a CSV file and write it to a DynamoDB table with automatic table creation.
 
 ```prolog
-% Declare the input concept 'users_csv' to read from the CSV file
-@input("users_csv").
-
 % Bind the 'users_csv' concept to the CSV file containing user data
 @bind("users_csv", "csv useHeaders=true", "disk/data/input", "users.csv").
 
@@ -1108,9 +1051,6 @@ Amazon S3 (Simple Storage Service) is a widely used cloud storage service that a
 In this example, we first read data from a CSV file stored locally and then write it to an S3 bucket.
 
 ```prolog
-% Declare the input concept 'user_csv' to read from the CSV file located on the local disk
-@input("user_csv").
-
 % Bind the 'user_csv' concept to the local CSV file 'users.csv' located in 'disk/datasources'
 @bind("user_csv", "csv useHeaders=true", "disk/datasources", "users.csv").
 
@@ -1127,9 +1067,6 @@ user(X) :- user_csv(X).
 In this example, we demonstrate how to read data from a CSV file stored in an S3 bucket.
 
 ```prolog
-% Declare the input concept 'user_s3' to read data from the CSV file in the S3 bucket
-@input("user_s3").
-
 % Bind the 'user_s3' concept to the CSV file 'user.csv' located in the specified S3 bucket
 @bind("user_s3", "csv", "s3a://your-s3-bucket/", "user.csv").
 
@@ -1145,9 +1082,6 @@ user(X) :- user_s3(X).
 You can use a similar approach to bind predicates to CSV files stored in Amazon S3:
 
 ```prolog
-% Declare the input concept 'user_s3' to read data from the CSV file in the S3 bucket
-@input("user_s3").
-
 % Bind the 'user_s3' concept to the CSV file 'user.csv' located in the specified S3 bucket
 @bind("user_s3", "csv", "s3a://your-s3-bucket/", "user.csv").
 
@@ -2219,9 +2153,6 @@ iNV__pdf_head(CustomerName,CustomerId,PurchaseOrder,InvoiceId,InvoiceDate,DueDat
 HDFS (Hadoop Distributed File System) is designed for distributed storage and large-scale data processing. Vadalog can integrate with HDFS by reading from and writing to files stored in HDFS clusters. This example shows how to read a CSV file from an HDFS location and process it within a Prometheux workflow.
 
 ```prolog
-% Declare the input concept 'user_csv' to read from the CSV file located in HDFS
-@input("user_csv").
-
 % Bind the 'user_csv' concept to the CSV file located in HDFS ('users.csv')
 % The file is located in the HDFS directory: hdfs://hdfs-host:9000/user
 % The 'useHeaders=true' option indicates that the first row contains column headers
@@ -2238,9 +2169,6 @@ user(X) :- user_csv(X).
 Sybase (now SAP ASE) is a relational database management system used for online transaction processing. This example shows how to read data from a Sybase database.
 
 ```prolog
-% Declare the input concept 'order_sybase' to read data from the 'orders' table in Sybase
-@input("order_sybase").
-
 % Bind the 'order_sybase' concept to the Sybase database using the JDBC connection details
 @bind("order_sybase", "sybase host='sybase-host', port=5000, username='myUser', password='myPassw'", 
       "myDatabase", "orders").
@@ -2256,9 +2184,6 @@ order_sybase_test(OrderId, CustomerId, Amount) :-
 ## Teradata Database
 Teradata is a highly scalable relational database often used in enterprise data warehousing. This example shows how to read data from a Teradata database.
 ```prolog
-% Declare the input concept 'sales_teradata' to read data from the 'sales' table in Teradata
-@input("sales_teradata").
-
 % Bind the 'sales_teradata' concept to the Teradata database using the JDBC connection details
 @bind("sales_teradata", "teradata host='teradata-host', port=1025, username='myUser', password='myPassw'", 
       "myDatabase", "sales").
@@ -2276,9 +2201,6 @@ sales_teradata_test(SaleId, ProductId, SaleAmount) :-
 Amazon Redshift is a fully managed data warehouse service designed for large-scale data analytics. This example shows how to read data from a Redshift table.
 
 ```prolog
-% Declare the input concept 'analytics_redshift' to read data from the 'analytics' table in Redshift
-@input("analytics_redshift").
-
 % Bind the 'analytics_redshift' concept to the Redshift database using the JDBC connection details
 @bind("analytics_redshift", "redshift host='redshift-cluster.amazonaws.com', port=5439, username='myUser', password='myPassword'", 
       "analyticsDB", "analytics").
@@ -2560,9 +2482,6 @@ ALTER USER username REMOVE PROGRAMMATIC ACCESS TOKEN token_name;
 This example demonstrates reading data from a Snowflake table using password authentication.
 
 ```prolog
-% Declare the input concept 'transactions_snowflake' to read data from the 'transactions' table in Snowflake
-@input("transactions_snowflake").
-
 % Bind the 'transactions_snowflake' concept to the Snowflake database using the JDBC connection details
 @bind("transactions_snowflake", "snowflake url='A778xxx-IVxxxx.snowflakecomputing.com', username='PROMETHEUX', password='myPassword', warehouse='COMPUTE_WH'", 
       "TEST", "transaction_data").
@@ -2580,9 +2499,6 @@ transactions_snowflake_test(TransactionId, CustomerId, Amount) :-
 This example demonstrates reading data from a Snowflake table using Programmatic Access Token (PAT) authentication instead of password. This method avoids MFA prompts during execution.
 
 ```prolog
-% Declare the input concept 'transactions_snowflake' to read data from the 'transactions' table in Snowflake
-@input("transactions_snowflake").
-
 % Bind the 'transactions_snowflake' concept to the Snowflake database using PAT authentication
 % Replace 'password' with your PAT token value obtained from the ALTER USER ADD PROGRAMMATIC ACCESS TOKEN command
 @bind("transactions_snowflake", "snowflake url='A778xxx-IVxxxx.snowflakecomputing.com', username='PROMETHEUX', password='your_pat_token_here', warehouse='COMPUTE_WH'", 
@@ -2604,9 +2520,6 @@ Databricks is a cloud-based platform for data engineering and data science.
 This example demonstrates writing data to a Databricks table.
 
 ```prolog
-% Declare the input concept 'sales_postgres' to read data from the 'sales' table in Postgres
-@input("sales_postgres").
-
 % Bind the 'sales_postgres' concept to the Postgres database using the JDBC connection details
 @qbind("sales_postgres","postgresql host='postgres-host', port=5432, username='prometheux', password='myPassw'",
       "postgres", "select sale_id, product_id, sale_amount from sales").
@@ -2627,9 +2540,6 @@ sales_databricks(SaleId, ProductId, SaleAmount) :-
 This example demonstrates reading data from a Databricks table.
 
 ```prolog
-% Declare the input concept 'sales_databricks' to read data from the 'sales' table in Databricks
-@input("sales_databricks").
-
 % Bind the 'sales_databricks' concept to the Databricks cluster using the JDBC connection details
 @qbind("sales_databricks","databricks fetchSize=5, authMode='PAT', token='dapixxxx', host='dbc-xxxx-02fe.cloud.databricks.com'",
       "/sql/1.0/warehouses/3283xxxx", "select sale_id, productId from sales").

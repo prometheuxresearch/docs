@@ -7,106 +7,34 @@ import TabItem from '@theme/TabItem';
 
 # Vadalog API
 
-The Vadalog API provides direct access to the Vadalog reasoning engine for evaluating logic programs and managing execution.
+The Vadalog API exposes JarvisPy routes for analyzing programs, managing bind annotations, and evaluating logic against the Vadalog engine.
+
+**Python SDK:** There are no dedicated Vadalog helpers in `prometheux_chain`. Call these endpoints with your HTTP client (for example `httpx` or `requests`) against your JarvisPy base URL, with a valid JWT.
 
 ---
 
-## Evaluate Program
+## Analyze Program
 
-Execute a Vadalog program with specified parameters.
+Inspect a Vadalog program without executing it. Returns predicate structure derived from the parser.
 
-<Tabs>
-  <TabItem value="sdk" label="Python SDK" default>
+**HTTP:** `POST /api/v1/vadalog/analyze`
 
-```python
-import prometheux_chain as px
+**Body (JSON)**
 
 program = """
 @output("expensive_products").
 expensive_products(Product, Price) :- products(Product, Price), Price > ?threshold.
 """
 
-parameters = {"threshold": 100}
-execution_options = {
-    "step_by_step": False,
-    "materialize_intermediate": True,
-    "debug_mode": False,
-    "max_iterations": 1000
-}
+**Response (`data`)**
 
-result = px.evaluate_vadalog(
-    program=program, 
-    parameters=parameters, 
-    execution_options=execution_options
-)
-print(f"Execution completed in {result['execution_time']}s")
-print(f"Results: {result['results']}")
-```
-
-**Function Signature**
-
-```python
-def evaluate_vadalog(
-    program, 
-    parameters=None, 
-    execution_options=None, 
-    timeout=300
-)
-```
-
-**Parameters**
-
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `program` | str | Yes | Vadalog program code |
-| `parameters` | dict | No | Program parameters |
-| `execution_options` | dict | No | Execution configuration |
-| `timeout` | int | No | Execution timeout in seconds. Defaults to 300 |
-
-**Execution Options**
-
-| Option | Type | Description |
-|--------|------|-------------|
-| `step_by_step` | bool | Enable step-by-step execution |
-| `materialize_intermediate` | bool | Materialize intermediate results |
-| `debug_mode` | bool | Enable debug output |
-| `max_iterations` | int | Maximum number of iterations |
-
-**Returns**
-
-The evaluation results data.
-
-  </TabItem>
-  <TabItem value="rest" label="REST API">
-
-### HTTP Request
+| Field | Description |
+|-------|-------------|
+| `headPredicates` | Head predicates in the program |
+| `inputPredicates` | Input predicates |
 
 ```bash
-POST /api/v1/vadalog/evaluate
-```
-
-### Parameters
-
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| program | string | Yes | Vadalog program code |
-| parameters | object | No | Program parameters |
-| execution_options | object | No | Execution configuration |
-| timeout | integer | No | Execution timeout in seconds (default: 300) |
-
-The execution_options object can contain:
-
-| Field | Type | Description |
-|-------|------|-------------|
-| step_by_step | boolean | Enable step-by-step execution |
-| materialize_intermediate | boolean | Materialize intermediate results |
-| debug_mode | boolean | Enable debug output |
-| max_iterations | integer | Maximum number of iterations |
-
-### cURL Example
-
-```bash
-curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/vadalog/evaluate" \
+curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/vadalog/analyze" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
   -d '{
@@ -124,129 +52,70 @@ curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/vadalog/e
   }'
 ```
 
-  </TabItem>
-</Tabs>
-
-### Response
+Example shape of `data`:
 
 ```json
 {
-  "data": {
-    "execution_id": "exec_12345",
-    "results": {
-      "expensive_products": [
-        ["Laptop", 1200],
-        ["Smartphone", 800],
-        ["Tablet", 600]
-      ]
-    },
-    "execution_time": 0.45,
-    "iterations": 3,
-    "memory_usage": "12MB",
-    "statistics": {
-      "facts_derived": 150,
-      "rules_fired": 25
-    }
-  },
-  "message": "Program evaluated successfully",
-  "status": "success"
+  "headPredicates": ["expensive_products"],
+  "inputPredicates": ["products"]
 }
 ```
 
 ---
 
-## Stop Evaluation
+## Parse Binds
 
-Force stop a running Vadalog evaluation.
+Parse `@bind` / `@qbind` annotations from a program and separate rule code from datasource bindings.
 
-<Tabs>
-  <TabItem value="sdk" label="Python SDK" default>
+**HTTP:** `POST /api/v1/vadalog/parse-binds`
 
-```python
-import prometheux_chain as px
+**Body (JSON)**
 
-# Stop a running Vadalog evaluation
-result = px.stop_vadalog_evaluation()
-print(result['message'])
-```
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `program` | string | Yes | Full Vadalog source including annotations |
+| `outputPredicate` | string | No | Extra predicate name to treat as output when classifying binds |
 
-  </TabItem>
-  <TabItem value="rest" label="REST API">
+**Response (`data`)**
 
-### HTTP Request
-
-```bash
-POST /api/v1/vadalog/stop
-```
-
-### cURL Example
+| Field | Description |
+|-------|-------------|
+| `code` | Program text without annotation lines |
+| `binds` | `{ "input": [...], "output": [...] }` — each entry includes `predicate`, `annotation`, and parsed fields when available |
 
 ```bash
-curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/vadalog/stop" \
-  -H "Authorization: Bearer YOUR_JWT_TOKEN"
+curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/vadalog/parse-binds" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -d '{
+    "program": "@bind(\"data\",\"csv useHeaders=true\",\"/tmp\",\"test.csv\").\nresult(X) :- data(X).\n@output(\"result\").",
+    "outputPredicate": "result"
+  }'
 ```
-
-  </TabItem>
-</Tabs>
 
 ---
 
-## Validate Program
+## Build Bind
 
-Validate a Vadalog program syntax without executing it.
+Rewrite an existing bind annotation for a new predicate name. When `isOutput` is true, the output target (e.g. CSV filename or query name) is updated for output usage.
 
-<Tabs>
-  <TabItem value="sdk" label="Python SDK" default>
+**HTTP:** `POST /api/v1/vadalog/build-bind`
 
-```python
-import prometheux_chain as px
+**Body (JSON)**
 
 program = """
 @output("expensive_products").
 expensive_products(Product, Price) :- products(Product, Price), Price > 100.
 """
 
-result = px.validate_vadalog(program=program, strict_mode=True)
-if result['status'] == 'success':
-    print("Program is valid!")
-    print(f"Analysis: {result['analysis']}")
-else:
-    print(f"Validation errors: {result['errors']}")
-```
+**Response (`data`)**
 
-**Function Signature**
-
-```python
-def validate_vadalog(program, strict_mode=False)
-```
-
-**Parameters**
-
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `program` | str | Yes | Vadalog program code to validate |
-| `strict_mode` | bool | No | Enable strict validation. Defaults to False |
-
-  </TabItem>
-  <TabItem value="rest" label="REST API">
-
-### HTTP Request
+| Field | Description |
+|-------|-------------|
+| `annotation` | Updated annotation string |
 
 ```bash
-POST /api/v1/vadalog/validate
-```
-
-### Parameters
-
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| program | string | Yes | Vadalog program code to validate |
-| strict_mode | boolean | No | Enable strict validation (default: false) |
-
-### cURL Example
-
-```bash
-curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/vadalog/validate" \
+curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/vadalog/build-bind" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
   -d '{
@@ -255,179 +124,122 @@ curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/vadalog/v
   }'
 ```
 
-  </TabItem>
-</Tabs>
-
 ---
 
-## Get Execution Status
+## Evaluate Program
 
-Check the status of a running or completed evaluation.
+Run a Vadalog program with optional parameters and compute hints. JarvisPy parses the program and delegates execution to the engine (local or configured compute).
 
 <Tabs>
   <TabItem value="sdk" label="Python SDK" default>
 
-```python
-import prometheux_chain as px
+**Not available in SDK — use REST API directly.**
 
-status = px.get_vadalog_status(execution_id="exec_12345")
-print(f"Execution status: {status['status']}")
-print(f"Progress: {status['progress']}%")
-if status['status'] == 'completed':
-    print(f"Results available: {len(status['results'])} facts")
-```
-
-**Function Signature**
-
-```python
-def get_vadalog_status(execution_id)
-```
-
-**Parameters**
-
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `execution_id` | str | Yes | The execution ID to check |
+There is no `evaluate_vadalog` (or similar) in the Python SDK. Use `POST /api/v1/vadalog/evaluate` with `requests`, `httpx`, or another HTTP client.
 
   </TabItem>
   <TabItem value="rest" label="REST API">
 
 ### HTTP Request
 
-```bash
-GET /api/v1/vadalog/status?execution_id={execution_id}
+```http
+POST /api/v1/vadalog/evaluate
 ```
 
-### Parameters
+### Body (JSON)
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| execution_id | string | Yes | The execution ID to check |
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `program` | string | Yes | Vadalog program source |
+| `params` | object | No | Parameter map passed to evaluation (default `{}`) |
+| `compute` | object | No | Optional compute overrides (resolved with the authenticated user’s compute configuration) |
 
 ### cURL Example
 
 ```bash
-curl -X GET "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/vadalog/status?execution_id=exec_12345" \
-  -H "Authorization: Bearer YOUR_JWT_TOKEN"
+curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/vadalog/evaluate" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -d '{
+    "program": "@input(\"products\").\n@output(\"expensive_products\").\nexpensive_products(Product, Price) :- products(Product, Price), Price > ?threshold.",
+    "params": {
+      "threshold": 100
+    }
+  }'
 ```
 
   </TabItem>
 </Tabs>
 
+### Response
+
+Successful responses use the standard JarvisPy envelope: `status`, `message`, and `data`. The `data` field contains the evaluation payload returned by the Vadalog client (structure depends on the program and engine).
+
+```json
+{
+  "data": {},
+  "message": "Vadalog program evaluated successfully",
+  "status": "success"
+}
+```
+
 ---
 
-## List Built-in Functions
+## Evaluate with parameters (engine proxy)
 
-Get a list of available built-in functions for Vadalog programs.
+Proxy to the Vadalog engine’s `evaluateWithParams` endpoint. Uses **multipart form** data (`application/x-www-form-urlencoded` / `multipart/form-data`), not JSON.
 
-<Tabs>
-  <TabItem value="sdk" label="Python SDK" default>
+**HTTP:** `POST /api/v1/vadalog/evaluateWithParams`
 
-```python
-import prometheux_chain as px
+| Input | Description |
+|-------|-------------|
+| Form: `program` | Required. Vadalog program text |
+| Query: `measureElapsedTime` | Optional. Default `false` |
 
-functions = px.list_vadalog_functions(category="math")
-print("Available math functions:")
-for func in functions['functions']:
-    print(f"  - {func['name']}: {func['description']}")
-    print(f"    Syntax: {func['syntax']}")
-    print(f"    Example: {func['example']}")
-```
+JarvisPy forwards `program` and `measureElapsedTime` to the engine and supplies empty default `params` and `databricksConfigs` in the proxied request.
 
-**Function Signature**
-
-```python
-def list_vadalog_functions(category="all")
-```
-
-**Parameters**
-
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `category` | str | No | Function category: "all", "math", "string", "date", "aggregation". Defaults to "all" |
-
-  </TabItem>
-  <TabItem value="rest" label="REST API">
-
-### HTTP Request
+The response body is whatever the engine returns (not necessarily the same envelope as `POST /evaluate`).
 
 ```bash
-GET /api/v1/vadalog/functions?category=all
+curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/vadalog/evaluateWithParams?measureElapsedTime=false" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  --form-string 'program=@input("x").@output("y").y(1).'
 ```
 
-### Parameters
+---
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| category | string | No | Function category: "all", "math", "string", "date", "aggregation" (default: "all") |
+## Stop Evaluation
 
-### cURL Example
+Signals the engine to stop the current evaluation and breaks any in-flight wait on the JarvisPy side.
+
+**HTTP:** `GET /api/v1/vadalog/stop`
 
 ```bash
-curl -X GET "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/vadalog/functions?category=math" \
+curl -X GET "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/vadalog/stop" \
   -H "Authorization: Bearer YOUR_JWT_TOKEN"
 ```
 
-  </TabItem>
-</Tabs>
-
 ---
 
-## Explain Program
+## Get Engine Status
 
-Get an explanation of how a Vadalog program works.
+Lightweight JarvisPy health-style check for the evaluation service (not per-execution polling).
 
-<Tabs>
-  <TabItem value="sdk" label="Python SDK" default>
+**HTTP:** `GET /api/v1/vadalog/status`
 
-```python
-import prometheux_chain as px
+**Response (`data`)**
 
 program = """
 @output("expensive_products").
 expensive_products(Product, Price) :- products(Product, Price), Price > 100.
 """
 
-explanation = px.explain_vadalog(
-    program=program, 
-    explanation_type="detailed"
-)
-print("Program Explanation:")
-print(explanation['explanation'])
-if explanation.get('examples'):
-    print("\nExamples:")
-    for example in explanation['examples']:
-        print(f"  - {example}")
-```
-
-**Function Signature**
-
-```python
-def explain_vadalog(
-    program, 
-    explanation_type="overview", 
-    include_examples=True
-)
-```
-
-**Parameters**
-
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `program` | str | Yes | Vadalog program to explain |
-| `explanation_type` | str | No | Type: "overview", "detailed", "step_by_step". Defaults to "overview" |
-| `include_examples` | bool | No | Include usage examples. Defaults to True |
-
-  </TabItem>
-  <TabItem value="rest" label="REST API">
-
-### HTTP Request
-
 ```bash
-POST /api/v1/vadalog/explain
+curl -X GET "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/vadalog/status" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN"
 ```
 
-### Parameters
+Example:
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
@@ -448,15 +260,11 @@ curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/vadalog/e
   }'
 ```
 
-  </TabItem>
-</Tabs>
-
 ---
 
 ## Complete Workflow Example
 
-<Tabs>
-  <TabItem value="sdk" label="Python SDK" default>
+REST-only flow: analyze structure, optionally parse binds, then evaluate.
 
 ```python
 import prometheux_chain as px
@@ -499,8 +307,8 @@ print(f"Results: {result['results']}")
   <TabItem value="rest" label="REST API">
 
 ```bash
-# Validate the program
-curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/vadalog/validate" \
+# 1. Analyze structure
+curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/vadalog/analyze" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
   -d '{
@@ -508,8 +316,8 @@ curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/vadalog/v
     "strict_mode": true
   }'
 
-# Get program explanation
-curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/vadalog/explain" \
+# 2. Parse binds (skip if the program has no @bind / @qbind)
+curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/vadalog/parse-binds" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
   -d '{
@@ -517,7 +325,7 @@ curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/vadalog/e
     "explanation_type": "overview"
   }'
 
-# Execute the program
+# 3. Evaluate with parameters
 curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/vadalog/evaluate" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
@@ -528,6 +336,4 @@ curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/vadalog/e
   }'
 ```
 
-  </TabItem>
-</Tabs>
-
+Replace `YOUR_JWT_TOKEN` and the org/user path with your values.

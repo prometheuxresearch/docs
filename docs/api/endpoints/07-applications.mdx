@@ -388,7 +388,7 @@ contributions(Project_name,Project_topic,Employee_id) :-
 
 @output("contributions").
 """
-px.save_concept(project_id=project_id, concept_logic=concept_logic)
+px.save_concept(project_id=project_id, definition=concept_logic)
 
 # Define teams and employees
 concept_logic = """
@@ -402,7 +402,7 @@ teams_employees(Team_name,Employee_id,Employee_name) :-
 
 @output("teams_employees").
 """
-px.save_concept(project_id=project_id, concept_logic=concept_logic)
+px.save_concept(project_id=project_id, definition=concept_logic)
 
 # Define projects concept
 concept_logic = """
@@ -411,7 +411,7 @@ projects(Project_name,Project_topic) :-
 
 @output("projects").
 """
-px.save_concept(project_id=project_id, concept_logic=concept_logic)
+px.save_concept(project_id=project_id, definition=concept_logic)
 
 # Define closest employee concept
 concept_logic = """
@@ -435,7 +435,7 @@ closest_employee_to_project(Id,Name,Distance) :-
 @output("closest_employee_to_project").
 @post("closest_employee_to_project","orderBy(3)").
 """
-px.save_concept(project_id=project_id, concept_logic=concept_logic)
+px.save_concept(project_id=project_id, definition=concept_logic)
 
 # Perform GraphRAG query
 rag_result = px.graph_rag(

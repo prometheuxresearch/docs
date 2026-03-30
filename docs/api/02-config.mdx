@@ -254,18 +254,7 @@ The SDK uses the following default configurations:
 
 Retrieve the current user's role.
 
-<Tabs>
-  <TabItem value="sdk" label="Python SDK" default>
-
-```python
-import prometheux_chain as px
-
-role = px.get_user_role()
-print(f"User role: {role}")
-```
-
-  </TabItem>
-  <TabItem value="rest" label="REST API">
+> **Python SDK:** Not available in the current SDK. Use the REST API below.
 
 ### HTTP Request
 
@@ -292,28 +281,13 @@ curl -X GET "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/users/get-
 }
 ```
 
-  </TabItem>
-</Tabs>
-
 ---
 
 ### Get Usage Status
 
 Get current API usage statistics and limits.
 
-<Tabs>
-  <TabItem value="sdk" label="Python SDK" default>
-
-```python
-import prometheux_chain as px
-
-usage = px.get_usage_status()
-print(f"LLM usage: {usage['llm_usage']}")
-print(f"Embedding usage: {usage['embedding_usage']}")
-```
-
-  </TabItem>
-  <TabItem value="rest" label="REST API">
+> **Python SDK:** Not available in the current SDK. Use the REST API below.
 
 ### HTTP Request
 
@@ -347,6 +321,122 @@ curl -X GET "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/users/usag
   "message": "Usage status retrieved successfully",
   "status": "success"
 }
+```
+
+---
+
+### Save User Config
+
+Persist user-scoped configuration on the server (for example UI preferences).
+
+<Tabs>
+  <TabItem value="sdk" label="Python SDK" default>
+
+```python
+import prometheux_chain as px
+
+px.save_user_config(config_data={"theme": "dark"}, scope="user")
+```
+
+**Function Signature**
+
+```python
+def save_user_config(config_data: Dict[str, Any], scope: str = "user") -> str
+```
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `config_data` | dict | Yes | Key-value configuration to save |
+| `scope` | str | No | Configuration scope (default: `"user"`) |
+
+**Returns**
+
+A string status or message from the server.
+
+  </TabItem>
+  <TabItem value="rest" label="REST API">
+
+### HTTP Request
+
+```bash
+POST /api/v1/users/save-config
+```
+
+### Request body
+
+```json
+{
+  "config_data": {
+    "theme": "dark"
+  },
+  "scope": "user"
+}
+```
+
+### cURL Example
+
+```bash
+curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/users/save-config" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -d '{
+    "config_data": {
+      "theme": "dark"
+    },
+    "scope": "user"
+  }'
+```
+
+  </TabItem>
+</Tabs>
+
+---
+
+### Load User Config
+
+Load user-scoped configuration from the server.
+
+<Tabs>
+  <TabItem value="sdk" label="Python SDK" default>
+
+```python
+import prometheux_chain as px
+
+config = px.load_user_config(scope="user")
+```
+
+**Function Signature**
+
+```python
+def load_user_config(scope: str = "user") -> Dict[str, Any]
+```
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `scope` | str | No | Configuration scope (default: `"user"`) |
+
+**Returns**
+
+A dictionary of configuration key-value pairs.
+
+  </TabItem>
+  <TabItem value="rest" label="REST API">
+
+### HTTP Request
+
+```bash
+GET /api/v1/users/load-config?scope=user
+```
+
+### cURL Example
+
+```bash
+curl -X GET "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/users/load-config?scope=user" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN"
 ```
 
   </TabItem>

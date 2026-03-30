@@ -21,8 +21,8 @@ Save or update a concept with Vadalog logic and optional Python scripts.
 ```python
 import prometheux_chain as px
 
-# Define concept logic in Vadalog
-concept_logic = """
+# Define the concept in Vadalog
+concept_def = """
 company("Apple", "Redwood City, CA").
 company("Google", "Mountain View, CA").
 company("Microsoft", "Redmond, WA").
@@ -35,19 +35,17 @@ location(Location) :- company(_,Location).
 # Save the concept
 result = px.save_concept(
     project_id="my_project_id",
-    concept_logic=concept_logic
+    definition=concept_def
 )
 ```
 
 **Function Signature**
 
 ```python
-def save_concept(
-    project_id=None, 
-    concept_logic=None, 
-    scope="user", 
-    python_scripts=None
-)
+def save_concept(project_id, definition, python_scripts=None, scope="user",
+                 description=None, concept_type="logic", concept_name=None,
+                 binds=None, output_predicate="", existing_name=None,
+                 position=None, group="group_id", compute=None)
 ```
 
 **Parameters**
@@ -55,9 +53,18 @@ def save_concept(
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
 | `project_id` | str | Yes | The project identifier |
-| `concept_logic` | str | Yes | The Vadalog logic defining the concept |
-| `scope` | str | No | The scope of the concept. Defaults to "user" |
+| `definition` | str | Yes | The Vadalog rules, SQL query, or Python logic defining the concept (depending on `concept_type`) |
 | `python_scripts` | dict | No | Dictionary of Python scripts to inject. Keys are script names, values are script content |
+| `scope` | str | No | The scope of the concept. Defaults to `"user"` |
+| `description` | str | No | Human-readable description of the concept |
+| `concept_type` | str | No | `"logic"` or `"sql"`. Defaults to `"logic"` |
+| `concept_name` | str | Conditional | Required for SQL concepts |
+| `binds` | dict | No | Optional binding parameters |
+| `output_predicate` | str | No | Output predicate name. Defaults to `""` |
+| `existing_name` | str | No | When updating, the name of the existing concept |
+| `position` | object | No | Optional layout position metadata |
+| `group` | str | No | Concept group identifier. Defaults to `"group_id"` |
+| `compute` | dict | No | Optional compute configuration |
 
 **Returns**
 
@@ -77,9 +84,18 @@ POST /api/v1/concepts/{project_id}/save
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
 | project_id | string | Yes | The project ID (in URL path) |
-| concept_logic | string | Yes | Vadalog program/annotations |
+| definition | string | Yes | Vadalog rules, SQL query, or Python logic with annotations |
 | scope | string | No | Concept scope (default: "user") |
 | python_scripts | object | No | Python scripts as name->code pairs |
+| description | string | No | Optional description |
+| concept_type | string | No | `"logic"` or `"sql"` (default: `"logic"`) |
+| concept_name | string | Conditional | Required for SQL concepts |
+| binds | object | No | Optional bindings |
+| output_predicate | string | No | Default empty string |
+| existing_name | string | No | Existing concept name when updating |
+| position | object | No | Optional position metadata |
+| group | string | No | Group id (default: `"group_id"`) |
+| compute | object | No | Optional compute configuration |
 
 ### cURL Example
 
@@ -88,7 +104,7 @@ curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/concepts/
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
   -d '{
-    "concept_logic": "@output(\"ordered_products\").\nordered_products(Product, Price) :- products(Product, Price), Price > 100.",
+    "definition": "@output(\"ordered_products\").\nordered_products(Product, Price) :- products(Product, Price), Price > 100.",
     "scope": "user",
     "python_scripts": {
       "data_processor": "def process_data(df):\n    return df.sort_values(\"price\")"
@@ -136,8 +152,8 @@ def main():
     return results
 """
 
-# Define concept logic that uses Python script execution
-concept_logic = """
+# Define the concept that uses Python script execution
+concept_def = """
 @output("test_python").
 test_python(Numbers,Total,Average,Maximum,Minimum,Count) :- python:run("python_script").
 """
@@ -145,7 +161,7 @@ test_python(Numbers,Total,Average,Maximum,Minimum,Count) :- python:run("python_s
 # Save the concept with Python script injection
 result = px.save_concept(
     project_id="my_project_id",
-    concept_logic=concept_logic,
+    definition=concept_def,
     python_scripts={
         "python_script": python_script
     }
@@ -160,7 +176,7 @@ curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/concepts/
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
   -d '{
-    "concept_logic": "@output(\"test_python\").\ntest_python(Numbers,Total,Average,Maximum,Minimum,Count) :- python:run(\"python_script\").",
+    "definition": "@output(\"test_python\").\ntest_python(Numbers,Total,Average,Maximum,Minimum,Count) :- python:run(\"python_script\").",
     "scope": "user",
     "python_scripts": {
       "python_script": "import json\n\ndef main():\n    numbers = [1, 2, 3, 4, 5]\n    return [{\"Numbers\": numbers, \"Total\": sum(numbers)}]"
@@ -242,7 +258,6 @@ results = px.run_concept(
     project_id="my_project_id",
     concept_name="location",
     params={"filter_city": "CA"},
-    step_by_step=True,
     persist_outputs=True
 )
 ```
@@ -250,16 +265,8 @@ results = px.run_concept(
 **Function Signature**
 
 ```python
-def run_concept(
-    project_id=None, 
-    concept_name=None, 
-    params=None, 
-    project_scope="user", 
-    step_by_step=False, 
-    materialize_intermediate_concepts=False, 
-    force_rerun=True, 
-    persist_outputs=False
-)
+def run_concept(project_id, concept_name, params=None, scope="user",
+                force_rerun=True, persist_outputs=False, compute=None)
 ```
 
 **Parameters**
@@ -269,11 +276,10 @@ def run_concept(
 | `project_id` | str | Yes | The project identifier |
 | `concept_name` | str | Yes | The name of the concept to run |
 | `params` | dict | No | Parameters to pass to the concept execution |
-| `project_scope` | str | No | The scope of the project. Defaults to "user" |
-| `step_by_step` | bool | No | Execute step by step. Defaults to False |
-| `materialize_intermediate_concepts` | bool | No | Materialize intermediate concepts. Defaults to False |
-| `force_rerun` | bool | No | Force rerun even if results exist. Defaults to True |
-| `persist_outputs` | bool | No | Persist the outputs. Defaults to False |
+| `scope` | str | No | The scope of the project. Defaults to `"user"` |
+| `force_rerun` | bool | No | Force rerun even if results exist. Defaults to `True` |
+| `persist_outputs` | bool | No | Persist the outputs. Defaults to `False` (SDK) / `True` (REST) |
+| `compute` | dict | No | Optional compute configuration |
 
 **Returns**
 
@@ -285,7 +291,7 @@ The execution results data.
 ### HTTP Request
 
 ```bash
-POST /api/v1/concepts/{project_id}/run
+POST /api/v1/concepts/{project_id}/run/{concept_name}
 ```
 
 ### Parameters
@@ -293,22 +299,24 @@ POST /api/v1/concepts/{project_id}/run
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
 | project_id | string | Yes | The project ID (in URL path) |
-| concept_name | string | Yes | Name of the concept to execute |
-| params | object | No | Parameters to pass to the concept |
+| concept_name | string | Yes | Name of the concept to execute (in URL path, not in body) |
+| params | object | No | Parameters to pass to the concept (request body) |
 | force_rerun | boolean | No | Force re-execution (default: true) |
-| persist_outputs | boolean | No | Persist execution outputs (default: false) |
-| project_scope | string | No | Project scope (default: "user") |
-| step_by_step | boolean | No | Enable step-by-step execution (default: false) |
-| materialize_intermediate_concepts | boolean | No | Materialize intermediate results (default: false) |
+| persist_outputs | boolean | No | Persist execution outputs (default: true) |
+| scope | string | No | Project scope (default: "user") |
+| compute | object | No | Optional compute configuration |
 
 ### cURL Example
 
 ```bash
-curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/concepts/1921d58a6g2/run" \
+curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/concepts/1921d58a6g2/run/shortest_routes" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
   -d '{
-    "concept_name": "shortest_routes"
+    "params": {},
+    "force_rerun": true,
+    "persist_outputs": true,
+    "scope": "user"
   }'
 ```
 
@@ -332,6 +340,80 @@ curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/concepts/
 
 ---
 
+## Fetch Results
+
+Paginated fetch of stored results for an output predicate.
+
+<Tabs>
+  <TabItem value="sdk" label="Python SDK" default>
+
+```python
+import prometheux_chain as px
+
+rows = px.fetch_results(
+    project_id="my_project_id",
+    output_predicate="location",
+    page=1,
+    page_size=10,
+    scope="user",
+    order_by=None,
+)
+```
+
+**Function Signature**
+
+```python
+def fetch_results(project_id, output_predicate, page=1, page_size=10,
+                  scope="user", order_by=None)
+```
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `project_id` | str | Yes | The project identifier |
+| `output_predicate` | str | Yes | Output predicate name to fetch results for |
+| `page` | int | No | Page number. Defaults to `1` |
+| `page_size` | int | No | Page size. Defaults to `10` |
+| `scope` | str | No | Project scope. Defaults to `"user"` |
+| `order_by` | str | No | Optional ordering expression |
+
+**Returns**
+
+Paginated result data for the output predicate.
+
+  </TabItem>
+  <TabItem value="rest" label="REST API">
+
+### HTTP Request
+
+```bash
+GET /api/v1/concepts/{project_id}/fetch
+```
+
+### Query Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| project_id | string | Yes | The project ID (in URL path) |
+| output_predicate | string | Yes | Output predicate to fetch |
+| page | integer | No | Page number (default: 1) |
+| page_size | integer | No | Page size (default: 30) |
+| project_scope | string | No | Project scope (default: "user") |
+| order_by | string | No | Optional ordering |
+
+### cURL Example
+
+```bash
+curl -X GET "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/concepts/1921d58a6g2/fetch?output_predicate=location&page=1&page_size=10&project_scope=user" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN"
+```
+
+  </TabItem>
+</Tabs>
+
+---
+
 ## List Concepts
 
 List all concepts in a project.
@@ -350,10 +432,7 @@ print(f"Available concepts: {concepts}")
 **Function Signature**
 
 ```python
-def list_concepts(
-    project_id=None, 
-    project_scope="user"
-)
+def list_concepts(project_id, scope="user")
 ```
 
 **Parameters**
@@ -361,7 +440,7 @@ def list_concepts(
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
 | `project_id` | str | Yes | The project identifier |
-| `project_scope` | str | No | The scope of the project. Defaults to "user" |
+| `scope` | str | No | The scope of the project. Defaults to `"user"` |
 
 **Returns**
 
@@ -408,25 +487,26 @@ import prometheux_chain as px
 # Clean up all concepts in a project
 result = px.cleanup_concepts(project_id="my_project_id")
 
-# Clean up all user concepts
-result = px.cleanup_concepts()
+# Clean up specific concepts by name
+result = px.cleanup_concepts(
+    project_id="my_project_id",
+    concept_names=["ordered_bom", "product_analysis"],
+)
 ```
 
 **Function Signature**
 
 ```python
-def cleanup_concepts(
-    project_id=None, 
-    project_scope="user"
-)
+def cleanup_concepts(project_id, scope="user", concept_names=None)
 ```
 
 **Parameters**
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `project_id` | str | No | The project identifier. If None, cleans up all concepts for the user |
-| `project_scope` | str | No | The scope of the project. Defaults to "user" |
+| `project_id` | str | Yes | The project identifier |
+| `scope` | str | No | The scope of the project. Defaults to `"user"` |
+| `concept_names` | list | No | Specific concept names to delete; if omitted, deletes all matching concepts in scope |
 
   </TabItem>
   <TabItem value="rest" label="REST API">
@@ -462,60 +542,6 @@ curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/concepts/
 
 ---
 
-## Rename Concept
-
-Rename an existing concept.
-
-<Tabs>
-  <TabItem value="sdk" label="Python SDK" default>
-
-```python
-import prometheux_chain as px
-
-# Rename a concept
-result = px.rename_concept(
-    project_id="my_project_id",
-    old_name="old_concept_name",
-    new_name="new_concept_name"
-)
-```
-
-  </TabItem>
-  <TabItem value="rest" label="REST API">
-
-### HTTP Request
-
-```bash
-POST /api/v1/concepts/{project_id}/rename
-```
-
-### Parameters
-
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| project_id | string | Yes | The project ID (in URL path) |
-| name | string | Yes | Current concept name |
-| new_name | string | Yes | New concept name |
-| scope | string | No | Concept scope (default: "user") |
-
-### cURL Example
-
-```bash
-curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/concepts/1921d58a6g2/rename" \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
-  -d '{
-    "name": "old_concept_name",
-    "new_name": "new_concept_name",
-    "scope": "user"
-  }'
-```
-
-  </TabItem>
-</Tabs>
-
----
-
 ## Complete Workflow Example
 
 <Tabs>
@@ -533,7 +559,7 @@ px.config.set('JARVISPY_URL', "https://api.prometheux.ai/jarvispy/my-org/my-user
 project_id = px.save_project(project_name="concept_demo")
 
 # Define and save a concept
-concept_logic = """
+concept_def = """
 company("Apple", "Redwood City, CA").
 company("Google", "Mountain View, CA").
 company("Microsoft", "Redmond, WA").
@@ -543,7 +569,7 @@ location(Location) :- company(_,Location).
 @output("location").
 """
 
-px.save_concept(project_id=project_id, concept_logic=concept_logic)
+px.save_concept(project_id=project_id, definition=concept_def)
 
 # List all concepts
 concepts = px.list_concepts(project_id=project_id)
@@ -552,6 +578,15 @@ print(f"Available concepts: {concepts}")
 # Run the concept
 results = px.run_concept(project_id=project_id, concept_name="location")
 print(f"Results: {results}")
+
+# Fetch paginated results for the output predicate
+fetched = px.fetch_results(
+    project_id=project_id,
+    output_predicate="location",
+    page=1,
+    page_size=10,
+)
+print(f"Fetched rows: {fetched}")
 
 # Clean up when done
 px.cleanup_concepts(project_id=project_id)
@@ -572,7 +607,7 @@ curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/concepts/
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
   -d '{
-    "concept_logic": "company(\"Apple\", \"Redwood City, CA\").\ncompany(\"Google\", \"Mountain View, CA\").\nlocation(Location) :- company(_,Location).\n@output(\"location\").",
+    "definition": "company(\"Apple\", \"Redwood City, CA\").\ncompany(\"Google\", \"Mountain View, CA\").\nlocation(Location) :- company(_,Location).\n@output(\"location\").",
     "scope": "user"
   }'
 
@@ -580,11 +615,15 @@ curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/concepts/
 curl -X GET "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/concepts/project_id/list?scope=user" \
   -H "Authorization: Bearer YOUR_JWT_TOKEN"
 
-# Run a concept
-curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/concepts/project_id/run" \
+# Run a concept (concept_name in URL path)
+curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/concepts/project_id/run/location" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
-  -d '{"concept_name": "location"}'
+  -d '{"scope": "user", "force_rerun": true, "persist_outputs": true}'
+
+# Fetch results
+curl -X GET "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/concepts/project_id/fetch?output_predicate=location&page=1&page_size=10&project_scope=user" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN"
 
 # Cleanup
 curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/concepts/project_id/cleanup" \

@@ -161,7 +161,7 @@ including Vadalog Distributed Evaluation, disk space, and a simple ping check.
 
 ### `/config-info/set`
 This endpoint allows you to set a single key-value pair for configuration. It is useful for dynamically setting credentials such as database connection details or AWS access keys for S3 buckets.
-Refer to the [Prometheux Configuration Guide](../on-prem/03-configuring-prometheux.md) to review the available configuration properties.
+Refer to the [Configuration Reference](/getting-started/installation/on-cloud-premises/cluster#configuration-reference) to review the available configuration properties.
 
 - URL: `/config-info/set`
 
@@ -188,7 +188,7 @@ curl -X POST "http://localhost:8080/config-info/set" \
 ## `/config-info/setAll`
 This endpoint allows you to set multiple key-value pairs for configuration at once. The key-value pairs should be provided in the request body as a JSON object.
 
-Refer to the [Prometheux Configuration Guide](../on-prem/03-configuring-prometheux.md) to review the available configuration properties.
+Refer to the [Configuration Reference](/getting-started/installation/on-cloud-premises/cluster#configuration-reference) to review the available configuration properties.
 
 - URL: `/config-info/setAll`
 

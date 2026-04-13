@@ -1,4 +1,4 @@
-# Installing PX on Databricks
+# Installing PX on Databricks & Connectors
 
 Prometheux integrates with Databricks through JDBC connectivity across all major cloud platforms (AWS, Azure, and Google Cloud), allowing you to execute Vadalog rules against Unity Catalog tables and SQL warehouses. This integration provides secure, governed access to your lakehouse data while maintaining performance and scalability regardless of your cloud provider.
 
@@ -48,8 +48,6 @@ databricks.authMode=PAT
 ### UI-Based Configuration
 
 Prometheux provides a user-friendly configuration interface for setting up Databricks connectivity. The data source connection dialog supports both OAuth and Personal Access Token authentication methods:
-
-![Databricks Connection UI](databricks_db_oauth.png)
 
 **Configuration Fields:**
 

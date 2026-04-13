@@ -79,13 +79,13 @@ This documentation is intended for:
 No prior ontology tooling is required, but familiarity with data modeling
 concepts is recommended.
 
-## What You’ll Learn Next
+## What's Next
 
-The following sections walk through Prometheux from first principles:
+Start by installing Prometheux in the environment that fits your team:
 
-- Defining an ontology
-- Connecting data sources
-- Executing ontology-based queries
-- Deploying Prometheux in production environments
+- [**Installation**](/getting-started/installation) — Choose between Cloud, Docker, Snowflake, Databricks, or on-premise
 
-➡️ **Next:** Create Your First Executable Ontology
+Then explore the fundamentals:
+
+- [**Concepts**](/getting-started/concepts) — Knowledge graphs, ontologies, reasoning, and chase graphs
+- [**Thinking in Vadalog**](/getting-started/thinking-vadalog) — Write your first executable ontology

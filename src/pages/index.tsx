@@ -8,7 +8,6 @@ export default function Home(): JSX.Element {
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    // Redirect to search or relevant documentation
     if (searchQuery.trim()) {
       window.location.href = `/search?q=${encodeURIComponent(searchQuery)}`;
     }

@@ -748,7 +748,7 @@ values that can be modified without changing the core logic of the program,
 making the rules more flexible and reusable.
 
 For parameterization via API refer to
-[`evaluateFromRepoWithParams`](https://www.prometheux.co.uk/docs/learn/on-prem/rest-api#evaluatefromrepowithparams).
+[`evaluateFromRepoWithParams`](/api/rest-api#evaluatefromrepowithparams).
 
 ### Syntax
 ```prolog

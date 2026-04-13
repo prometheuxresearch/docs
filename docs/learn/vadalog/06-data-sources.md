@@ -92,7 +92,7 @@ This method allows for streamlined integration within the same code, ensuring th
 However, for better security and flexibility, these credentials can also be stored in external configurations:
 
 - Credentials can be stored the `px.properties` file to centralize sensitive information and allow reusability without hardcoding values within the @bind annotations.
-- REST APIs for dynamic configuration management, where you can set individual credentials or update multiple settings at once through [API endpoints](../on-prem/04-rest-api.md).
+- REST APIs for dynamic configuration management, where you can set individual credentials or update multiple settings at once through [API endpoints](/api/rest-api).
 
 ## CSV Datasource
 

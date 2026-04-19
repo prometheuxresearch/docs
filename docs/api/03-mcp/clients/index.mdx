@@ -1,0 +1,29 @@
+---
+title: MCP Client Guides
+sidebar_label: Client Guides
+sidebar_position: 3
+---
+
+# MCP Client Guides
+
+The Prometheux [Remote MCP Server](/api/mcp/remote) works with any AI agent that supports the [Model Context Protocol](https://modelcontextprotocol.io). Below you'll find step-by-step connection guides for specific clients.
+
+## Supported Clients
+
+| Client | Description | Guide |
+|--------|-------------|-------|
+| **Claude** | Anthropic's AI assistant — connect via Desktop or Web | [Connect Claude →](/api/mcp/clients/claude) |
+| **Genie Code** | Databricks' autonomous AI agent for data work — connect via external MCP server registration | [Connect Genie Code →](/api/mcp/clients/databricks-genie) |
+| **Snowflake Cortex** | Snowflake's AI layer — coming soon | 🔜 Coming soon |
+
+## Other Clients
+
+Any MCP-compatible client can connect to Prometheux using the remote server's standard OAuth 2.0 flow. See the [Remote MCP Server](/api/mcp/remote#server-details) page for connection details, OAuth endpoints, and parameters.
+
+## Prerequisites
+
+All client connections require:
+
+- **Prometheux account** with valid credentials
+- **Username**, **organization**, and **API token** from your Prometheux admin
+- The remote MCP server at `https://api.prometheux.ai/px-remote-mcp-server`

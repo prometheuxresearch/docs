@@ -8,12 +8,12 @@ import TabItem from '@theme/TabItem';
 
 # AI Agent Integration via MCP
 
-Connect AI agents like Claude to Prometheux using the [Model Context Protocol (MCP)](https://modelcontextprotocol.io) — an open standard that enables AI assistants to interact with external tools and data sources.
+Connect AI agents to Prometheux using the [Model Context Protocol (MCP)](https://modelcontextprotocol.io) — an open standard that enables AI assistants to interact with external tools and data sources.
 
 Prometheux offers two MCP integration options:
 
 - **[Local MCP Server](/api/mcp/local)** (`prometheux-mcp`): Runs on your machine alongside Claude Desktop
-- **[Remote MCP Server](/api/mcp/remote)** (`px-remote-mcp-server`): Cloud-hosted option that works with both Claude Desktop and Claude Web via OAuth authentication
+- **[Remote MCP Server](/api/mcp/remote)** (`px-remote-mcp-server`): Cloud-hosted option that works with any MCP-compatible client via OAuth authentication
 
 ## What is MCP?
 
@@ -22,7 +22,7 @@ The Model Context Protocol allows AI agents to:
 - **Execute** operations through a standardized interface
 - **Access** external data sources and APIs
 
-With Prometheux's MCP integration, you can use natural language to interact with your ontologies, list concepts, and execute reasoning — all directly from Claude Desktop or Claude Web.
+With Prometheux's MCP integration, you can use natural language to interact with your ontologies, list concepts, and execute reasoning — all directly from your preferred AI agent.
 
 ## Which Option Should I Use?
 
@@ -41,7 +41,7 @@ With Prometheux's MCP integration, you can use natural language to interact with
 
 **Cons:**
 <ul>
-<li>Requires Claude Desktop app (not available for Claude Web)</li>
+<li>Requires Claude Desktop app</li>
 <li>Needs to be installed on each machine</li>
 </ul>
 
@@ -57,11 +57,11 @@ With Prometheux's MCP integration, you can use natural language to interact with
   </TabItem>
   <TabItem value="remote" label="Remote MCP Server">
 
-**Best for:** Claude Web users, multi-user deployments, enterprise environments
+**Best for:** Multi-client deployments, enterprise environments, browser-based AI agents
 
 **Pros:**
 <ul>
-<li>Works with both Claude Desktop and Claude Web</li>
+<li>Works with any MCP-compatible client (Claude, Genie Code, and more)</li>
 <li>OAuth authentication with browser login flow</li>
 <li>Centralized deployment (one server, many users)</li>
 <li>Handles authentication and session management</li>
@@ -76,7 +76,7 @@ With Prometheux's MCP integration, you can use natural language to interact with
 
 **Use this when:**
 <ul>
-<li>You want to use Claude Web (browser-based)</li>
+<li>You want to connect from Genie Code, Claude Web, or other MCP clients</li>
 <li>You want centralized authentication for multiple users</li>
 <li>You're deploying for an organization</li>
 <li>You prefer not to install anything locally</li>
@@ -87,9 +87,21 @@ With Prometheux's MCP integration, you can use natural language to interact with
   </TabItem>
 </Tabs>
 
+## Supported MCP Clients
+
+The remote MCP server supports any client that implements the MCP standard. We provide step-by-step connection guides for:
+
+| Client | Status | Guide |
+|--------|--------|-------|
+| **Claude** (Desktop & Web) | ✅ Supported | [Connect Claude →](/api/mcp/clients/claude) |
+| **Genie Code** (Databricks) | ✅ Supported | [Connect Genie Code →](/api/mcp/clients/databricks-genie) |
+| **Snowflake Cortex** | 🔜 Coming soon | — |
+
+Don't see your client? The remote server exposes a standard MCP endpoint with OAuth — any compliant client can connect using the details in the [Remote MCP Server](/api/mcp/remote) page.
+
 ## Available Tools
 
-Both MCP servers expose the following tools to AI agents:
+Both MCP servers dynamically expose the following tools to AI agents. The tool catalog is served by the Prometheux backend, so new capabilities are available automatically as they are added to the platform.
 
 ### `list_concepts`
 
@@ -107,6 +119,8 @@ Lists all concepts available in a project.
 
 Executes a concept to derive new knowledge through reasoning.
 
+This tool supports **long-running executions** — the server sends progress notifications while the concept is being evaluated, preventing client-side timeouts during complex reasoning tasks.
+
 **Parameters:**
 - `project_id` (string, required): The unique identifier of the project
 - `concept_name` (string, required): Name of the concept to execute
@@ -122,18 +136,43 @@ Executes a concept to derive new knowledge through reasoning.
 - `predicates_populated`: List of populated predicates
 - `total_records`: Number of records derived
 
+### `list_data_sources`
+
+Lists data sources connected to a project.
+
+**Parameters:**
+- `project_id` (string, required): The unique identifier of the project
+- `scope` (string, optional): Search scope - `"user"` or `"organization"`. Default: `"user"`
+
+**Returns:**
+- `data_sources`: Array of connected data source objects with metadata
+
+### `list_projects`
+
+Lists all projects accessible to the authenticated user.
+
+**Parameters:**
+- `scope` (string, optional): Search scope - `"user"` or `"organization"`. Default: `"user"`
+
+**Returns:**
+- `projects`: Array of project objects with metadata (name, id, description)
+
 ## Example Usage
 
-Once configured, just chat naturally with Claude. The AI will automatically use the Prometheux MCP tools when relevant.
+Once configured, just chat naturally with your AI agent. The agent will automatically use the Prometheux MCP tools when relevant.
 
 **Example queries:**
+> "What projects do I have?"
+
 > "What concepts are available in my customer-analytics project?"
 
 > "Run the churn_prediction concept in the customer-analytics project"
 
 > "Execute high_value_customers in sales-data with min_value set to 1000"
 
-Claude will automatically:
+> "What data sources are connected to my project?"
+
+The AI agent will automatically:
 - Call the appropriate Prometheux MCP tools
 - Parse the results
 - Present them in a readable format

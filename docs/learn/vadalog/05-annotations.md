@@ -1,3 +1,7 @@
+---
+slug: /learn/vadalog/annotations
+---
+
 # Annotations
 
 Annotations are special facts that allow to inject specific behaviors into
@@ -40,28 +44,6 @@ In all the syntaxes above, `annotationName` indicates the specific annotation
 and each of them accepts a specific list of parameters. In the following
 sections we present the supported annotations.
 
-## @input
-
-It specifies that the facts for an atom of the program are imported from an
-external data source, for example a relational database.
-
-The syntax is the following:
-
-```
-@input("atomName").
-```
-
-where `atomName` is the atom for which the facts have to be imported from an
-external data source.
-
-It is assumed that an atom annotated with `@input`:
-
-1. never appears as the head of any rule
-2. it is never used within an `@output` annotation.
-
-The full details of the external source must be specified with the `@bind`,
-`@mapping` and `@qbind` annotations.
-
 ## @output
 
 It specifies that the facts for an atom of the program will be exported to an
@@ -78,8 +60,7 @@ external target.
 
 It is assumed that an atom annotated with `@output`:
 
-1. does not have any explicit facts in the program,
-2. is never used within an `@input` annotation.
+1. does not have any explicit facts in the program.
 
 If the `@output` annotation is used without any `@bind` annotation, it is
 assumed that the default target is the standard output. Annotations `@model`,
@@ -122,7 +103,7 @@ types:
 - third: double
 - fourth: string
 
-#### Workflow
+### Workflow
 
 Assume to have a parquet dataset containing the following row:
 
@@ -134,7 +115,6 @@ Assume to have a parquet dataset containing the following row:
 
    ```prolog
    @model("b", "['first:int', 'second:string', 'third:double', 'fourth:string']").
-   @input("b").
    ```
 
    This ensures that predicate `b` adheres to the specified schema.
@@ -194,10 +174,10 @@ enclosed in square brackets `[]` in the description.
        "The probability of a series of states with ID [id] from [startState] to [endState] is [prob].").
 ```
 
-#### Automatic Generation of natural language description
+### Automatic Generation of natural language description
 
 If a model annotation does not include a natural language description for the
-predicate and if an [LLM is available](../../sdk/python-api/config#configuring-llms),
+predicate and if an [LLM is available](/api/config#configuring-llms),
 the description will be **automatically generated** during the compilation
 phase.
 
@@ -286,7 +266,7 @@ specified as another predicate. This nested predicate must define a primary key
 that identifies its instances uniquely, which is used as the reference key in
 the composite predicate.
 
-#### Example
+### Example
 
 Consider modeling events and states where each event transitions from one state
 to another:
@@ -304,7 +284,7 @@ event uses state for both `Start State` and `End State`, with `state_id` serving
 as the data type for these fields, implied to be string type due to the primary
 key type of state.
 
-#### Vadalog Examples
+### Vadalog Examples
 
 ```prolog {2}
 @model("state","['state_id(ID):string', 'Type:string', 'Balance:double']").
@@ -320,7 +300,7 @@ out_event(StartState, EndState, Prob) :- event(Id, StartState, EndState, Prob).
 @output("out_event").
 ```
 
-#### Typed Collections
+### Typed Collections
 
 Composition also allows you to include a predicate as a data type within a
 Collection. Specifically, the type of elements within the Collection is
@@ -360,11 +340,11 @@ risk_path_prob(RiskId, StartStateId, EndStateId, NumStepsNew, Events, ProbNew) :
 ## Bind, Mappings and Qbind
 
 These annotations (`@bind`, `@mapping`, `@qbind`) allow to customize the data
-sources for the `@input` annotation or the targets for the `@output` annotation.
+sources and targets for the `@output` annotation.
 
 ### @bind
 
-`@bind` binds an input or output atom to a [source](./data-sources). The syntax for `@bind` is the
+`@bind` binds an input or output atom to a [source](/learn/vadalog/data-sources). The syntax for `@bind` is the
 follows:
 
 ```
@@ -380,8 +360,6 @@ relational database).
 Let's take a look at this example:
 
 ```prolog showLineNumbers
-@input("m").
-@input("q").
 @output("m").
 @bind("m","postgres","doctors_source","Medprescriptions").
 @bind("q","sqlite","doctors_source","Medprescriptions").
@@ -400,14 +378,11 @@ file and a postgres database and we bind them to the predicate `edge`. As a
 result the facts from the two sources are merged into `edge`.
 
 ```prolog showLineNumbers
-@input("edge").
 @output("path").
 path(X,Y) :- edge(X,Y).
 path(X,Z) :- edge(X,Y),path(Y,Z).
 @bind("edge","csv","path/to/myCsv1/","graph_partition_1.csv").
 @bind("edge","postgres","graph_source_db","graph_partition_2_table").
-
-@output("path").
 ```
 
 ### @mapping
@@ -431,7 +406,6 @@ be specified: _string_, _int_, _double_, _boolean_ and _date_.
 In this example, we map the columns of the `Medprescriptions` table:
 
 ```
-@input("m").
 @bind("m","postgres","doctors_source","Medprescriptions").
 @mapping("m",0,"id","int").
 @mapping("m",1,"patient","string").
@@ -441,14 +415,14 @@ In this example, we map the columns of the `Medprescriptions` table:
 @mapping("m",5,"conf","int").
 ```
 
-Observe that _mappings can be omitted_ for both `@input` and `@output` atoms. In
-such case they are automatically inferred from the source (target); the result
-can be however unsatisfactory depending on the sources, since some of them do
-not support positional reference to the attributes.
+Observe that _mappings can be omitted_. In such case they are automatically
+inferred from the source (target); the result can be however unsatisfactory
+depending on the sources, since some of them do not support positional
+reference to the attributes.
 
 ### @qbind
 
-`@qbind` binds an input atom to a source, generating the facts for the atom as
+`@qbind` binds an atom to a source, generating the facts for the atom as
 the result of a query executed on the source.
 
 The syntax is the following:
@@ -489,7 +463,7 @@ You can also use multiple parameters within a parametric `@qbind`:
 
 where `${1}` and `${2}` are the first and second parameters of all `t` results.
 
-## Post-processing with @post
+## Post-processing with @post {#post-processing-with-post}
 
 This category of annotations include a set of post-processing operations that
 can be applied to facts of atoms annotated with @output before exporting the
@@ -774,9 +748,9 @@ values that can be modified without changing the core logic of the program,
 making the rules more flexible and reusable.
 
 For parameterization via API refer to
-[`evaluateFromRepoWithParams`](https://www.prometheux.co.uk/docs/learn/on-prem/rest-api#evaluatefromrepowithparams).
+[`evaluateFromRepoWithParams`](/api/rest-api#evaluatefromrepowithparams).
 
-#### Syntax
+### Syntax
 ```prolog
 @param("parameter_name", value).
 ```
@@ -787,9 +761,9 @@ For parameterization via API refer to
   type in Vadalog (e.g., integer, string, double, list, etc..).
 
 
-#### Vadalog examples
+### Vadalog examples
 
-#### Filtering Paths Within a Specified Distance Range
+### Filtering Paths Within a Specified Distance Range
 
 ```prolog
 @param("max_distance", 15).
@@ -821,7 +795,7 @@ valid_path("D", "E", 5).
 These results reflect only those paths where the distance falls within the
 specified range between 5 and 15.
 
-#### Filtering Connections Based on Priority Levels
+### Filtering Connections Based on Priority Levels
 
 ```prolog
 @param("priority_levels", [1, 2, 3]).

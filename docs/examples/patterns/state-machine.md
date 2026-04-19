@@ -1,8 +1,6 @@
 # State Machine
 
-A [state machine](https://en.wikipedia.org/wiki/Finite-state_machine) is simply
-system that exists in one of a number of states. That system changes states, it
-"transitions", due to some input into the system, resulting in another state.
+A [state machine](https://en.wikipedia.org/wiki/Finite-state_machine) is simply a system that exists in one of a number of states. That system changes states, it "transitions", due to some input into the system, resulting in another state.
 
 In order to model a state machine's transitions, you'll need to keep track of 
 the time (or order) of the events, otherwise Prometheux will not know how

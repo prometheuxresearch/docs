@@ -1,0 +1,87 @@
+---
+slug: /learn/vadalog/expressions/negation
+---
+
+# Negation
+
+Negation is a prefix modifier that negates the truth value for an atom. In logic
+terms, we say that a negated formula holds whenever it is false, for example
+`not employee(X)` holds if `X` is not an employee. Negation has higher
+precedence than conjunction, so the single atoms are negated and not the entire
+body (or parts thereof).
+
+The following assumptions are made:
+
+1. Every variable that occurs in the head must have a binding in a non-negated
+   atom.
+2. Every binding of a variable that occurs only in a negation is not exported
+   outside of the negation.
+
+It is clear that assumption 2 implies assumption 1: as the bindings captured
+within the negation cannot be used outside the negation itself, they cannot be
+used to generate new facts in the head.
+
+However 2 is more specific, since it even forbids joins in the body based on
+negatively bound variables.
+
+Whereas assumption 1 is enforced in the Engine and its violation causes a
+runtime error, condition 2 is not enforced and negatively bound joins can be
+used (albeit discouraged), being aware of the theoretical and practical
+implications.
+
+```prolog showLineNumbers {10}
+employee("Mark").
+employee("Ruth").
+director("Jane").
+hired("Ruth").
+contractor("Mark").
+project(1,"Mark").
+project(2,"Ruth").
+project(3,"Jane").
+
+safeProjects(X,P) :- project(X,P), not contractor(P).
+
+@output("safeProjects").
+```
+
+The expected result is:
+
+```
+safeProjects(2, "Ruth").
+safeProjects(3, "Jane").
+```
+
+Here we select the safe projects, which are those run by a person who is not a
+contractor. Since a person can have various company attributes (`employee`,
+`hired`, etc.), even at the same time, here we simply check that he/she is not a
+contractor.
+
+Consider this next example:
+
+```prolog showLineNumbers {10,11}
+s(1, 2).
+s(2, 3).
+s(3, 5).
+s(4, 6).
+b(6, 2).
+b(4, 2).
+b(2, 2).
+c(2).
+
+f(X, Y) :- s(X, Y), not b(Y, Z).
+f(Y, X) :- f(X, Y), not b(X, Z).
+
+@output("f").
+```
+
+The expected result is:
+
+```
+f(5, 3).
+f(2, 3).
+f(3, 5).
+```
+
+Here we combine recursion and negation and recursively generate f, by negating
+b.
+

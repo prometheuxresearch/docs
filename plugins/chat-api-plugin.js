@@ -1,5 +1,206 @@
 // Load environment variables from .env.local
 require('dotenv').config({ path: '.env.local' });
+const VADALOG_SYSTEM_PROMPT = require('./vadalog-reference');
+
+function getProviderLabel(provider) {
+  const labels = { anthropic: 'Anthropic', azure: 'Azure OpenAI' };
+  return labels[provider] || provider;
+}
+
+function getModelName(provider) {
+  if (provider === 'anthropic') return process.env.ANTHROPIC_MODEL || 'claude-opus-4-6';
+  return process.env.AZURE_OPENAI_DEPLOYMENT || 'gpt-4o';
+}
+
+async function callAnthropic(systemPrompt, messages, { maxTokens = 4096, temperature = 0.3 } = {}) {
+  const model = process.env.ANTHROPIC_MODEL || 'claude-opus-4-6';
+  const response = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': process.env.ANTHROPIC_API_KEY,
+      'anthropic-version': '2023-06-01',
+    },
+    body: JSON.stringify({
+      model,
+      max_tokens: maxTokens,
+      temperature,
+      system: systemPrompt,
+      messages,
+    }),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`Anthropic API error ${response.status}: ${errorText}`);
+  }
+
+  const data = await response.json();
+  const text = data.content
+    ?.filter(block => block.type === 'text')
+    .map(block => block.text)
+    .join('') || 'No response';
+  const tokensUsed = (data.usage?.input_tokens || 0) + (data.usage?.output_tokens || 0);
+  return { text, tokensUsed, provider: 'anthropic' };
+}
+
+async function callAzure(systemPrompt, messages, { maxTokens = 4096, temperature = 0.3 } = {}) {
+  const endpoint = process.env.AZURE_OPENAI_ENDPOINT;
+  const deployment = process.env.AZURE_OPENAI_DEPLOYMENT || 'gpt-4o';
+  const response = await fetch(
+    `${endpoint}/openai/deployments/${deployment}/chat/completions?api-version=2024-02-15-preview`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'api-key': process.env.AZURE_OPENAI_KEY,
+      },
+      body: JSON.stringify({
+        messages: [{ role: 'system', content: systemPrompt }, ...messages],
+        max_tokens: maxTokens,
+        temperature,
+      }),
+    }
+  );
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`Azure OpenAI error ${response.status}: ${errorText}`);
+  }
+
+  const data = await response.json();
+  const text = data.choices[0]?.message?.content || 'No response';
+  const tokensUsed = data.usage?.total_tokens || 'unknown';
+  return { text, tokensUsed, provider: 'azure' };
+}
+
+async function refineQuery(rawText) {
+  if (!process.env.AZURE_OPENAI_KEY) return rawText;
+
+  const refinePrompt =
+    'You are a query refinement assistant. ' +
+    'The user is asking a question about Vadalog (a logic-programming / knowledge-graph language) or its documentation. ' +
+    'Your ONLY job is to rewrite their message so it is grammatically correct, clear, and well-structured. ' +
+    'Rules:\n' +
+    '- Fix spelling, grammar, and punctuation.\n' +
+    '- Preserve every technical term, file path, predicate name, and annotation exactly as-is.\n' +
+    '- Do NOT answer the question — just return the improved version.\n' +
+    '- Do NOT add extra commentary, prefixes like "Here is the refined query:", or quotes.\n' +
+    '- If the message is already clear, return it unchanged.\n' +
+    '- Keep the same language (e.g. if the user writes in Italian, refine in Italian).';
+
+  try {
+    const result = await callAzure(refinePrompt, [{ role: 'user', content: rawText }], {
+      maxTokens: 512,
+      temperature: 0.1,
+    });
+    const refined = result.text.trim();
+    if (refined && refined.length > 0) {
+      console.log(`[Refine] Original : "${rawText}"`);
+      console.log(`[Refine] Refined  : "${refined}"`);
+      return refined;
+    }
+  } catch (err) {
+    console.warn('[Refine] Azure refinement failed, using original query:', err.message);
+  }
+  return rawText;
+}
+
+async function callLLM(systemPrompt, messages, opts = {}) {
+  // Try Anthropic first if key is available
+  if (process.env.ANTHROPIC_API_KEY) {
+    try {
+      console.log('Trying Anthropic...');
+      return await callAnthropic(systemPrompt, messages, opts);
+    } catch (err) {
+      console.warn('Anthropic failed, falling back to Azure OpenAI:', err.message);
+    }
+  }
+
+  // Fallback to Azure OpenAI
+  if (process.env.AZURE_OPENAI_KEY) {
+    console.log('Using Azure OpenAI...');
+    return await callAzure(systemPrompt, messages, opts);
+  }
+
+  throw new Error('No AI provider configured. Set ANTHROPIC_API_KEY or AZURE_OPENAI_KEY.');
+}
+
+function cleanVadalogCodeBlocks(text) {
+  return text.replace(/```(\w*)\n([\s\S]*?)```/g, (fullMatch, lang, code) => {
+    const lines = code.split('\n');
+    let lastAnnotationIdx = -1;
+    for (let i = 0; i < lines.length; i++) {
+      if (/^\s*@(output|post|bind|model|mapping|param)\s*\(/.test(lines[i])) {
+        lastAnnotationIdx = i;
+      }
+    }
+    if (lastAnnotationIdx === -1) return fullMatch;
+    const cleaned = lines.slice(0, lastAnnotationIdx + 1).join('\n');
+    return '```' + lang + '\n' + cleaned + '\n```';
+  });
+}
+
+function logEnvCheck() {
+  console.log('Environment check:', {
+    ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY ? 'SET' : 'NOT SET',
+    ANTHROPIC_MODEL: process.env.ANTHROPIC_MODEL || '(default: claude-opus-4-6)',
+    AZURE_OPENAI_ENDPOINT: process.env.AZURE_OPENAI_ENDPOINT ? 'SET' : 'NOT SET',
+    AZURE_OPENAI_KEY: process.env.AZURE_OPENAI_KEY ? 'SET' : 'NOT SET',
+    AZURE_OPENAI_DEPLOYMENT: process.env.AZURE_OPENAI_DEPLOYMENT,
+  });
+}
+
+function extractKeyTerms(query) {
+  const cleaned = query.toLowerCase().replace(/[?.,!;:]/g, '');
+  const stopWords = ['how', 'do', 'does', 'did', 'i', 'can', 'could', 'would', 'should',
+                      'you', 'please', 'show', 'me', 'the', 'a', 'an', 'in', 'to', 'for',
+                      'with', 'using', 'use', 'using', 'compute', 'calculate', 'create',
+                      'make', 'get', 'find', 'my', 'vadalog', 'prometheux'];
+  const words = cleaned.split(/\s+/);
+  const keyTerms = words.filter(w => !stopWords.includes(w) && w.length > 2);
+  return keyTerms.length > 0 ? keyTerms.join(' ') : cleaned;
+}
+
+async function searchAlgolia(query) {
+  const algoliasearch = (await import('algoliasearch')).default;
+  const appId = process.env.ALGOLIA_APP_ID || 'DCCC0T0ITC';
+  const apiKey = process.env.ALGOLIA_API_KEY || '870d45e2eaf4483e87c2204607df57c7';
+  const indexName = process.env.ALGOLIA_INDEX_NAME || 'prometheux-co';
+  const client = algoliasearch(appId, apiKey);
+  const index = client.initIndex(indexName);
+
+  const searchQuery = extractKeyTerms(query) || query;
+  console.log(`[Algolia] Original query: "${query}"`);
+  console.log(`[Algolia] Search query: "${searchQuery}"`);
+
+  const algoliaResults = await index.search(searchQuery, {
+    hitsPerPage: 5,
+    attributesToRetrieve: ['content', 'hierarchy', 'url'],
+    attributesToHighlight: [],
+    removeStopWords: true,
+  });
+
+  if (algoliaResults.hits.length === 0) {
+    console.warn(`[Algolia] No results found for search query: "${searchQuery}"`);
+    return { relevantDocs: '', searchResults: [] };
+  }
+
+  const topHits = algoliaResults.hits.slice(0, 3);
+  const relevantDocs = topHits
+    .map((hit) => `## ${hit.hierarchy?.lvl1 || 'Documentation'}\n${hit.content || ''}`)
+    .join('\n\n');
+  const searchResults = topHits.map(hit => ({
+    title: hit.hierarchy?.lvl1 || 'Documentation',
+    url: hit.url?.startsWith('http') ? hit.url : `https://docs.prometheux.ai${hit.url || ''}`,
+    excerpt: (hit.content || '').substring(0, 200) + '...'
+  }));
+
+  console.log(`[Algolia] Found ${algoliaResults.nbHits} total docs, using top ${topHits.length}`);
+  console.log('[Algolia] Retrieved sections:', searchResults.map(r => r.title).join(', '));
+  console.log(`[Algolia] Total chars injected into prompt: ${relevantDocs.length}`);
+  return { relevantDocs, searchResults };
+}
 
 module.exports = function chatApiPlugin(context, options) {
   return {
@@ -38,119 +239,36 @@ module.exports = function chatApiPlugin(context, options) {
             devServer.app.post('/api/vadalog', async (req, res) => {
               try {
                 console.log('Standard API called!');
-                
-                // Debug environment variables
-                console.log('Environment check:', {
-                  USE_AZURE_OPENAI: process.env.USE_AZURE_OPENAI,
-                  AZURE_OPENAI_ENDPOINT: process.env.AZURE_OPENAI_ENDPOINT ? 'SET' : 'NOT SET',
-                  AZURE_OPENAI_KEY: process.env.AZURE_OPENAI_KEY ? 'SET' : 'NOT SET',
-                  AZURE_OPENAI_DEPLOYMENT: process.env.AZURE_OPENAI_DEPLOYMENT,
-                  OPENAI_API_KEY: process.env.OPENAI_API_KEY ? 'SET' : 'NOT SET'
-                });
+                logEnvCheck();
 
                 const { query, context, include_docs = true } = req.body;
 
-                // Check for API configuration
-                const useAzure = process.env.USE_AZURE_OPENAI === "true" && process.env.AZURE_OPENAI_KEY;
-                const useOpenAI = !useAzure && process.env.OPENAI_API_KEY;
+                const refinedQuery = await refineQuery(query);
 
-                if (!useAzure && !useOpenAI) {
-                  console.error('No AI provider configured.');
-                  return res.status(503).json({
-                    error: 'AI assistant not available',
-                    message: 'AI assistant is not configured for this deployment.',
-                    status: 503,
-                    timestamp: new Date().toISOString()
-                  });
-                }
-
-                // Search Algolia for relevant documentation
                 let relevantDocs = '';
                 let searchResults = [];
                 
                 if (include_docs) {
                   try {
-                    const algoliasearch = (await import('algoliasearch')).default;
-                    const client = algoliasearch('DCCC0T0ITC', '870d45e2eaf4483e87c2204607df57c7');
-                    const index = client.initIndex('prometheux-co');
-                    
-                    const algoliaResults = await index.search(query, {
-                      hitsPerPage: 3,
-                      attributesToRetrieve: ['content', 'hierarchy', 'url'],
-                      attributesToHighlight: [],
-                    });
-
-                    if (algoliaResults.hits.length > 0) {
-                      relevantDocs = algoliaResults.hits
-                        .map((hit) => `## ${hit.hierarchy?.lvl1 || 'Documentation'}\n${hit.content || ''}`)
-                        .join('\n\n');
-                      
-                      searchResults = algoliaResults.hits.map(hit => ({
-                        title: hit.hierarchy?.lvl1 || 'Documentation',
-                        url: `https://docs.prometheux.ai${hit.url || ''}`,
-                        excerpt: (hit.content || '').substring(0, 200) + '...'
-                      }));
-                      
-                      console.log('Found relevant docs for:', query);
-                    }
+                    const algoliaResult = await searchAlgolia(refinedQuery);
+                    relevantDocs = algoliaResult.relevantDocs;
+                    searchResults = algoliaResult.searchResults;
                   } catch (error) {
                     console.warn('Algolia search failed:', error);
                   }
                 }
                 
-                console.log('Making Azure OpenAI request...');
-                
-                const systemPrompt = `You are a Vadalog code assistant for Prometheux. Your PRIMARY GOAL is to provide complete, copy-pasteable Vadalog code snippets.
+                const systemPrompt = VADALOG_SYSTEM_PROMPT +
+                  (context ? `\n\nUSER CONTEXT: ${context}` : '') +
+                  (relevantDocs ? `\n\nRELEVANT DOCUMENTATION:\n${relevantDocs}\n\nUse this documentation as additional reference.` : '');
 
-RESPONSE FORMAT REQUIREMENTS:
-1. ALWAYS provide complete Vadalog code blocks
-2. Include ALL necessary annotations (@output, @bind, @model)
-3. Show full working examples, not partial snippets
-4. Make code copy-pasteable and immediately runnable
-5. Include comments explaining each part
+                const result = await callLLM(systemPrompt, [{ role: 'user', content: refinedQuery }]);
 
-${context ? `CONTEXT: ${context}` : ''}
-
-${relevantDocs ? `\n\nRELEVANT DOCUMENTATION:\n${relevantDocs}\n\nUse this documentation to provide accurate, complete code examples.` : ''}
-
-CRITICAL: Every response should include a complete, working Vadalog code block that users can copy and paste.`;
-
-                const response = await fetch(`${process.env.AZURE_OPENAI_ENDPOINT}/openai/deployments/${process.env.AZURE_OPENAI_DEPLOYMENT}/chat/completions?api-version=2024-02-15-preview`, {
-                  method: 'POST',
-                  headers: {
-                    'Content-Type': 'application/json',
-                    'api-key': process.env.AZURE_OPENAI_KEY,
-                  },
-                  body: JSON.stringify({
-                    messages: [
-                      { role: 'system', content: systemPrompt },
-                      { role: 'user', content: query }
-                    ],
-                    max_tokens: 1500,
-                    temperature: 0.3,
-                  }),
-                });
-
-                if (!response.ok) {
-                  const errorText = await response.text();
-                  console.error('Azure OpenAI error:', response.status, errorText);
-                  return res.status(500).json({ 
-                    error: 'Azure OpenAI error', 
-                    status: response.status,
-                    details: errorText,
-                    timestamp: new Date().toISOString()
-                  });
-                }
-
-                const data = await response.json();
-                const assistantMessage = data.choices[0]?.message?.content || 'No response';
-
-                // Extract code blocks from the response
+                const cleanedResult = cleanVadalogCodeBlocks(result.text);
                 const codeBlocks = [];
                 const codeRegex = /```(?:vadalog|prolog)?\n([\s\S]*?)```/g;
                 let match;
-                
-                while ((match = codeRegex.exec(assistantMessage)) !== null) {
+                while ((match = codeRegex.exec(cleanedResult)) !== null) {
                   codeBlocks.push({
                     language: 'vadalog',
                     code: match[1].trim(),
@@ -158,20 +276,19 @@ CRITICAL: Every response should include a complete, working Vadalog code block t
                   });
                 }
 
-                // Return structured JSON response
                 res.setHeader('Content-Type', 'application/json');
                 res.setHeader('Access-Control-Allow-Origin', process.env.NODE_ENV === 'production' ? 'https://docs.prometheux.ai' : '*');
                 res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
                 res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
                 res.json({
-                  response: assistantMessage,
+                  response: cleanedResult,
                   code_examples: codeBlocks,
                   relevant_docs: searchResults,
                   metadata: {
-                    provider: useAzure ? 'Azure OpenAI' : 'OpenAI',
-                    model: process.env.AZURE_OPENAI_DEPLOYMENT || 'gpt-4',
-                    tokens_used: data.usage?.total_tokens || 'unknown',
+                    provider: getProviderLabel(result.provider),
+                    model: getModelName(result.provider),
+                    tokens_used: result.tokensUsed,
                     search_results: searchResults.length
                   },
                   timestamp: new Date().toISOString()
@@ -190,163 +307,31 @@ CRITICAL: Every response should include a complete, working Vadalog code block t
             devServer.app.post('/api/docsChat', async (req, res) => {
               try {
                 console.log('API called!');
-                
-                // Debug environment variables
-                console.log('Environment check:', {
-                  USE_AZURE_OPENAI: process.env.USE_AZURE_OPENAI,
-                  AZURE_OPENAI_ENDPOINT: process.env.AZURE_OPENAI_ENDPOINT ? 'SET' : 'NOT SET',
-                  AZURE_OPENAI_KEY: process.env.AZURE_OPENAI_KEY ? 'SET' : 'NOT SET',
-                  AZURE_OPENAI_DEPLOYMENT: process.env.AZURE_OPENAI_DEPLOYMENT,
-                  OPENAI_API_KEY: process.env.OPENAI_API_KEY ? 'SET' : 'NOT SET'
-                });
+                logEnvCheck();
 
                 const { messages } = req.body;
 
-                // Check for API configuration
-                const useAzure = process.env.USE_AZURE_OPENAI === "true" && process.env.AZURE_OPENAI_KEY;
-                const useOpenAI = !useAzure && process.env.OPENAI_API_KEY;
-
-                if (!useAzure && !useOpenAI) {
-                  console.error('No AI provider configured.');
-                  return res.status(503).json({
-                    error: 'AI assistant not available',
-                    message: 'AI assistant is not configured for this deployment. Please contact the administrator.'
-                  });
-                }
-
-                // Get the latest user message for search
                 const latestMessage = messages[messages.length - 1];
                 const userQuery = latestMessage?.content || '';
+
+                const refinedQuery = await refineQuery(userQuery);
                 
-                // Search Algolia for relevant documentation
                 let relevantDocs = '';
                 try {
-                  const algoliasearch = (await import('algoliasearch')).default;
-                  const client = algoliasearch('DCCC0T0ITC', '870d45e2eaf4483e87c2204607df57c7');
-                  const index = client.initIndex('prometheux-co');
-                  
-                  const searchResults = await index.search(userQuery, {
-                    hitsPerPage: 3,
-                    attributesToRetrieve: ['content', 'hierarchy', 'url'],
-                    attributesToHighlight: [],
-                  });
-
-                  if (searchResults.hits.length > 0) {
-                    relevantDocs = searchResults.hits
-                      .map((hit) => `## ${hit.hierarchy?.lvl1 || 'Documentation'}\n${hit.content || ''}`)
-                      .join('\n\n');
-                    console.log('Found relevant docs for:', userQuery);
-                  }
+                  const algoliaResult = await searchAlgolia(refinedQuery);
+                  relevantDocs = algoliaResult.relevantDocs;
                 } catch (error) {
                   console.warn('Algolia search failed:', error);
-                  // Continue without search results
                 }
                 
-                console.log('Making Azure OpenAI request...');
-                
-                const response = await fetch(`${process.env.AZURE_OPENAI_ENDPOINT}/openai/deployments/${process.env.AZURE_OPENAI_DEPLOYMENT}/chat/completions?api-version=2024-02-15-preview`, {
-                  method: 'POST',
-                  headers: {
-                    'Content-Type': 'application/json',
-                    'api-key': process.env.AZURE_OPENAI_KEY,
-                  },
-                  body: JSON.stringify({
-                    messages: [
-                      {
-                        role: 'system',
-                        content: `You are a Vadalog code assistant for Prometheux. Your PRIMARY GOAL is to provide complete, copy-pasteable Vadalog code snippets.
+                const systemPrompt = VADALOG_SYSTEM_PROMPT +
+                  (relevantDocs ? `\n\nRELEVANT DOCUMENTATION:\n${relevantDocs}\n\nUse this documentation as additional reference.` : '');
 
-RESPONSE FORMAT REQUIREMENTS:
-1. ALWAYS provide complete Vadalog code blocks
-2. Include ALL necessary annotations (@output, @bind, @model)
-3. Show full working examples, not partial snippets
-4. Make code copy-pasteable and immediately runnable
-5. Include comments explaining each part
+                const chatMessages = messages.filter(m => m.role !== 'system').map(m =>
+                  m === latestMessage ? { ...m, content: refinedQuery } : m
+                );
+                const result = await callLLM(systemPrompt, chatMessages);
 
-FOCUS ON:
-- Complete database connection examples with all parameters
-- Full data processing workflows
-- Working rule definitions with proper syntax
-- Real-world use cases with complete code
-
-Vadalog syntax essentials:
-- Rules: head :- body.
-- Facts: fact(arg1, arg2).
-- Variables: Uppercase (X, Y, Name)
-- Constants: lowercase (john, 42)
-- Annotations: @output("concept"), @bind("concept", "type params", "db", "table"), @model("concept", "schema")
-- Common types: postgresql, neo4j, csv, json, excel, parquet, s3, text, binaryfile
-- NOTE: @input annotations are no longer required
-
-AGGREGATION FUNCTIONS (CRITICAL - use correct syntax):
-- mavg(expression) - average (NO variable list in function!)
-- msum(expression) - sum (NO variable list in function!)
-- mcount() - count (NO arguments!)
-- mmin(expression) - minimum
-- mmax(expression) - maximum
-
-GROUP-BY LOGIC (CRITICAL):
-- Group-by variables appear in BOTH head and body
-- Aggregation function takes ONLY the expression to aggregate
-- Example: avg_salary(Dept, Avg) :- employee(_, Dept, Salary), Avg = mavg(Salary).
-- The grouping happens because Dept appears in both head and body
-
-CORRECT AGGREGATION PATTERNS:
-❌ WRONG: mavg(Age, [City]) - NEVER put variables in aggregation function!
-✅ CORRECT: average_age(City, Avg) :- people(_, Age, City), Avg = mavg(Age).
-
-❌ WRONG: AvgAge = avg(Age) from table(Age)
-✅ CORRECT: global_avg(Avg) :- people(_, Age, _), Avg = mavg(Age).
-
-BUILT-IN FUNCTIONS:
-- Math: math:sqrt(), math:abs(), math:round(), math:pow(), math:mod()
-- String: concat(), substring(), contains(), starts_with(), ends_with(), to_lower(), to_upper()
-- Date: date:current_date(), date:add(), date:diff(), date:format()
-- Collections: collections:size(), collections:contains(), collections:add(), collections:sort()
-- Null handling: nullManagement:isnull(), nullManagement:coalesce()
-- Hash: hash:sha1(), hash:md5(), hash:sha2()
-- AI: embeddings:vectorize(), embeddings:cosine_sim(), llm:generate()
-
-${relevantDocs ? `\n\nRELEVANT DOCUMENTATION:\n${relevantDocs}\n\nUse this documentation to provide accurate, complete code examples.` : ''}
-
-CRITICAL SYNTAX RULES:
-1. ALL annotations must end with a DOT: @bind(...).  @model(...).  @output(...).
-2. @model syntax: @model("concept", "['field:type', 'field:type']").
-3. @bind syntax: @bind("concept", "type host=... port=... user=... password=...", "database", "table").
-4. Connection params go in the SECOND argument as a single string
-
-CORRECT ANNOTATION EXAMPLES:
-✅ @bind("employee", "postgresql host=localhost port=5432 user=myuser password=mypass", "mydb", "employee").
-✅ @model("employee", "['id:int', 'name:string', 'salary:double']").
-✅ @output("result").
-
-❌ WRONG: @bind("employee", "postgresql", "host=localhost...", "employee") - params split wrong!
-❌ WRONG: @model("employee", "id:int, name:string") - missing square brackets!
-❌ WRONG: @output("result") - missing dot!
-
-Every response should include a complete, working Vadalog code block that users can copy and paste.`
-                      },
-                      ...messages
-                    ],
-                    max_tokens: 1500,
-                    temperature: 0.3,
-                  }),
-                });
-
-                if (!response.ok) {
-                  const errorText = await response.text();
-                  console.error('Azure OpenAI error:', response.status, errorText);
-                  return res.status(500).json({ 
-                    error: 'Azure OpenAI error', 
-                    status: response.status,
-                    details: errorText 
-                  });
-                }
-
-                const data = await response.json();
-                const assistantMessage = data.choices[0]?.message?.content || 'No response';
-
-                // Format response exactly as AI SDK expects for useChat hook
                 res.setHeader('Content-Type', 'text/plain; charset=utf-8');
                 res.setHeader('Cache-Control', 'no-cache');
                 res.setHeader('Connection', 'keep-alive');
@@ -354,17 +339,12 @@ Every response should include a complete, working Vadalog code block that users 
                 res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
                 res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-                // Stream response in the format useChat expects
-                // Split into words and send each as a separate chunk
-                const words = assistantMessage.split(' ');
+                const cleanedText = cleanVadalogCodeBlocks(result.text);
+                const words = cleanedText.split(' ');
                 for (let i = 0; i < words.length; i++) {
                   const word = words[i];
                   const chunk = i === 0 ? word : ' ' + word;
-                  
-                  // Send in the format: 0:"text"
                   res.write(`0:"${chunk.replace(/"/g, '\\"').replace(/\n/g, '\\n')}"\n`);
-                  
-                  // Small delay for streaming effect
                   await new Promise(resolve => setTimeout(resolve, 10));
                 }
                 res.end();

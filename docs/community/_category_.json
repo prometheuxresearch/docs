@@ -1,0 +1,13 @@
+{
+  "label": "Developer Community",
+  "position": 4,
+  "link": {
+    "type": "generated-index",
+    "title": "Developer Community",
+    "description": "Connect, collaborate, and contribute to the Prometheux ecosystem. Join our growing community of developers building with PX.",
+    "keywords": ["community", "developers", "contribute", "open source"]
+  },
+  "customProps": {
+    "icon": "👥"
+  }
+}

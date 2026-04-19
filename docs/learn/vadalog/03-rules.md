@@ -1,3 +1,7 @@
+---
+slug: /learn/vadalog/rules
+---
+
 # Rules
 
 ## Linear rules

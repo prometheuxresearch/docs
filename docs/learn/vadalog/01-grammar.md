@@ -1,3 +1,7 @@
+---
+slug: /learn/vadalog/grammar
+---
+
 # Vadalog Grammar Reference
 
 This document provides a comprehensive reference for the Vadalog grammar, covering all syntax rules, operators, and language constructs.
@@ -214,6 +218,7 @@ munion(expression, varList?)   % Incremental union
 mmax(expression)               % Incremental maximum
 mmin(expression)               % Incremental minimum
 mavg(expression)               % Incremental average
+mmedian(expression, "variant") % Incremental median (exact/p2_algorithm/reservoir_sampling)
 ```
 
 ### Standard Aggregations
@@ -240,6 +245,16 @@ dept_avg_age(Dept, AvgAge) :-
     employee(Name, Dept, Age), 
     AvgAge = mavg(Age).
 
+% Median salary by department (robust to outliers)
+dept_median_salary(Dept, Median) :- 
+    employee(Name, Dept, Salary), 
+    Median = mmedian(Salary, "exact").
+
+% Approximate median for large datasets
+dept_approx_median(Dept, Median) :- 
+    employee(Name, Dept, Salary), 
+    Median = mmedian(Salary, "reservoir_sampling").
+
 % Count employees per department (Dept is the grouping variable)
 dept_count(Dept, Count) :- 
     employee(Name, Dept), 
@@ -254,6 +269,7 @@ total_employees(Count) :-
 % The aggregation function takes ONLY the expression to aggregate
 % ❌ WRONG: mavg(Age, [Dept]) 
 % ✅ CORRECT: avg_age(Dept, Avg) :- employee(_, Dept, Age), Avg = mavg(Age).
+% ✅ CORRECT: median_age(Dept, Med) :- employee(_, Dept, Age), Med = mmedian(Age, "exact").
 ```
 
 ---
@@ -265,6 +281,8 @@ Comprehensive string manipulation functions:
 ```prolog
 substring(string, start, length?)  % Extract substring
 contains(string, substring)        % Check if contains
+contains_any(string, keywords_array) % Check if contains any keyword
+rlike(string, pattern)             % Check if matches regex
 starts_with(string, prefix)        % Check if starts with
 ends_with(string, suffix)          % Check if ends with
 concat(str1, str2, ...)           % Concatenate strings
@@ -277,6 +295,7 @@ split(string, delimiter)           % Split string
 index_of(string, substring)        % Find substring index
 replace(string, old, new)          % Replace substring
 join(array, separator)             % Join array elements
+strip(string)                      % Remove leading/trailing whitespace
 ```
 
 **Examples:**
@@ -364,6 +383,8 @@ Handle null values explicitly:
 ```prolog
 is_null(expression)        % Check if null
 is_not_null(expression)    % Check if not null
+nullManagement:ifnull(expression, valueIfNull, valueIfNotNull)  % Conditional null handling
+nullManagement:coalesce(expr1, expr2, ...)  % First non-null value
 ```
 
 ---

@@ -1,0 +1,6 @@
+User-agent: *
+Disallow:
+
+# Allow all crawlers to index the documentation site.
+Sitemap: https://docs.prometheux.ai/sitemap.xml
+

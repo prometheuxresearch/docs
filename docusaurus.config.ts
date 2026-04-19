@@ -22,7 +22,12 @@ const config: Config = {
   trailingSlash: false,
 
   onBrokenLinks: "throw",
-  onBrokenMarkdownLinks: "warn",
+
+  markdown: {
+    hooks: {
+      onBrokenMarkdownLinks: "warn",
+    },
+  },
 
   // Even if you don't use internationalization, you can use this field to set
   // useful metadata like html lang. For example, if your site is Chinese, you
@@ -49,7 +54,11 @@ const config: Config = {
           customCss: "./src/css/custom.css",
         },
         sitemap: {
-          ignorePatterns: ["https://docs.prometheux.ai/"],
+          filename: 'sitemap.xml',
+          changefreq: 'weekly',
+          priority: 0.5,
+          // Exclude none by default; add patterns like '/private/**' if needed
+          ignorePatterns: [],
         },
       } satisfies Preset.Options,
     ],
@@ -58,6 +67,11 @@ const config: Config = {
   themeConfig: {
     // Replace with your project's social card
     image: "img/docusaurus-social-card.jpg",
+    colorMode: {
+      defaultMode: 'light',
+      disableSwitch: true,
+      respectPrefersColorScheme: false,
+    },
     algolia: {
       // The application ID provided by Algolia
       appId: "DCCC0T0ITC",
@@ -95,15 +109,21 @@ const config: Config = {
       title: "",
       logo: {
         alt: "Prometheux Logo",
-        src: "img/logotype.svg",
-        srcDark: "img/logotype-dark.svg",
+        src: "img/prometheux-logo.png",
+        srcDark: "img/prometheux-logo.png",
       },
       items: [
         {
           type: "docSidebar",
-          sidebarId: "learn",
+          sidebarId: "gettingStarted",
           position: "left",
-          label: "Learn",
+          label: "Get Started",
+        },
+        {
+          type: "docSidebar",
+          sidebarId: "api",
+          position: "left",
+          label: "PX APIs",
         },
         {
           type: "docSidebar",
@@ -113,66 +133,20 @@ const config: Config = {
         },
         {
           type: "docSidebar",
-          sidebarId: "api",
+          sidebarId: "community",
           position: "left",
-          label: "REST API",
-        },
-        {
-          type: "docSidebar",
-          sidebarId: "sdk",
-          position: "left",
-          label: "Python SDK",
+          label: "Developer Community",
+          className: "navbar-community-item",
         },
         {
           href: "https://www.prometheux.ai",
-          label: "Back to homepage",
+          label: "Prometheux Website",
           position: "right",
         },
       ],
     },
     footer: {
-      style: "dark",
-      links: [
-        {
-          title: "Docs",
-          items: [
-            {
-              label: "Learn",
-              to: "/learn/getting-started",
-            },
-            {
-              label: "Examples",
-              to: "/examples",
-            },
-            {
-              label: "REST API",
-              to: "/api",
-            },
-            {
-              label: "Python SDK",
-              to: "/sdk",
-            },
-          ],
-        },
-
-        {
-          title: "More",
-          items: [
-            {
-              label: "Home",
-              to: "https://docs.prometheux.ai",
-            },
-            {
-              label: "Research",
-              to: "https://docs.prometheux.ai/#research-section",
-            },
-            {
-              label: "LinkedIn",
-              to: "https://www.linkedin.com/company/prometheux",
-            },
-          ],
-        },
-      ],
+      style: "light",
       copyright: `Copyright © ${new Date().getFullYear()} Prometheux. All rights reserved.`,
     },
     prism: {
@@ -184,12 +158,8 @@ const config: Config = {
   } satisfies Preset.ThemeConfig,
   customFields: {
     docsChatUrl: process.env.NODE_ENV === 'production' 
-      ? "https://chat-docs.prometheux.ai/api/docsChat"  // EC2 deployment with chat API
-      : "/api/docsChat",  // Use local API in development
-    // Azure OpenAI configuration (safe to commit - endpoint is public, key is handled server-side)
-    azureOpenAIEndpoint: process.env.AZURE_OPENAI_ENDPOINT || "https://davbe-mdg4jzfa-eastus2.cognitiveservices.azure.com/",
-    azureOpenAIDeployment: process.env.AZURE_OPENAI_DEPLOYMENT || "gpt-4o",
-    useAzureOpenAI: process.env.USE_AZURE_OPENAI === "true",
+      ? "https://chat-docs.prometheux.ai/api/docsChat"
+      : "/api/docsChat",
   },
 };
 

@@ -30,16 +30,12 @@ Example: When NFC1 defaults, it exposes:
 ![Example modelling when NFC1 defaults](./non-performing-loans-example.png)
 
 ```prolog showLineNumbers
-@input("loan").
 @bind("loan","csv useHeaders=true","disk/data/non_performing_loan","loan.csv").
 
-@input("bank").
 @bind("bank","csv useHeaders=true","disk/data/non_performing_loan","bank.csv").
 
-@input("own").
 @bind("own","csv useHeaders=true","disk/data/non_performing_loan","person_own_bank.csv").
 
-@input("npl").
 @bind("npl","csv useHeaders=true","disk/data/non_performing_loan","npl.csv").
 
 debit(Bank2, Bank1) :- loan(Bank1,Bank2).

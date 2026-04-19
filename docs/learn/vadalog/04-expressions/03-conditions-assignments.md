@@ -1,0 +1,109 @@
+---
+slug: /learn/vadalog/expressions/conditions-assignments
+---
+
+# Conditions & Assignments
+
+## Conditions
+
+Rules can be enriched with conditions in order to constrain specific values for
+variables of the body. Syntactically, the conditions follow the body of the
+rule. A condition is the comparison (`>,<,==,>=,<=,<>`) of a variable (the LHS of
+the comparison) of the body and an **expression** (the RHS of the comparison).
+
+Notice that although the comparison symbols used in conditions are partially
+overlapped with the symbols for comparison operators they have different semantics. 
+While comparison operators calculate Boolean results, comparison symbols in conditions
+only specify a filter.
+
+Each rule can have multiple comma-separated conditions.
+
+```prolog showLineNumbers {3}
+contract("Mark",14).
+contract("Jeff",22).
+rich(X) :- contract(X,Y),Y>=20.
+@output("rich").
+```
+
+In the example we individuate the contracts for `Y>=20` and classify the
+respective employee as rich. The expected result is:
+
+```
+rich("Jeff").
+```
+
+Consider this next example:
+
+```prolog showLineNumbers {3}
+balanceItem(1, 7, 2, 5).
+balanceItem(2, 2, 2, 7).
+error(E, I) :- balanceItem(I, X, Y, Z), X <> Y+Z.
+@output("error").
+```
+
+Here, we individuate the balance items for which X is different from the sum of
+Y and Z and report an error E for the identifier I of such an item. The expected
+result is:
+
+```
+error(_e, 2).
+```
+
+This next example selects the senior English players.
+
+```prolog showLineNumbers {13}
+player(1, "Chelsea").
+age(1, 24).
+player(2, "Bayern").
+team("Chelsea").
+age(2, 25).
+player(2, "Bayern").
+team("Chelsea").
+age(2, 25).
+player(3, "Chelsea").
+age(3, 18).
+team("Chelsea").
+team("Bayern").
+seniorEnglish(X) :- player(X, Y), team(Y), age(X, A), Y=="Chelsea", A > 20.
+@output("seniorEnglish").
+```
+
+They are those who play with Chelsea with age greater than 20. The expected
+result is:
+
+```
+seniorEnglish(1).
+```
+
+## Assignment
+
+Rules can be enriched with assignments in order to generate specific values for
+existentially quantified variables of the head. Syntactically, the assignments
+follow the body of the rule. An assignment is the equation (`=`) of a variable
+(the LHS of the equation) of the body and an expression (the RHS of the
+equation).
+
+Each rule can have multiple comma-separated assignments.
+
+```prolog showLineNumbers {3,4}
+balanceItem("loans", 23.0).
+balanceItem("deposits", 20.0).
+operations(Q, Z, A) :- balanceItem(I1,X), balanceItem(I2,Y),
+                       I1=="loans", I2=="deposits", 
+                       Z=X+Y, 
+                       A=(X+Y)/2.
+@output("operations").
+```
+
+This example generates a fact for operations, summing two balance items, one for
+loans and one for deposits. Observe that `I1=="loans"` and `I2=="deposits"` are
+conditions to select the `balanceItems` (as I1 and I2 appear in the body),
+whereas `Z=X+Y` and `A=(X+Y)/2` are assignments (as Z and A do not appear in the
+body).
+
+The expected result is:
+
+```
+operations(_q, 43, 21.5).
+```
+

@@ -1,0 +1,45 @@
+---
+slug: /learn/vadalog/expressions/recursion
+---
+
+# Recursion
+
+We say that a Vadalog program or ontology is **recursive** if the dependency
+graph implied by the rules is cyclical. The simplest form of recursion is that
+in which the head of a rule also appears in the body (_self-recursive rules_).
+
+Recursion is particularly powerful as it allows for inference based on
+previously inferred results.
+
+In self-recursive rules, in case of bodies with two atoms, we distinguish
+between:
+
+1. _left recursion_, where the recursive atom is the left-most;
+2. _right recursion_, where the recursive atom is the right-most.
+
+Some examples follow.
+
+```prolog showLineNumbers {6}
+edge(1, 2).
+edge(2, 3).
+edge(1, 4).
+edge(4, 5).
+path(X, Y) :- edge(X, Y).
+path(X, Z) :- path(Y, Z), edge(X, Y).
+@output("path").
+```
+
+The expected results are:
+
+```
+path(1, 3).
+path(1, 2).
+path(1, 5).
+path(2, 3).
+path(1, 4).
+path(4, 5).
+```
+
+The examples above show reachability in graphs with left recursion, in the
+extended version of the manual further examples.
+

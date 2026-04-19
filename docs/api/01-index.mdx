@@ -11,9 +11,9 @@ The Prometheux platform provides multiple ways to interact with all platform fea
 
 - **Python SDK** (`prometheux_chain`): A high-level Python library for seamless integration
 - **REST API**: Direct HTTP endpoints for maximum flexibility and language-agnostic access
-- **MCP Integration**: Connect AI agents like Claude to your ontologies via Model Context Protocol
+- **MCP Integration**: Connect AI agents to your ontologies via Model Context Protocol
   - **Local MCP Server** (`prometheux-mcp`): For Claude Desktop with local installation
-  - **Remote MCP Server** (`px-remote-mcp-server`): For Claude Desktop and Web with OAuth
+  - **Remote MCP Server** (`px-remote-mcp-server`): For any MCP client (Claude, Genie Code, and more) with OAuth
 
 All interfaces provide equivalent functionality—choose the one that best fits your workflow.
 
@@ -164,24 +164,26 @@ See the [full MCP documentation](/api/mcp/local) for detailed setup and usage.
 
 ### Cloud-Hosted with OAuth
 
-The remote MCP server works with both Claude Desktop and Claude Web, using OAuth for authentication.
+The remote MCP server works with any MCP-compatible client — Claude, Genie Code, and more — using OAuth for authentication.
 
-### Setup
+### Server URL
 
-1. **Open Claude** (Web at [claude.ai](https://claude.ai) or Desktop app)
-2. **Add Connector:**
-   - Settings → Connectors → Add custom connector
-   - **Name:** `prometheux`
-   - **Remote MCP Server URL:** `https://api.prometheux.ai/px-remote-mcp-server`
-   - Click "Add"
-3. **Connect:**
-   - Click "Connect" on the Prometheux connector
-   - Enter your username, organization, and API token
-   - Click "Connect to Claude"
+```
+https://api.prometheux.ai/px-remote-mcp-server
+```
+
+### Connect Your Client
+
+We provide step-by-step guides for specific clients:
+
+- **[Claude (Desktop & Web)](/api/mcp/clients/claude)** — Add as a custom connector in Claude settings
+- **[Genie Code (Databricks)](/api/mcp/clients/databricks-genie)** — Register as an external MCP server
+
+For other MCP clients, see the [Remote MCP Server](/api/mcp/remote#server-details) page for OAuth endpoints and connection parameters.
 
 ### First Interaction
 
-Ask Claude:
+Once connected, ask your AI agent:
 
 > "What concepts are available in my project-name project?"
 
@@ -254,7 +256,9 @@ The API is organized into the following categories:
 | [**Concepts**](/api/endpoints/concepts) | Concept execution and management |
 | [**Vadalog**](/api/endpoints/vadalog) | Vadalog program evaluation |
 | [**Rule Inference**](/api/endpoints/rule-inference) | Schema inference from data sources |
-| [**Applications**](/api/endpoints/applications) | Advanced applications like Graph RAG |
+| [**Dashboards**](/api/endpoints/dashboards) | Dashboard CRUD |
+| [**Vadalingo**](/api/endpoints/vadalingo) | NL, SQL, RDF, and OWL to Vadalog translation |
+| [**AI Agent**](/api/endpoints/agent) | Streaming conversational AI agent |
 
 ## Error Handling
 

@@ -95,7 +95,7 @@ The remote MCP server supports any client that implements the MCP standard. We p
 |--------|--------|-------|
 | **Claude** (Desktop & Web) | ✅ Supported | [Connect Claude →](/api/mcp/clients/claude) |
 | **Genie Code** (Databricks) | ✅ Supported | [Connect Genie Code →](/api/mcp/clients/databricks-genie) |
-| **Snowflake Cortex** | 🔜 Coming soon | — |
+| **Snowflake Cortex** | For more info, ask your Prometheux rep | — |
 
 Don't see your client? The remote server exposes a standard MCP endpoint with OAuth — any compliant client can connect using the details in the [Remote MCP Server](/api/mcp/remote) page.
 
@@ -103,59 +103,59 @@ Don't see your client? The remote server exposes a standard MCP endpoint with OA
 
 Both MCP servers dynamically expose the following tools to AI agents. The tool catalog is served by the Prometheux backend, so new capabilities are available automatically as they are added to the platform.
 
-### `list_concepts`
+### Projects & Data Sources
 
-Lists all concepts available in a project.
+| Tool | Description | Key Parameters |
+|------|-------------|----------------|
+| `list_projects` | List all projects the user has access to | `scope` |
+| `create_project` | Create a new empty project | `name`, `description`, `scope` |
+| `list_data_sources` | List all data sources with their predicate names, bind annotations, field schemas, and row counts | `scope` |
 
-**Parameters:**
-- `project_id` (string, required): The unique identifier of the project
-- `scope` (string, optional): Search scope - `"user"` or `"organization"`. Default: `"user"`
+### Concepts
 
-**Returns:**
-- `concepts`: Array of concept objects with metadata (name, fields, types, descriptions)
-- `count`: Total number of concepts found
+| Tool | Description | Key Parameters |
+|------|-------------|----------------|
+| `list_concepts` | List all concepts available in a project | `project_id`, `scope` |
+| `get_concept` | Get full detail for a single concept including its Vadalog code | `project_id`, `concept_name`, `scope` |
+| `create_concept` | Save a Vadalog program as a new named concept | `project_id`, `vadalog_code`, `description`, `scope` |
+| `update_concept` | Overwrite the Vadalog code of an existing concept | `project_id`, `concept_name`, `vadalog_code`, `description`, `scope` |
+| `run_concept` | Execute a concept to derive new knowledge through reasoning (supports long-running executions with progress notifications) | `project_id`, `concept_name`, `params`, `scope`, `force_rerun`, `persist_outputs` |
 
-### `run_concept`
+### Vadalog
 
-Executes a concept to derive new knowledge through reasoning.
+| Tool | Description | Key Parameters |
+|------|-------------|----------------|
+| `search_vadalog_docs` | Search the Vadalog documentation and return ready-to-use code examples | `query` |
+| `generate_vadalog` | Generate a Vadalog program from a natural language description | `description`, `predicates_and_schemas` |
+| `fix_vadalog` | Fix a Vadalog program that failed to compile or execute | `vadalog_code`, `error_message`, `original_request` |
+| `generate_sample_facts` | Generate realistic sample input or output facts for a set of predicates | `predicates_and_schemas`, `domain_context`, `vadalog_rules`, `fact_type` |
 
-This tool supports **long-running executions** — the server sends progress notifications while the concept is being evaluated, preventing client-side timeouts during complex reasoning tasks.
+### Ontology
 
-**Parameters:**
-- `project_id` (string, required): The unique identifier of the project
-- `concept_name` (string, required): Name of the concept to execute
-- `params` (object, optional): Parameters for the reasoning engine
-- `scope` (string, optional): Search scope - `"user"` or `"organization"`. Default: `"user"`
-- `force_rerun` (boolean, optional): Re-execute even if results exist. Default: `true`
-- `persist_outputs` (boolean, optional): Save derived facts to database. Default: `false`
+| Tool | Description | Key Parameters |
+|------|-------------|----------------|
+| `get_ontology` | Load the current ontology graph for a project | `project_id`, `scope` |
+| `save_ontology` | Save a complete ontology graph for a project | `project_id`, `ontology_data`, `scope` |
+| `set_concept_ontology_role` | Assign or update a single concept's role in the ontology graph | `project_id`, `concept_name`, `ontology_type`, `edge_source`, `edge_target`, `scope` |
 
-**Returns:**
-- `concept_name`: The executed concept
-- `message`: Status message
-- `evaluation_results`: Reasoning results with derived facts
-- `predicates_populated`: List of populated predicates
-- `total_records`: Number of records derived
+### Dashboards
 
-### `list_data_sources`
+| Tool | Description | Key Parameters |
+|------|-------------|----------------|
+| `list_dashboards` | List all dashboards across every project in the workspace | `scope` |
+| `get_dashboard` | Load a single dashboard with its full definition | `project_id`, `dashboard_id`, `scope` |
+| `save_dashboard` | Create or update a dashboard for a project | `project_id`, `dashboard`, `scope` |
+| `delete_dashboard` | Permanently delete a dashboard | `project_id`, `dashboard_id`, `scope` |
 
-Lists data sources connected to a project.
+### Company Knowledge
 
-**Parameters:**
-- `project_id` (string, required): The unique identifier of the project
-- `scope` (string, optional): Search scope - `"user"` or `"organization"`. Default: `"user"`
+| Tool | Description | Key Parameters |
+|------|-------------|----------------|
+| `get_company_info` | Search the Prometheux company knowledge base | `query` |
 
-**Returns:**
-- `data_sources`: Array of connected data source objects with metadata
-
-### `list_projects`
-
-Lists all projects accessible to the authenticated user.
-
-**Parameters:**
-- `scope` (string, optional): Search scope - `"user"` or `"organization"`. Default: `"user"`
-
-**Returns:**
-- `projects`: Array of project objects with metadata (name, id, description)
+:::tip Parameter Defaults
+Most tools accept a `scope` parameter (`"user"` or `"organization"`, default `"user"`). Boolean parameters like `force_rerun` and `persist_outputs` default to `true` and `false` respectively.
+:::
 
 ## Example Usage
 
@@ -168,9 +168,11 @@ Once configured, just chat naturally with your AI agent. The agent will automati
 
 > "Run the churn_prediction concept in the customer-analytics project"
 
-> "Execute high_value_customers in sales-data with min_value set to 1000"
+> "Generate a Vadalog program that finds all transitive suppliers for a company"
 
-> "What data sources are connected to my project?"
+> "Create a dashboard showing the results of churn_prediction"
+
+> "What does the Vadalog documentation say about recursive rules?"
 
 The AI agent will automatically:
 - Call the appropriate Prometheux MCP tools

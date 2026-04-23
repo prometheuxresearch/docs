@@ -44,6 +44,7 @@ where `datasource_type` should be one of:
 - `parquet` for Parquet files
 - `excel` for Excel files
 - `json` for JSON files
+- `cobol` for legacy COBOL / EBCDIC data files (with copybook)
 - `postgresql` for PostgreSQL databases
 - `neo4j` for Neo4j databases
 - `db2` for DB2 databases
@@ -564,6 +565,159 @@ pending_orders_alert() <-
 
 @output("pending_orders_alert").
 ```
+
+## COBOL Datasource
+
+Prometheux can read legacy **COBOL / EBCDIC** data files alongside the other file‑based datasources, so mainframe extracts (VSAM dumps, flat record files, variable‑length `RDW`/`BDW` streams) can be joined and transformed with the same Vadalog rules you already use for CSV, Parquet or JSON data. The connector is powered by the [AbsaOSS Cobrix](https://github.com/AbsaOSS/cobrix) Spark data source, so it fits naturally into Spark‑native Prometheux deployments.
+
+A COBOL binding always needs two inputs:
+
+1. a **data file** (binary, addressed by `<filepath>` + `<filename>`, exactly as for CSV or Parquet),
+2. a **copybook** describing the record layout — passed via the `copybook` option as a path to a `.cpy` file on the same file system (local, HDFS, or S3 via `s3a://`).
+
+:::note Why the copybook is always a path
+The engine‑side `@bind` tokenizer strips `\n` and `\t` characters from the option block and does not support escaped single quotes, which makes multi‑line copybook bodies and `VALUE 'A'` clauses structurally impossible to embed inline. Keep the copybook as a file next to (or accessible from) the data file and reference it by path.
+:::
+
+### @bind options
+
+```prolog
+@bind("relation",
+      "cobol option_1='value_1', option_2='value_2', …, option_n='value_n'",
+      "filepath",
+      "filename").
+```
+
+Supported options:
+
+- `copybook`: **required**, path to the COBOL copybook file describing the record layout (e.g. `/data/layouts/customer_master.cpy`).
+- `cobolPreset`: shortcut for common mainframe framings. One of:
+  - `flat-fixed-ebcdic` (default) — fixed‑length records, EBCDIC encoding (IBM037 / IBM1140). Matches most VSAM ESDS and flat dump exports.
+  - `flat-fixed-ascii` — fixed‑length records, ASCII encoding. Used when a vendor has already transcoded the extract.
+  - `mainframe-v` — IBM variable‑length records with a 4‑byte big‑endian RDW header.
+  - `mainframe-vb` — IBM variable‑blocked: BDW‑prefixed blocks of RDW‑prefixed records.
+  - `custom` — no preset; every Cobrix flag is supplied via `cobrix.*` options.
+- `encoding`: override the encoding inferred by the preset. Typical values are `ebcdic` (with `ebcdic_code_page='common'`, `'cp037'`, `'cp1140'`, …) or `ascii`.
+- `record_format`: Cobrix record format. `F` for fixed, `V` for variable, `VB` for variable‑blocked.
+- `cobolFlattenPolicy`: how nested COBOL groups (e.g. `CUST-ADDRESS` in the example below) are exposed in the Vadalog schema.
+  - `dotted` (default) — nested groups are flattened and leaf columns are prefixed with their parent group name (`CUST_ADDRESS_CUST_CITY`).
+  - `keepNested` — nested structs are preserved and exposed as `map` values in the Vadalog predicate, consumed via `struct:get`.
+- `cobolFileExtensions`: optional comma‑separated extension filter when the filepath points to a directory (e.g. `.dat,.bin`).
+- `cobrix.<flag>`: passthrough escape hatch — any option starting with `cobrix.` is forwarded to the underlying Cobrix reader verbatim (e.g. `cobrix.is_rdw_big_endian='true'`). Useful when a preset does not cover a particular vendor quirk.
+
+### Example: reading `customer_master.dat`
+
+The copybook describes a 119‑byte fixed‑length record with a nested address group, COMP‑3 packed decimals, a COMP binary counter, and zoned‑decimal identifiers — a realistic shape for a customer master extract:
+
+```cobol
+       01 CUSTOMER-REC.
+          05 CUST-ID             PIC 9(8).
+          05 CUST-NAME           PIC X(25).
+          05 CUST-STATUS         PIC X.
+             88 STATUS-ACTIVE    VALUE 'A'.
+             88 STATUS-INACTIVE  VALUE 'I'.
+          05 CUST-ADDRESS.
+             10 CUST-STREET      PIC X(30).
+             10 CUST-CITY        PIC X(20).
+             10 CUST-POSTCODE    PIC X(10).
+             10 CUST-COUNTRY     PIC X(3).
+          05 CUST-BALANCE        PIC S9(9)V99 COMP-3.
+          05 CUST-CREDIT-LIMIT   PIC S9(9)V99 COMP-3.
+          05 CUST-REG-DATE       PIC 9(8).
+          05 CUST-ORDER-COUNT    PIC 9(4) COMP.
+```
+
+Given the copybook `customer_master.cpy` and the binary extract `customer_master.dat` sitting in `/data/cobol/`, the binding below reads the records, flattens the `CUST-ADDRESS` group into top‑level columns, and projects the customers registered in Italy:
+
+```prolog
+% Bind to the EBCDIC extract. The preset covers encoding, record_format=F,
+% and schema_retention_policy so the copybook's 01-level name is retained
+% as a prefix on the flattened columns.
+@bind("customer_master",
+      "cobol copybook='/data/cobol/customer_master.cpy', cobolPreset='flat-fixed-ebcdic'",
+      "/data/cobol",
+      "customer_master.dat").
+
+% The nested CUST-ADDRESS group is flattened with dotted naming, so every
+% leaf column (CUST_ADDRESS_CUST_CITY, CUST_ADDRESS_CUST_COUNTRY, …) is
+% addressable as a plain Vadalog variable.
+italian_customers(Id, Name, Status, City, Balance) <-
+    SELECT CUST_REC_CUST_ID          AS id,
+           CUST_REC_CUST_NAME        AS name,
+           CUST_REC_CUST_STATUS      AS status,
+           CUST_REC_CUST_ADDRESS_CUST_CITY AS city,
+           CUST_REC_CUST_BALANCE     AS balance
+    FROM customer_master
+    WHERE CUST_REC_CUST_ADDRESS_CUST_COUNTRY = 'ITA'
+      AND CUST_REC_CUST_STATUS = 'A'.
+
+@output("italian_customers").
+```
+
+### Example: variable‑length mainframe file
+
+For extracts shipped with IBM's variable‑length framing (RDW‑prefixed records), switch the preset:
+
+```prolog
+@bind("transactions",
+      "cobol copybook='/data/cobol/transactions.cpy', cobolPreset='mainframe-v'",
+      "/data/cobol",
+      "transactions.bin").
+
+high_value_tx(Id, Amount) :-
+    transactions(Id, _, _, Amount, _),
+    Amount > 10000.
+
+@output("high_value_tx").
+```
+
+### Example: advanced Cobrix overrides
+
+When the file uses a non‑standard framing (e.g. RDW whose length field is *not* part of the record length, or a big‑endian BDW with non‑zero adjustment), drop down to the `custom` preset and forward the Cobrix flags unchanged via the `cobrix.*` passthrough:
+
+```prolog
+@bind("legacy_stream",
+      "cobol copybook='/data/cobol/legacy.cpy',
+             cobolPreset='custom',
+             encoding='ebcdic',
+             record_format='VB',
+             cobrix.is_rdw_big_endian='true',
+             cobrix.rdw_adjustment='-4',
+             cobrix.bdw_adjustment='-4',
+             cobrix.is_rdw_part_of_record_length='false'",
+      "s3a://my-legacy-bucket/cobol",
+      "legacy.bin").
+
+result(Id, Code) :- legacy_stream(Id, Code, _).
+@output("result").
+```
+
+### Keeping nested groups as structs
+
+If you prefer to query nested groups with `struct:get` (as you already do for JSON), flip the flatten policy:
+
+```prolog
+@bind("customer_master",
+      "cobol copybook='/data/cobol/customer_master.cpy',
+             cobolPreset='flat-fixed-ebcdic',
+             cobolFlattenPolicy='keepNested'",
+      "/data/cobol",
+      "customer_master.dat").
+
+% CUST-ADDRESS is now a struct column; reach into it with struct:get.
+customer_city(Id, City) :-
+    customer_master(Id, _, _, Address, _, _, _, _),
+    City = struct:get("CUST_CITY", Address).
+
+@output("customer_city").
+```
+
+### Tips
+
+- `PIC S9(n)V99 COMP-3` (packed decimal) is decoded as a `decimal` on the Spark side and exposed as `double` in the Vadalog model — use `double` in `@model`/`@mapping` if you declare the schema explicitly.
+- `PIC 9(n) COMP` binary counters are exposed as integers (`int`/`long` depending on width).
+- `OCCURS n TIMES` groups become Vadalog `list` columns and can be expanded with `collections:explode`, just like JSON arrays.
+- Point `filepath` to a directory (not a single file) to read every candidate extract in one go; combine with `cobolFileExtensions='.dat,.bin'` to narrow the selection.
 
 ## PostgreSQL Database
 PostgreSQL is a robust open-source relational database that supports a wide range of data types and advanced querying capabilities. In this section, we will explore how to integrate PostgreSQL with Vadalog by first populating a customer table from a CSV file and then reading data from it using two approaches: full table read and a custom query.

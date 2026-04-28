@@ -25,7 +25,7 @@ Variables on the head of the rule with the function receive the algorithm’s re
 | Function | Problem solved | Input predicate (arity) | Output variables | Notes |
 |----------|----------------|-------------------------|------------------|-------|
 | `#TC(P)` | **Transitive Closure** – reachability. | `P/2` `edge(U,V)` | `(X,Y)` | Directed graph. Includes self-loops from cycles. |
-| `#PATHS(P[,options])` | **All Paths** with configurable options. | `P/2` `edge(U,V)` + optional string | `(X,Y,Visited)` or `(X,Y)` | Optional parameters: `visited=true/false` (default `false`), `self_loops=true/false` (default `false`), `all_paths=true/false` (default `false`), `max_depth=N` (default `-1` = unlimited). Format: `"visited=true,max_depth=5"`. |
+| `#PATHS(P[,options])` | **All Paths** with configurable options. | `P/2` `edge(U,V)` + optional string | `(X,Y,Visited)` or `(X,Y)` | Optional parameters: `visited=true/false` (default `false`), `self_loops=true/false` (default `false`), `all_paths=true/false` (default `false`), `max_depth=N` (default `-1` = unlimited), `source=X` (only paths from node X), `target=Y` (only paths to node Y). Format: `"visited=true,max_depth=5,source=A,target=D"`. |
 | `#ASP(P)` | **All‑Shortest Paths** (weighted). | `P/3` `edge(U,V,W)` | `(X,Y,Z)` | Parallel multi‑source Dijkstra. Can include self-loops from cycles. |
 | `#SSSP(P[,options])` | **Single‑Source Shortest Path**. | `P/3` `edge(U,V,W)` + optional string | `(Y,Dist)` | Required parameter: `source=N` to specify the source node. Format: `"source=1"`. |
 | `#BFS(P)` | **Breadth‑First Levels**. | `P/2` | `(X,Level)` | Unweighted tiers. |
@@ -92,6 +92,38 @@ paths_custom(X,Y,V) :- #PATHS(edge, "visited=true,self_loops=false,all_paths=tru
 **`paths_depth1` Output**: Only direct edges: `(1,2), (2,3), (3,1)` – 3 tuples.
 
 **`paths_visited_depth2` Output**: Paths up to 2 hops with visited tracking: `(1,2,[1,2]), (2,3,[2,3]), (3,1,[3,1]), (1,3,[1,2,3]), (2,1,[2,3,1]), (3,2,[3,1,2])` – 6 tuples.
+
+### 2b  PATHS with source and target filtering
+
+The `source` and `target` parameters restrict path enumeration to specific endpoints. This is particularly useful for large graphs where you only care about paths between two known nodes.
+
+```prolog
+edge("A","B").
+edge("A","C").
+edge("B","D").
+edge("C","D").
+edge("B","E").
+edge("D","F").
+
+% Only paths starting from node A
+paths_from_a(X,Y,V) :- #PATHS(edge, "visited=true,source=A").
+
+% Only paths ending at node F
+paths_to_f(X,Y,V) :- #PATHS(edge, "visited=true,target=F").
+
+% Only paths from A to F (all distinct routes)
+paths_a_to_f(X,Y,V) :- #PATHS(edge, "visited=true,all_paths=true,source=A,target=F").
+
+@output("paths_from_a").
+@output("paths_to_f").
+@output("paths_a_to_f").
+```
+
+**`paths_from_a` Output**: All paths originating at A: `(A,B,[A,B]), (A,C,[A,C]), (A,D,[A,B,D]), (A,D,[A,C,D]), (A,E,[A,B,E]), (A,F,[A,B,D,F]), (A,F,[A,C,D,F])` – 7 tuples. All start from A.
+
+**`paths_to_f` Output**: All paths ending at F: `(A,F,[A,B,D,F]), (A,F,[A,C,D,F]), (B,F,[B,D,F]), (C,F,[C,D,F]), (D,F,[D,F])` – 5 tuples. All end at F.
+
+**`paths_a_to_f` Output**: Only paths from A to F: `(A,F,[A,B,D,F]), (A,F,[A,C,D,F])` – 2 tuples. Two distinct routes from A to F.
 
 ### 3  All shortest paths
 ```prolog

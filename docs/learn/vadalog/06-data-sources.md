@@ -1016,6 +1016,104 @@ persons_order_neo4j_test(CustomerId, OrderId) :-
 @output("persons_order_neo4j_test").
 ```
 
+### Querying Neo4j with SQL
+
+You can also use **SQL queries** directly against Neo4j-bound predicates using the `<-` operator. Prometheux automatically translates the SQL into optimized Cypher and pushes it down to the Neo4j server — no data is loaded into memory unnecessarily.
+
+This is useful when you want to preview, paginate, count, or filter Neo4j data using familiar SQL syntax.
+
+#### Reading all nodes
+
+Bind a Neo4j node label and read all its data:
+
+```prolog
+@bind("person_db", "neo4j username='neo4j', password='myPassw', host='neo4j-host', port=7680", "neo4j", "(:Person)").
+
+person_result(Id, Name, Surname, Email) :- person_db(Id, Name, Surname, Email).
+
+@output("person_result").
+```
+
+#### Preview with LIMIT and OFFSET
+
+Paginate through Neo4j data using SQL `LIMIT` and `OFFSET`. These are translated to Cypher `SKIP`/`LIMIT` and pushed down to the Neo4j server:
+
+```prolog
+@bind("person_db", "neo4j username='neo4j', password='myPassw', host='neo4j-host', port=7680", "neo4j", "(:Person)").
+
+% Get the first 10 persons
+person_preview() <- SELECT * FROM person_db LIMIT 10.
+
+@output("person_preview").
+```
+
+```prolog
+@bind("person_db", "neo4j username='neo4j', password='myPassw', host='neo4j-host', port=7680", "neo4j", "(:Person)").
+
+% Get persons 11-20 (page 2 with page size 10)
+person_page_2() <- SELECT * FROM person_db LIMIT 10 OFFSET 10.
+
+@output("person_page_2").
+```
+
+#### Counting records
+
+Use SQL `COUNT(*)` to count nodes or relationships. The count is computed entirely by the Neo4j server:
+
+```prolog
+@bind("person_db", "neo4j username='neo4j', password='myPassw', host='neo4j-host', port=7680", "neo4j", "(:Person)").
+
+person_count(Total) <- SELECT COUNT(*) AS total FROM person_db.
+
+@output("person_count").
+```
+
+#### Querying relationships with SQL
+
+SQL works on relationship patterns as well:
+
+```prolog
+@bind("friend_of_db", "neo4j username='neo4j', password='myPassw', host='neo4j-host', port=7680", "neo4j", "(:Person)-[:FRIEND_OF]->(:Person)").
+
+% Preview the first 5 friendship relationships
+friendship_preview() <- SELECT * FROM friend_of_db LIMIT 5.
+
+@output("friendship_preview").
+```
+
+```prolog
+@bind("friend_of_db", "neo4j username='neo4j', password='myPassw', host='neo4j-host', port=7680", "neo4j", "(:Person)-[:FRIEND_OF]->(:Person)").
+
+% Count the total number of FRIEND_OF relationships
+friendship_count(Total) <- SELECT COUNT(*) AS total FROM friend_of_db.
+
+@output("friendship_count").
+```
+
+#### Combining preview and count
+
+A common pattern is to run both a paginated preview and a count in the same program:
+
+```prolog
+@bind("order_rel", "neo4j username='neo4j', password='myPassw', host='neo4j-host', port=7680", "neo4j", "(:Order)-[IS_RELATED_TO]->(:Person)").
+
+% Preview: first 10 results
+order_preview() <- SELECT * FROM order_rel LIMIT 10 OFFSET 0.
+
+% Count: total number of relationships
+order_count(Total) <- SELECT COUNT(*) AS total FROM order_rel.
+
+@output("order_preview").
+@output("order_count").
+```
+
+:::info How SQL-to-Neo4j translation works
+When you write SQL against a Neo4j `@bind` predicate, Prometheux transparently converts the query:
+- **`SELECT *` with `LIMIT`/`OFFSET`** → The `@bind` pattern is used to generate optimized Cypher with `WITH ... SKIP n LIMIT n RETURN ...`, fully pushed down to Neo4j.
+- **`SELECT COUNT(*)`** and other aggregations → Converted to a Cypher `@qbind` query (e.g., `MATCH (n:Person) RETURN count(n) AS total`) and executed server-side.
+- **No data is loaded into memory** for filtering or pagination — everything is handled by the Neo4j server.
+:::
+
 ## Amazon DynamoDB Database
 Amazon DynamoDB is a fully managed NoSQL database service that provides fast and predictable performance with seamless scalability. Prometheux supports both reading from and writing to DynamoDB tables, with automatic table creation capabilities and support for PartiQL queries.
 

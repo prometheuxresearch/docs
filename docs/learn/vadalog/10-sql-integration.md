@@ -404,13 +404,49 @@ dept_budget() <- SELECT pg_departments_1 as dept_name,
 @output("dept_budget").
 ```
 
+### Example 10: SQL over Neo4j (Graph Database)
+
+SQL queries work seamlessly with Neo4j graph data. Prometheux automatically translates the SQL into optimized Cypher and pushes it down to the Neo4j server — no data is loaded into memory.
+
+```prolog
+@bind("person_db", "neo4j username='neo4j', password='myPassw', host='neo4j-host', port=7680", "neo4j", "(:Person)").
+
+% Preview the first 10 persons with pagination
+person_preview() <- SELECT * FROM person_db LIMIT 10 OFFSET 0.
+
+% Count all Person nodes
+person_count(Total) <- SELECT COUNT(*) AS total FROM person_db.
+
+@output("person_preview").
+@output("person_count").
+```
+
+SQL also works on Neo4j relationship patterns:
+
+```prolog
+@bind("friend_of", "neo4j username='neo4j', password='myPassw', host='neo4j-host', port=7680", "neo4j", "(:Person)-[:FRIEND_OF]->(:Person)").
+
+% Preview with pagination
+friendship_preview() <- SELECT * FROM friend_of LIMIT 5.
+
+% Count relationships
+friendship_count(Total) <- SELECT COUNT(*) AS total FROM friend_of.
+
+@output("friendship_preview").
+@output("friendship_count").
+```
+
+:::tip Neo4j Pushdown
+`SELECT *` with `LIMIT`/`OFFSET` is translated to Cypher `WITH ... SKIP n LIMIT n RETURN ...` and executed server-side. Aggregations like `COUNT(*)` become Cypher `count()` queries. No data is loaded into memory for filtering or pagination.
+:::
+
 ---
 
 ## SQL in Graph Functions
 
 All graph analytics functions (`#TC`, `#ASP`, `#PATHS`, `#CC`, etc.) can accept SQL queries instead of predicate atoms.
 
-### Example 10: Transitive Closure with SQL
+### Example 11: Transitive Closure with SQL
 
 ```prolog
 edge(1, 2).
@@ -426,7 +462,7 @@ tc(X, Y) :- #TC("SELECT edge_0, edge_1 FROM edge").
 **Result:**  
 All reachable pairs including transitive paths (1→2, 2→3, 3→4, 1→3, 2→4, 1→4)
 
-### Example 11: All-Shortest Paths with SQL
+### Example 12: All-Shortest Paths with SQL
 
 ```prolog
 edge(1, 2, 10).
@@ -439,7 +475,7 @@ asp(X, Y, Dist) :- #ASP("SELECT edge_0, edge_1, edge_2 FROM edge").
 @output("asp").
 ```
 
-### Example 12: PATHS Function with SQL and Options
+### Example 13: PATHS Function with SQL and Options
 
 ```prolog
 edge(1, 2).
@@ -454,7 +490,7 @@ paths(X, Y, V) :- #PATHS("SELECT edge_0, edge_1 FROM edge",
 @output("paths").
 ```
 
-### Example 13: Connected Components with SQL
+### Example 14: Connected Components with SQL
 
 ```prolog
 edge(1, 2).
@@ -469,7 +505,7 @@ cc(Node, ComponentId, Component) :- #CC("SELECT edge_0, edge_1 FROM edge",
 @output("cc").
 ```
 
-### Example 14: SQL Function with Filtering and JOIN
+### Example 15: SQL Function with Filtering and JOIN
 
 ```prolog
 @bind("employees", "postgresql", "company_db", "employees").
@@ -482,7 +518,7 @@ tc(X, Y) :- #TC("SELECT name, dept_id
 @output("tc").
 ```
 
-### Example 15: SQL Function from CSV
+### Example 16: SQL Function from CSV
 
 ```prolog
 @bind("ownerships", "csv useHeaders=true", "data", "ownerships.csv").
@@ -730,7 +766,7 @@ SQL integration in Vadalog provides a powerful bridge between declarative logic 
 
 ✅ **Embed SQL `SELECT` statements** directly in rule bodies  
 ✅ **Pass SQL queries** to graph analytics functions  
-✅ **Query across data sources** – PostgreSQL, MariaDB, CSV, facts, and more  
+✅ **Query across data sources** – PostgreSQL, MariaDB, Neo4j, CSV, facts, and more  
 ✅ **Use full SQL expressiveness** – JOINs, aggregations, CTEs, window functions  
 ✅ **Flexible column naming** – use actual column names for same-database queries, or `predicateName_i` for cross-source queries  
 ✅ **Universal backtick notation** – write portable queries with automatic quote conversion  

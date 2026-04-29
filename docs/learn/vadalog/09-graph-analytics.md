@@ -13,9 +13,9 @@ Execution is automatically parallel and distributed.
 A graph algorithm appears as a *function literal* that starts with `#` and lives in a rule body:
 
 ```prolog
-tc_function(X,Y)  :-  #TC(edge).           % transitive closure on edge/2
-paths_function(X,Y) :- #PATHS(edge).       % all paths with default options
-asp_function(X,Y,Z) :-  #ASP(edge).        % all‑shortest paths on weighted edge/3
+tc_function(X,Y)  <-  #TC(edge).           % transitive closure on edge/2
+paths_function(X,Y) <- #PATHS(edge).       % all paths with default options
+asp_function(X,Y,Z) <-  #ASP(edge).        % all‑shortest paths on weighted edge/3
 ```
 
 Variables on the head of the rule with the function receive the algorithm’s results.  
@@ -45,7 +45,7 @@ edge(2,3).
 edge(3,4).
 edge(4,1).
 
-tc_function(X,Y) :- #TC(edge).
+tc_function(X,Y) <- #TC(edge).
 @output("tc_function").
 ```
 **Output**: All reachable pairs including self-loops from cycles: `(1,2), (2,3), (3,4), (4,1), (1,3), (2,4), (3,1), (4,2), (1,4), (2,1), (3,2), (4,3), (1,1), (2,2), (3,3), (4,4)` – 16 tuples total.
@@ -58,22 +58,22 @@ edge(2,3).
 edge(3,1).
 
 % Default behavior (no parameters)
-paths_default(X,Y) :- #PATHS(edge).
+paths_default(X,Y) <- #PATHS(edge).
 
 % Paths with visited nodes tracking (simple paths only)
-paths_visited(X,Y,Visited) :- #PATHS(edge, "visited=true").
+paths_visited(X,Y,Visited) <- #PATHS(edge, "visited=true").
 
 % Paths with self-loops enabled
-paths_with_loops(X,Y) :- #PATHS(edge, "self_loops=true").
+paths_with_loops(X,Y) <- #PATHS(edge, "self_loops=true").
 
 % Paths with max depth limit (only 1 hop)
-paths_depth1(X,Y) :- #PATHS(edge, "max_depth=1").
+paths_depth1(X,Y) <- #PATHS(edge, "max_depth=1").
 
 % Paths with visited tracking and max depth 2
-paths_visited_depth2(X,Y,V) :- #PATHS(edge, "visited=true,max_depth=2").
+paths_visited_depth2(X,Y,V) <- #PATHS(edge, "visited=true,max_depth=2").
 
 % All options specified
-paths_custom(X,Y,V) :- #PATHS(edge, "visited=true,self_loops=false,all_paths=true,max_depth=10").
+paths_custom(X,Y,V) <- #PATHS(edge, "visited=true,self_loops=false,all_paths=true,max_depth=10").
 
 @output("paths_default").
 @output("paths_visited").
@@ -106,13 +106,13 @@ edge("B","E").
 edge("D","F").
 
 % Only paths starting from node A
-paths_from_a(X,Y,V) :- #PATHS(edge, "visited=true,source=A").
+paths_from_a(X,Y,V) <- #PATHS(edge, "visited=true,source=A").
 
 % Only paths ending at node F
-paths_to_f(X,Y,V) :- #PATHS(edge, "visited=true,target=F").
+paths_to_f(X,Y,V) <- #PATHS(edge, "visited=true,target=F").
 
 % Only paths from A to F (all distinct routes)
-paths_a_to_f(X,Y,V) :- #PATHS(edge, "visited=true,all_paths=true,source=A,target=F").
+paths_a_to_f(X,Y,V) <- #PATHS(edge, "visited=true,all_paths=true,source=A,target=F").
 
 @output("paths_from_a").
 @output("paths_to_f").
@@ -132,7 +132,7 @@ edge(2,3,5).
 edge(3,4,6).
 edge(4,1,8).
 
-asp_function(X,Y,Z) :- #ASP(edge).
+asp_function(X,Y,Z) <- #ASP(edge).
 @output("asp_function").
 ```
 
@@ -148,7 +148,7 @@ edge(2,4,1).
 edge(3,4,9).
 
 % Find shortest paths from node 1 to all other nodes
-sssp_from_node1(Target, Distance) :- #SSSP(edge, "source=1").
+sssp_from_node1(Target, Distance) <- #SSSP(edge, "source=1").
 @output("sssp_from_node1").
 ```
 
@@ -170,20 +170,20 @@ edge_raw(2,3).
 edge_raw(4,5).
 
 % Make edges undirected (symmetric)
-edge(X,Y) :- edge_raw(X,Y).
-edge(Y,X) :- edge_raw(X,Y).
+edge(X,Y) <- edge_raw(X,Y).
+edge(Y,X) <- edge_raw(X,Y).
 
 % Default: no sorting, no component ID
-cc_default(X,C) :- #CC(edge).
+cc_default(X,C) <- #CC(edge).
 
 % With sorted components for determinism
-cc_sorted(X,C) :- #CC(edge, "sort_component=true").
+cc_sorted(X,C) <- #CC(edge, "sort_component=true").
 
 % With component ID (minimum node in component)
-cc_with_id(X,ID,C) :- #CC(edge, "component_id=true").
+cc_with_id(X,ID,C) <- #CC(edge, "component_id=true").
 
 % With both sorting and ID for full determinism
-cc_full(X,ID,C) :- #CC(edge, "sort_component=true,component_id=true").
+cc_full(X,ID,C) <- #CC(edge, "sort_component=true,component_id=true").
 
 @output("cc_default").
 @output("cc_sorted").
@@ -207,7 +207,7 @@ edge(2,3).
 edge(3,4).
 edge(4,1).
 
-cc(X,C) :- #CC(edge).
+cc(X,C) <- #CC(edge).
 @output("cc").
 ```
 **Output**: All nodes in one component: `(1, [1,2,3,4]), (2, [1,2,3,4]), (3, [1,2,3,4]), (4, [1,2,3,4])`.
@@ -219,7 +219,7 @@ edge(1,2).
 edge(3,4).
 edge(5,6).
 
-cc(X,C) :- #CC(edge).
+cc(X,C) <- #CC(edge).
 @output("cc").
 ```
 **Output**: Three components: `(1, [1,2]), (3, [3,4]), (5, [5,6])`.
@@ -234,13 +234,13 @@ The component ID (minimum node) is crucial for **deterministic results** in dist
 edge(X,Y).
 
 % Without ID: each partition might output the same component differently
-cc_no_id(X,C) :- #CC(edge).
+cc_no_id(X,C) <- #CC(edge).
 
 % With ID: all partitions agree on component identity (minimum node)
-cc_with_id(X,ID,C) :- #CC(edge, "component_id=true").
+cc_with_id(X,ID,C) <- #CC(edge, "component_id=true").
 
 % Deduplicate by component ID
-unique_components(ID,C) :- cc_with_id(X,ID,C), X = ID.
+unique_components(ID,C) <- cc_with_id(X,ID,C), X = ID.
 
 @output("unique_components").
 ```
@@ -255,14 +255,14 @@ directed_edge(1,2).
 directed_edge(3,4).
 
 % For CC: make the graph undirected by adding symmetric edges
-undirected_edge(X,Y) :- directed_edge(X,Y).
-undirected_edge(X,Y) :- directed_edge(Y,X).
+undirected_edge(X,Y) <- directed_edge(X,Y).
+undirected_edge(X,Y) <- directed_edge(Y,X).
 
 % CC expects undirected (symmetric) edges
-cc_result(X,C) :- #CC(undirected_edge).
+cc_result(X,C) <- #CC(undirected_edge).
 
 % WCC works directly on directed edges (ignores direction)
-wcc_result(X,C) :- #WCC(directed_edge).
+wcc_result(X,C) <- #WCC(directed_edge).
 
 @output("cc_result").
 @output("wcc_result").
@@ -310,7 +310,7 @@ edge_simple(1, 2).
 edge_simple(2, 3).
 
 % Create struct edges by joining nodes with edges
-edge_struct(X, Y) :- 
+edge_struct(X, Y) <- 
     edge_simple(Id1, Id2),
     node(Id1, Name1, Dept1),
     node(Id2, Name2, Dept2),
@@ -318,7 +318,7 @@ edge_struct(X, Y) :-
     Y = struct("id", Id2, "name", Name2, "dept", Dept2).
 
 % Apply TC on struct edges - properties are preserved!
-tc(X, Y) :- #TC(edge_struct).
+tc(X, Y) <- #TC(edge_struct).
 
 @output("tc").
 ```
@@ -348,7 +348,7 @@ knows(1, 2).
 knows(2, 3).
 
 % Create struct edges
-knows_struct(X, Y) :- 
+knows_struct(X, Y) <- 
     knows(Id1, Id2),
     person(Id1, Name1, Age1),
     person(Id2, Name2, Age2),
@@ -356,7 +356,7 @@ knows_struct(X, Y) :-
     Y = struct("id", Id2, "name", Name2, "age", Age2).
 
 % Find all paths with visited nodes (visited nodes are also full structs!)
-paths_with_metadata(X, Y, Visited) :- 
+paths_with_metadata(X, Y, Visited) <- 
     #PATHS(knows_struct, "visited=true").
 
 @output("paths_with_metadata").
@@ -387,7 +387,7 @@ flight(2, 3, 9560.0).  % London to Tokyo: 9560 km
 flight(1, 3, 10850.0). % NYC to Tokyo (direct): 10850 km
 
 % Create weighted struct edges
-flight_struct(X, Y, Dist) :- 
+flight_struct(X, Y, Dist) <- 
     flight(Id1, Id2, Dist),
     city(Id1, Name1, Lat1, Lon1),
     city(Id2, Name2, Lat2, Lon2),
@@ -395,7 +395,7 @@ flight_struct(X, Y, Dist) :-
     Y = struct("id", Id2, "name", Name2, "lat", Lat2, "lon", Lon2).
 
 % Find shortest paths with city metadata preserved
-asp(X, Y, Distance) :- #ASP(flight_struct).
+asp(X, Y, Distance) <- #ASP(flight_struct).
 
 @output("asp").
 ```
@@ -421,15 +421,15 @@ partner_raw(1, 2).
 partner_raw(3, 4).
 
 % Make undirected and create struct edges
-partner(X, Y) :- partner_raw(A, B), company(A, N1, I1), company(B, N2, I2),
+partner(X, Y) <- partner_raw(A, B), company(A, N1, I1), company(B, N2, I2),
                  X = struct("id", A, "name", N1, "industry", I1),
                  Y = struct("id", B, "name", N2, "industry", I2).
-partner(X, Y) :- partner_raw(B, A), company(A, N1, I1), company(B, N2, I2),
+partner(X, Y) <- partner_raw(B, A), company(A, N1, I1), company(B, N2, I2),
                  X = struct("id", A, "name", N1, "industry", I1),
                  Y = struct("id", B, "name", N2, "industry", I2).
 
 % Find components with company metadata and IDs
-cc(Node, ComponentId, Component) :- 
+cc(Node, ComponentId, Component) <- 
     #CC(partner, "component_id=true,sort_component=true").
 
 @output("cc").
@@ -483,13 +483,13 @@ edge("d","h").
 edge("f","g").
 
 % Total degree (in + out, normalized)
-dc_total(N, DC) :- #DC(edge).
+dc_total(N, DC) <- #DC(edge).
 
 % In-degree only (incoming edges)
-dc_in(N, DC) :- #DC(edge, "type=in").
+dc_in(N, DC) <- #DC(edge, "type=in").
 
 % Out-degree only (outgoing edges)
-dc_out(N, DC) :- #DC(edge, "type=out").
+dc_out(N, DC) <- #DC(edge, "type=out").
 
 @output("dc_total").
 @output("dc_in").
@@ -525,10 +525,10 @@ edge(4,5).
 edge(5,6).
 
 % Exact betweenness (all sources)
-bc_exact(N, BC) :- #BC(edge).
+bc_exact(N, BC) <- #BC(edge).
 
 % Approximate betweenness (sample 100 sources for large graphs)
-bc_approx(N, BC) :- #BC(edge, "sample=100").
+bc_approx(N, BC) <- #BC(edge, "sample=100").
 
 @output("bc_exact").
 @output("bc_approx").
@@ -563,13 +563,13 @@ edge(3,4).
 edge(4,1).
 
 % Default PageRank (damping=0.85, tolerance=0.0001)
-pr_default(N, PR) :- #PR(edge).
+pr_default(N, PR) <- #PR(edge).
 
 % Custom damping factor
-pr_custom(N, PR) :- #PR(edge, "damping=0.9").
+pr_custom(N, PR) <- #PR(edge, "damping=0.9").
 
 % High precision
-pr_precise(N, PR) :- #PR(edge, "damping=0.85,tolerance=0.00001").
+pr_precise(N, PR) <- #PR(edge, "damping=0.85,tolerance=0.00001").
 
 @output("pr_default").
 @output("pr_custom").
@@ -601,9 +601,9 @@ edge(3,4).
 edge(1,3).
 
 % Compute all centralities
-dc(N, Score) :- #DC(edge).
-bc(N, Score) :- #BC(edge).
-pr(N, Score) :- #PR(edge).
+dc(N, Score) <- #DC(edge).
+bc(N, Score) <- #BC(edge).
+pr(N, Score) <- #PR(edge).
 
 @output("dc").
 @output("bc").
@@ -622,11 +622,11 @@ edge_short(4,1,1).
 unweighted_edge(1,5).
 unweighted_edge(5,2).
 
-edge(X,Y,Z) :- edge_large(X,Y,Z).
-edge(X,Y,Z) :- edge_short(X,Y,Z).
-edge(X,Y,1) :- unweighted_edge(X,Y). % We assign a default distance = 1
+edge(X,Y,Z) <- edge_large(X,Y,Z).
+edge(X,Y,Z) <- edge_short(X,Y,Z).
+edge(X,Y,1) <- unweighted_edge(X,Y). % We assign a default distance = 1
 
-asp_function(X,Y,Z) :- #ASP(edge).
-max_asp(X,Y,M) :- asp_function(X,Y,Z), M = mmax(Z).
+asp_function(X,Y,Z) <- #ASP(edge).
+max_asp(X,Y,M) <- asp_function(X,Y,Z), M = mmax(Z).
 @output("max_asp").
 ```

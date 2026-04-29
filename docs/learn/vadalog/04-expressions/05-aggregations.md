@@ -28,7 +28,7 @@ value to be used in the incremental computation of the aggregation.
 **Group-by Logic**: 
 - Variables that appear in both the head and body create implicit grouping
 - The aggregation function takes only the expression to aggregate
-- Example: `dept_avg(Dept, Avg) :- employee(_, Dept, Salary), Avg = mavg(Salary).`
+- Example: `dept_avg(Dept, Avg) <- employee(_, Dept, Salary), Avg = mavg(Salary).`
 - Here, `Dept` creates the grouping because it appears in both head and body
 
 Some aggregate functions cannot be used inside a recursive rule because the
@@ -56,14 +56,14 @@ a("two", 6, "g", 70).
 a("two", 2, "d", 40).
 a("two", 3, "d", 40).
 
-ssum(X, Sum) :- a(X, Y, Z, U), Sum = msum(Y).
-pprod(X, Sum) :- a(X, Y, Z, U), Sum = mprod(Y).
-pmin(X, Sum) :- a(X, Y, Z, U), Sum = mmin(Y).
-pmax(X, Sum) :- a(X, Y, Z, U), Sum = mmax(Y).
-ccount(X, Sum) :- a(X, Y, Z, U), Sum = mcount(X).
-ccount_other(X, Sum) :- a(X, Y, Z, U), Sum = mcount(X).
-aavg(X, AVG) :- a(X, Y, Z, U), AVG = mavg(Y).
-mmedian_result(X, Median) :- a(X, Y, Z, U), Median = mmedian(Y, "exact").
+ssum(X, Sum) <- a(X, Y, Z, U), Sum = msum(Y).
+pprod(X, Sum) <- a(X, Y, Z, U), Sum = mprod(Y).
+pmin(X, Sum) <- a(X, Y, Z, U), Sum = mmin(Y).
+pmax(X, Sum) <- a(X, Y, Z, U), Sum = mmax(Y).
+ccount(X, Sum) <- a(X, Y, Z, U), Sum = mcount(X).
+ccount_other(X, Sum) <- a(X, Y, Z, U), Sum = mcount(X).
+aavg(X, AVG) <- a(X, Y, Z, U), AVG = mavg(Y).
+mmedian_result(X, Median) <- a(X, Y, Z, U), Median = mmedian(Y, "exact").
 
 @output("ssum").
 @output("pprod").
@@ -135,7 +135,7 @@ mmedian_result("two", 3.0)
 A rule with an assignment using an aggregation operator has the general form:
 
 ```prolog
-q(K1, …, Kn, J) :- body, J = maggr(x, <C1, …, Cm>)
+q(K1, …, Kn, J) <- body, J = maggr(x, <C1, …, Cm>)
 ```
 
 where:
@@ -190,7 +190,7 @@ s(3.0, "a").
 s(4.0, "b").
 s(3.0, "b").
 
-f(J, Y) :- s(X, Y), J = msum(X).
+f(J, Y) <- s(X, Y), J = msum(X).
 @output("f").
 ```
 
@@ -223,7 +223,7 @@ s(0.5, 3, "a").
 s(0.6, 4, "b").
 s(0.5, 5, "b").
 
-f(J, Z) :- s(X, Y, Z), J = mprod(X,<Y>).
+f(J, Z) <- s(X, Y, Z), J = mprod(X,<Y>).
 @output("f").
 ```
 
@@ -260,8 +260,8 @@ edge(3,2).
 edge(5,2).
 edge(3,1).
 edge(2,5).
-indegree(Y, J) :- edge(X, Y), J = msum(1, <X>).
-found(X) :- indegree(X, J), J > 2.
+indegree(Y, J) <- edge(X, Y), J = msum(1, <X>).
+found(X) <- indegree(X, J), J > 2.
 @output("found").
 ```
 
@@ -287,7 +287,7 @@ s(3.0, "a").
 s(4.0, "b").
 s(3.0, "b").
 
-f(J, Y) :- s(X, Y), J = msum(X).
+f(J, Y) <- s(X, Y), J = msum(X).
 @output("f").
 @post("f", "mmax(1)").
 ```
@@ -302,7 +302,7 @@ b(1, 2).
 b(1, 3).
 b(2, 5).
 b(2, 7).
-h(X, Z) :- b(X, Y), Z = mmax(Y), X > 0.
+h(X, Z) <- b(X, Y), Z = mmax(Y), X > 0.
 
 @output("h").
 ```
@@ -326,8 +326,8 @@ b(1, 3).
 b(2, 5).
 b(2, 7).
 
-b_msum(X, Z):- b(X, Y), Z = msum(Y).
-b_sum(X, Z) :- b_msum(X, Y), Z = mmax(Y).
+b_msum(X, Z) <- b(X, Y), Z = msum(Y).
+b_sum(X, Z) <- b_msum(X, Y), Z = mmax(Y).
 
 @output("b_sum").
 ```
@@ -350,7 +350,7 @@ b(1, 3).
 b(2, 5).
 b(2, 7).
 b(2, 9).
-h(X, Z) :- b(X, Y), Z = mcount(Y), X > 0.
+h(X, Z) <- b(X, Y), Z = mcount(Y), X > 0.
 
 @output("h").
 ```
@@ -369,7 +369,7 @@ c(15552,"Name").
 c(15552,"Synonym").
 c(15552,"Alternative").
 
-synonyms(Id, NewSynonyms) :- c(Id,Synonym), NewSynonyms = munion({}|Synonym).
+synonyms(Id, NewSynonyms) <- c(Id,Synonym), NewSynonyms = munion({}|Synonym).
 ```
 
 ## Median Aggregation
@@ -408,17 +408,17 @@ mark("Bob", "Math", 75.0).
 mark("Bob", "Math", 72.0).
 
 % Exact median by student
-median_exact(Student, Median) :- 
+median_exact(Student, Median) <- 
     mark(Student, _, Score), 
     Median = mmedian(Score, "exact").
 
 % Approximate median using P² algorithm
-median_approx(Student, Median) :- 
+median_approx(Student, Median) <- 
     mark(Student, _, Score), 
     Median = mmedian(Score, "p2_algorithm").
 
 % Approximate median using reservoir sampling
-median_reservoir(Student, Median) :- 
+median_reservoir(Student, Median) <- 
     mark(Student, _, Score), 
     Median = mmedian(Score, "reservoir_sampling").
 
@@ -445,12 +445,12 @@ salary("Engineering", "Charlie", 82000).
 salary("Engineering", "CEO", 500000).  % Outlier
 
 % Average is affected by outliers
-avg_salary(Dept, Avg) :- 
+avg_salary(Dept, Avg) <- 
     salary(Dept, _, Amount), 
     Avg = mavg(Amount).
 
 % Median is robust to outliers
-median_salary(Dept, Median) :- 
+median_salary(Dept, Median) <- 
     salary(Dept, _, Amount), 
     Median = mmedian(Amount, "exact").
 
@@ -494,7 +494,7 @@ affects("Component4","Component2").
 affects("Component5","Component1").
 affects("Component2","Component1").
 affects("Component6","Component7").
-hotspot(Component2,MaxCount) :- affects(Component1,Component2), MaxCount=maxcount().
+hotspot(Component2,MaxCount) <- affects(Component1,Component2), MaxCount=maxcount().
 ```
 
 The expected output is

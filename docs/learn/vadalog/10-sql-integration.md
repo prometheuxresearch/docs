@@ -10,7 +10,7 @@ Prometheux supports **native SQL queries** embedded directly within Vadalog rule
 
 - **Leverage existing SQL skills** – write familiar SQL SELECT statements alongside Vadalog rules
 - **Use SQL's expressive power** – complex JOINs, aggregations, window functions, and CTEs
-- **Query across data sources** – seamlessly combine PostgreSQL, MariaDB, CSV files, and in-memory facts in a single SQL query
+- **Query across data sources** – seamlessly combine PostgreSQL, MariaDB, Neo4j, COBOL mainframe files, CSV, and in-memory facts in a single SQL query
 - **Scale to large datasets** – benefit from distributed query execution for large-scale data processing
 - **Simplify data transformation** – use SQL for data manipulation while keeping Vadalog for logical reasoning
 
@@ -20,17 +20,16 @@ Prometheux automatically parallelizes and optimizes SQL queries across distribut
 
 ## Two Ways to Use SQL
 
-### 1. SQL in Rule Bodies (Simple Approach)
+### 1. SQL in Rule Bodies
 
-You can replace the traditional Vadalog body with a SQL `SELECT` statement using the `<-` operator:
+When a rule body starts with a `SELECT` or `WITH` keyword, it is interpreted as a SQL query:
 
 ```prolog
 result_predicate() <- SELECT column1, column2 FROM table WHERE condition.
 ```
 
 **Syntax:**
-- Use `<-` instead of `:-` to indicate a SQL body
-- The SQL query starts with `SELECT` and ends with `.` (the rule terminator)
+- The SQL query starts with `SELECT` (or `WITH` for CTEs) and ends with `.` (the rule terminator)
 - **No arguments needed in the head** – the output schema is defined by the SELECT clause
 
 **Simple Example:**
@@ -40,7 +39,7 @@ person("Alice", 25).
 person("Bob", 30).
 person("Charlie", 20).
 
-% SQL rule - empty parentheses in head
+% Rule with SQL body - empty parentheses in head
 adults() <- SELECT person_0 as name, person_1 as age 
             FROM person 
             WHERE person_1 >= 25.
@@ -83,10 +82,10 @@ edge(2, 3).
 edge(3, 4).
 
 % Traditional approach - pass predicate atom
-tc_traditional(X, Y) :- #TC(edge).
+tc_traditional(X, Y) <- #TC(edge).
 
 % SQL approach - pass SQL query as string
-tc_sql(X, Y) :- #TC("SELECT edge_0, edge_1 FROM edge WHERE edge_0 < 3").
+tc_sql(X, Y) <- #TC("SELECT edge_0, edge_1 FROM edge WHERE edge_0 < 3").
 
 @output("tc_sql").
 ```
@@ -454,7 +453,7 @@ edge(2, 3).
 edge(3, 4).
 
 % Compute transitive closure using SQL
-tc(X, Y) :- #TC("SELECT edge_0, edge_1 FROM edge").
+tc(X, Y) <- #TC("SELECT edge_0, edge_1 FROM edge").
 
 @output("tc").
 ```
@@ -470,7 +469,7 @@ edge(2, 3, 20).
 edge(3, 4, 15).
 
 % Compute shortest paths using SQL
-asp(X, Y, Dist) :- #ASP("SELECT edge_0, edge_1, edge_2 FROM edge").
+asp(X, Y, Dist) <- #ASP("SELECT edge_0, edge_1, edge_2 FROM edge").
 
 @output("asp").
 ```
@@ -484,7 +483,7 @@ edge(3, 4).
 edge(4, 5).
 
 % Compute paths with max depth using SQL
-paths(X, Y, V) :- #PATHS("SELECT edge_0, edge_1 FROM edge", 
+paths(X, Y, V) <- #PATHS("SELECT edge_0, edge_1 FROM edge", 
                          "visited=true,max_depth=2").
 
 @output("paths").
@@ -499,7 +498,7 @@ edge(3, 4).
 edge(4, 3).
 
 % Find connected components using SQL
-cc(Node, ComponentId, Component) :- #CC("SELECT edge_0, edge_1 FROM edge", 
+cc(Node, ComponentId, Component) <- #CC("SELECT edge_0, edge_1 FROM edge", 
                                          "component_id=true").
 
 @output("cc").
@@ -511,7 +510,7 @@ cc(Node, ComponentId, Component) :- #CC("SELECT edge_0, edge_1 FROM edge",
 @bind("employees", "postgresql", "company_db", "employees").
 
 % Transitive closure over filtered PostgreSQL data
-tc(X, Y) :- #TC("SELECT name, dept_id 
+tc(X, Y) <- #TC("SELECT name, dept_id 
                  FROM employees 
                  WHERE dept_id IS NOT NULL").
 
@@ -524,7 +523,7 @@ tc(X, Y) :- #TC("SELECT name, dept_id
 @bind("ownerships", "csv useHeaders=true", "data", "ownerships.csv").
 
 % Compute transitive closure of ownership relationships
-tc(Company1, Company2) :- #TC("SELECT companyfrom, companyto 
+tc(Company1, Company2) <- #TC("SELECT companyfrom, companyto 
                                FROM ownerships 
                                WHERE ownership_pct > 25").
 
@@ -542,15 +541,15 @@ You can freely mix SQL-based rules with traditional Vadalog rules:
 ```prolog
 @bind("employees", "csv useHeaders=true", "data", "employees.csv").
 
-% SQL rule
+% Rule with SQL body
 high_earners() <- SELECT name, salary 
                   FROM employees 
                   WHERE salary > 100000.
 
-% Traditional Vadalog rule using SQL rule result
-very_high_earner(Name) :- high_earners(Name, Salary), Salary > 150000.
+% Rule with Vadalog body using the SQL-derived predicate
+very_high_earner(Name) <- high_earners(Name, Salary), Salary > 150000.
 
-% Another SQL rule referencing Vadalog-derived predicate
+% Another rule with SQL body referencing Vadalog-derived predicate
 top_earners() <- SELECT high_earners_0, high_earners_1 
                  FROM high_earners 
                  ORDER BY high_earners_1 DESC 
@@ -700,7 +699,7 @@ You can filter data directly within SQL queries passed to graph functions:
 
 ```prolog
 % Filter edges with SQL before computing transitive closure
-filtered_tc(X, Y) :- #TC("SELECT edge_0, edge_1 
+filtered_tc(X, Y) <- #TC("SELECT edge_0, edge_1 
                           FROM edge 
                           WHERE weight > 100").
 ```

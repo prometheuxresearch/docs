@@ -39,7 +39,7 @@ project(1,"Mark").
 project(2,"Ruth").
 project(3,"Jane").
 
-safeProjects(X,P) :- project(X,P), not contractor(P).
+safeProjects(X,P) <- project(X,P), not contractor(P).
 
 @output("safeProjects").
 ```
@@ -68,8 +68,8 @@ b(4, 2).
 b(2, 2).
 c(2).
 
-f(X, Y) :- s(X, Y), not b(Y, Z).
-f(Y, X) :- f(X, Y), not b(X, Z).
+f(X, Y) <- s(X, Y), not b(Y, Z).
+f(Y, X) <- f(X, Y), not b(X, Z).
 
 @output("f").
 ```

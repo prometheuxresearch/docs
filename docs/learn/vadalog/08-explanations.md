@@ -39,8 +39,8 @@ The explanation output has three fields:
 edge(1, 2).
 edge(2, 3).
 edge(3, 4).
-tc(X, Y) :- edge(X, Y).
-tc(X, Z) :- tc(X, Y), edge(Y, Z).
+tc(X, Y) <- edge(X, Y).
+tc(X, Z) <- tc(X, Y), edge(Y, Z).
 @output("tc").
 @explain("console").
 ```
@@ -108,7 +108,7 @@ since there is an edge from 1 to 2, then there is a transitive closure from 1 to
 ### Example 1: Linear Rule Explanation without Model Annotations
 ```prolog
 b(1).
-a(X) :- b(X).
+a(X) <- b(X).
 @output("a").
 @explain("console").
 ```
@@ -125,7 +125,7 @@ since b(1), then a(1).
 @model("employee", "['Name:string']", " [Name] is an employee").
 employee("Alice").
 @model("manager", "['Name:string']", "[Name] is manager").
-manager(X) :- employee(X).
+manager(X) <- employee(X).
 @output("manager").
 @explain("console").
 ```
@@ -145,7 +145,7 @@ developer("Bob").
 project("ProjectX").
 project("ProjectY").
 
-works_on(X, Y) :- developer(X), project(Y).
+works_on(X, Y) <- developer(X), project(Y).
 @model("works_on", "['Project:string']", "[X] works on project [Y]").
 @output("works_on").
 @explain("console").
@@ -172,8 +172,8 @@ To explain specific predicates not in `@output`, use the `predicates='predicate1
 edge(1, 2).
 edge(2, 3).
 edge(3, 4).
-tc(X, Y) :- edge(X, Y).
-tc(X, Z) :- tc(X, Y), edge(Y, Z).
+tc(X, Y) <- edge(X, Y).
+tc(X, Z) <- tc(X, Y), edge(Y, Z).
 @output("tc").
 @chase("csv", "datasets", "chase_results").
 ```
@@ -184,7 +184,7 @@ tc(X, Z) :- tc(X, Y), edge(Y, Z).
 @bind("chase_results", "csv useHeaders=true", "datasets", "chase_results").
 @model("tc", "['From:string', 'To:string']", "there is a transitive closure from [From] to [To]").
 @model("edge", "['From:string', 'To:string']", "there is an edge from [From] to [To]").
-my_explanation(Fact, ProvenanceLeft, ProvenanceRight, RuleDescription) :- 
+my_explanation(Fact, ProvenanceLeft, ProvenanceRight, RuleDescription) <- 
     chase_results(Fact, ProvenanceLeft, ProvenanceRight, RuleDescription).
 @output("my_explanation").
 @explain("console chase=false, predicates='tc'").
@@ -215,8 +215,8 @@ Prometheu will generate comprehensive explanations that cover derivations across
 edge(1, 2).
 edge(2, 3).
 edge(3, 4).
-tc(X, Y) :- edge(X, Y).
-tc(X, Z) :- tc(X, Y), edge(Y, Z).
+tc(X, Y) <- edge(X, Y).
+tc(X, Z) <- tc(X, Y), edge(Y, Z).
 @output("tc").
 @bind("tc", "csv", "path/to/datasets", "tc").
 @chase("csv saveMode=append", "path/to/datasets", "chase").
@@ -229,8 +229,8 @@ arc(1, 2).
 arc(2, 3).
 arc(3, 4).
 @bind("tc", "csv", "path/to/datasets", "tc").
-path(X, Y) :- tc(X, Y).
-path(X, Z) :- path(X, Y), arc(Y, Z).
+path(X, Y) <- tc(X, Y).
+path(X, Z) <- path(X, Y), arc(Y, Z).
 @output("path").
 @chase("csv saveMode=append", "path/to/datasets", "chase").
 ```
@@ -243,7 +243,7 @@ path(X, Z) :- path(X, Y), arc(Y, Z).
 @model("path", "['From:string', 'To:string']", "There is a path from [From] to [To]").
 @model("tc", "['From:string', 'To:string']", "There is a transitive closure from [From] to [To]").
 @bind("chase", "csv useHeaders=true", "path/to/datasets", "chase").
-explain(Fact, ProvenanceLeft, ProvenanceRight, RuleDescription) :- 
+explain(Fact, ProvenanceLeft, ProvenanceRight, RuleDescription) <- 
     chase(Fact, ProvenanceLeft, ProvenanceRight, RuleDescription).
 @output("explain").
 @explain("console chase=false, predicates='path,tc'").

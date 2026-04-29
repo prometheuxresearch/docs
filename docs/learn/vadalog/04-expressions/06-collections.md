@@ -17,7 +17,7 @@ collections:size(arr: array<any>) → int
 
 **Example:**
 ```prolog
-skilled_employees(Name, SkillCount) :- 
+skilled_employees(Name, SkillCount) <- 
     employee(Name, Skills), 
     SkillCount = collections:size(Skills), 
     SkillCount > 3.
@@ -33,7 +33,7 @@ collections:is_empty(arr: array<any>) → boolean
 **Example:**
 ```prolog
 % Find all records with empty lists using implicit boolean condition
-emptyList(ID) :- 
+emptyList(ID) <- 
     data(ID, List), 
     collections:is_empty(List).
 ```
@@ -47,7 +47,7 @@ collections:contains(arr: array<any>, value: any) → boolean
 
 **Example:**
 ```prolog
-java_developers(Name) :- 
+java_developers(Name) <- 
     employee(Name, Skills), 
     HasJava = collections:contains(Skills, "Java"), 
     HasJava == #T.
@@ -62,7 +62,7 @@ collections:contains_all(arr: array<any>, subset: array<any>) → boolean
 
 **Example:**
 ```prolog
-qualified_candidates(Name) :- 
+qualified_candidates(Name) <- 
     candidate(Name, Skills), 
     RequiredSkills = ["Java", "Python"], 
     HasAll = collections:contains_all(Skills, RequiredSkills), 
@@ -78,7 +78,7 @@ collections:add(arr: array<T>, elem: T) → array<T>
 
 **Example:**
 ```prolog
-add_skill(Name, Skills, UpdatedSkills) :- 
+add_skill(Name, Skills, UpdatedSkills) <- 
     employee(Name, Skills), 
     UpdatedSkills = collections:add(Skills, "Leadership").
 ```
@@ -92,7 +92,7 @@ collections:remove(arr: array<T>, elem: T) → array<T>
 
 **Example:**
 ```prolog
-cleaned(Result) :- 
+cleaned(Result) <- 
     data([1, 2, 3, 2, 4]), 
     Result = collections:remove([1, 2, 3, 2, 4], 2).
 % Result: [1, 3, 4]
@@ -107,7 +107,7 @@ collections:get(arr: array<T>, index: int) → T
 
 **Example:**
 ```prolog
-first_skill(Name, FirstSkill) :- 
+first_skill(Name, FirstSkill) <- 
     employee(Name, Skills), 
     FirstSkill = collections:get(Skills, 1).
 ```
@@ -125,7 +125,7 @@ collections:union(a: array<T>, b: array<T>) → array<T>
 
 **Example:**
 ```prolog
-combined_skills(Dept, AllSkills) :- 
+combined_skills(Dept, AllSkills) <- 
     dept_skills(Dept, Skills1), 
     other_dept_skills(Dept, Skills2), 
     AllSkills = collections:union(Skills1, Skills2).
@@ -140,7 +140,7 @@ collections:difference(a: array<T>, b: array<T>) → array<T>
 
 **Example:**
 ```prolog
-unique_skills(Name, UniqueSkills) :- 
+unique_skills(Name, UniqueSkills) <- 
     employee(Name, Skills), 
     common_skills(CommonSkills), 
     UniqueSkills = collections:difference(Skills, CommonSkills).
@@ -155,7 +155,7 @@ collections:intersection(a: array<T>, b: array<T>) → array<T>
 
 **Example:**
 ```prolog
-shared_skills(Name1, Name2, SharedSkills) :- 
+shared_skills(Name1, Name2, SharedSkills) <- 
     employee(Name1, Skills1), 
     employee(Name2, Skills2), 
     SharedSkills = collections:intersection(Skills1, Skills2).
@@ -180,20 +180,20 @@ The optional second parameter specifies the sort order:
 **Examples:**
 ```prolog
 % Sort in ascending order (default)
-sorted_asc(Name, SortedScores) :- 
+sorted_asc(Name, SortedScores) <- 
     test_scores(Name, Scores), 
     SortedScores = collections:sort(Scores).
 
 % Sort numbers in ascending order
 data([3, 1, 4, 2]).
-sorted_desc(Result) :- 
+sorted_desc(Result) <- 
     data(List), 
     Result = collections:sort(List, "asc").
 % Result: [1, 2, 3, 4]
 
 % Sort strings in descending order
 fruits(["mango", "apple", "zebra", "banana"]).
-sorted_strings(Result) :- 
+sorted_strings(Result) <- 
     fruits(List), 
     Result = collections:sort(List, "desc").
 % Result: ["zebra", "mango", "banana", "apple"]
@@ -208,7 +208,7 @@ collections:distinct(arr: array<T>) → array<T>
 
 **Example:**
 ```prolog
-unique_categories(Product, UniqueCategories) :- 
+unique_categories(Product, UniqueCategories) <- 
     product_tags(Product, Tags), 
     UniqueCategories = collections:distinct(Tags).
 ```
@@ -222,7 +222,7 @@ collections:remove_nulls(arr: array<T>) → array<T>
 
 **Example:**
 ```prolog
-clean_data(Name, CleanedValues) :- 
+clean_data(Name, CleanedValues) <- 
     data_with_nulls(Name, Values), 
     CleanedValues = collections:remove_nulls(Values).
 ```
@@ -236,7 +236,7 @@ collections:shuffle(arr: array<T>) → array<T>
 
 **Example:**
 ```prolog
-randomized_questions(Quiz, RandomOrder) :- 
+randomized_questions(Quiz, RandomOrder) <- 
     quiz_questions(Quiz, Questions), 
     RandomOrder = collections:shuffle(Questions).
 ```
@@ -254,7 +254,7 @@ collections:explode(arr: array<T>) → T
 
 **Example:**
 ```prolog
-exploded(Element) :- 
+exploded(Element) <- 
     fruits(["apple", "banana", "cherry"]), 
     Element = collections:explode(["apple", "banana", "cherry"]).
 % Results in 3 rows: "apple", "banana", "cherry"
@@ -270,7 +270,7 @@ collections:flatten(arr: array<T>) → T
 **Example:**
 ```prolog
 nested_elements([[1, 2], [3, 4]])
-flattened(Element) :- 
+flattened(Element) <- 
     nested_elements(X), 
     Element = collections:flatten(X).
 % Results in a single array: [1, 2, 3, 4]
@@ -285,7 +285,7 @@ collections:slice(arr: array<T>, start: int, length: int) → array<T>
 
 **Example:**
 ```prolog
-slice_example(Result) :- 
+slice_example(Result) <- 
     fruits(["apple", "banana", "cherry", "date", "elderberry"]), 
     Result = collections:slice(["apple", "banana", "cherry", "date", "elderberry"], 2, 3).
 % Result: ["banana", "cherry", "date"]
@@ -300,7 +300,7 @@ collections:sub_array(arr: array<T>, length: int) → array<T>
 
 **Example:**
 ```prolog
-top_three(List, TopThree) :- 
+top_three(List, TopThree) <- 
     ranked_items(List), 
     TopThree = collections:sub_array(List, 3).
 ```
@@ -315,13 +315,13 @@ collections:transform(arr: array<T>, lambdaSql: string) → array<any>
 **Examples:**
 ```prolog
 % Add 1 to each element
-increment_all(Transformed) :- 
+increment_all(Transformed) <- 
     input([1, 2, 3]), 
     Transformed = collections:transform([1, 2, 3], "x -> x + 1").
 % Result: [2, 3, 4]
 
 % Transform with index (element + index)
-with_index(Transformed) :- 
+with_index(Transformed) <- 
     input([1, 2, 3]), 
     Transformed = collections:transform([1, 2, 3], "(x, i) -> x + i").
 % Result: [1, 3, 5]
@@ -337,13 +337,13 @@ collections:filter(arr: array<T>, lambdaSql: string) → array<T>
 **Examples:**
 ```prolog
 % Filter elements greater than 2
-filter_large(Filtered) :- 
+filter_large(Filtered) <- 
     input([1, 2, 3, 4]), 
     Filtered = collections:filter([1, 2, 3, 4], "x -> x > 2").
 % Result: [3, 4]
 
 % Filter with index (keep elements at odd indices)
-filter_odd_indices(Filtered) :- 
+filter_odd_indices(Filtered) <- 
     input([10, 20, 30, 40]), 
     Filtered = collections:filter([10, 20, 30, 40], "(x, i) -> i % 2 != 0").
 % Result: [20, 40]
@@ -362,7 +362,7 @@ collections:map(k1: K, v1: V, k2: K, v2: V, …) → map<K,V>
 
 **Example:**
 ```prolog
-user_metadata(UserID, Metadata) :- 
+user_metadata(UserID, Metadata) <- 
     user(UserID, Name, Age), 
     Metadata = collections:map("name", Name, "age", Age, "id", UserID).
 ```

@@ -122,7 +122,7 @@ Configure input tables using Unity Catalog three-level namespace:
 @bind("orders", "databricks", "sales_catalog.transactions_schema", "orders").
 
 % Vadalog rule using Unity Catalog data
-customer_orders(CustomerName, OrderId, OrderDate, Amount) :- 
+customer_orders(CustomerName, OrderId, OrderDate, Amount) <- 
     customers(CustomerId, CustomerName, Email),
     orders(OrderId, CustomerId, OrderDate, Amount).
 
@@ -145,10 +145,10 @@ val outputTable = "all_shortest_paths_routes"
 
 val program = s"""
   @bind("air_routes","databricks inCluster=true","","prometheux_workspace.default.$tableName").
-  edge(From, To, Dist) :- 
+  edge(From, To, Dist) <- 
     air_routes(Id, From, To,Label,Dist).
 
-  all_shortest_paths_routes(From,To,Distance) :- #ASP(edge).
+  all_shortest_paths_routes(From,To,Distance) <- #ASP(edge).
   
   @output("all_shortest_paths_routes"). 
   @bind("all_shortest_paths_routes","databricks inCluster=true","","$outputTable").
@@ -193,7 +193,7 @@ CREATE TABLE prometheux_workspace.default.air_routes_edges (
 val preprocessProgram = s"""
   @bind("raw_routes","databricks inCluster=true","","raw_flight_data").
   
-  clean_routes(From, To, Distance) :- 
+  clean_routes(From, To, Distance) <- 
     raw_routes(_, From, To, _, Distance),
     Distance > 0.
   
@@ -205,8 +205,8 @@ val preprocessProgram = s"""
 val analysisProgram = s"""
   @bind("routes","databricks inCluster=true","","clean_air_routes").
   
-  edge(From, To, Dist) :- routes(From, To, Dist).
-  shortest_path(From, To, MinDist) :- #ASP(edge).
+  edge(From, To, Dist) <- routes(From, To, Dist).
+  shortest_path(From, To, MinDist) <- #ASP(edge).
   
   @output("shortest_path").
   @bind("shortest_path","databricks inCluster=true","","flight_shortest_paths").

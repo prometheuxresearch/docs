@@ -110,7 +110,7 @@ curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/data/infe
 
 ```json
 {
-  "data": "@bind(\"customers\", \"postgresql\", ...).\ncustomers(Id, Name, Email) :- ...",
+  "data": "@bind(\"customers\", \"postgresql\", ...).\ncustomers(Id, Name, Email) <- ...",
   "message": "Schema inferred successfully",
   "status": "success"
 }

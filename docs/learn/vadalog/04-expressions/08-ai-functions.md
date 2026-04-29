@@ -21,7 +21,7 @@ embeddings:cosine_sim(left: array<double>, right: array<double>) → double
 **Example:**
 ```prolog
 % Generate embeddings for similarity analysis
-customer_similarity(Name1, Name2, Similarity) :- 
+customer_similarity(Name1, Name2, Similarity) <- 
     customer(Name1, Info1), 
     customer(Name2, Info2), 
     Vec1 = embeddings:vectorize(Name1, Info1), 
@@ -75,12 +75,12 @@ llm:generate(prompt: string, options: string, arg1: any, arg2: any, ...) → typ
 **Simplest usage (defaults to string output):**
 ```prolog
 % Ask a question with default string output
-answer(Q, A) :- 
+answer(Q, A) <- 
     question(Q), 
     A = llm:generate(Q).
 
 % Generate description with variable interpolation
-product_summary(Name, Price, Summary) :- 
+product_summary(Name, Price, Summary) <- 
     product(Name, Price), 
     Summary = llm:generate("Describe ${Name} priced at ${Price}").
 ```
@@ -88,27 +88,27 @@ product_summary(Name, Price, Summary) :-
 **Using options:**
 ```prolog
 % Specify output type only
-count(Data, Num) :- 
+count(Data, Num) <- 
     data(Data), 
     Num = llm:generate("Count items in: ${Data}", "output_type=int").
 
 % Specify model selection only (defaults to string)
-fast_answer(Q, A) :- 
+fast_answer(Q, A) <- 
     question(Q), 
     A = llm:generate(Q, "selected_models=gpt-4o-mini").
 
 % Combine both options
-analysis(Data, Result) :- 
+analysis(Data, Result) <- 
     data(Data), 
     Result = llm:generate("Analyze: ${Data}", "output_type=boolean,selected_models=gpt-4o").
 
 % Use multiple models for load balancing
-balanced_query(Q, A) :- 
+balanced_query(Q, A) <- 
     question(Q), 
     A = llm:generate(Q, "selected_models=gpt-4o;gpt-4o-mini;gpt-4.1").
 
 % Skip options entirely and pass data args directly (defaults to string, all models)
-description(Name, Age, Desc) :- 
+description(Name, Age, Desc) <- 
     person(Name, Age), 
     Desc = llm:generate("Describe {arg_1} aged {arg_2}", Name, Age).
 ```
@@ -116,7 +116,7 @@ description(Name, Age, Desc) :-
 **Using positional arguments with options format:**
 ```prolog
 % Generate with arg_1, arg_2 placeholders and explicit output types
-diagnose_with_args(PatientID, HasDiagnosis, Explanation) :- 
+diagnose_with_args(PatientID, HasDiagnosis, Explanation) <- 
     clinical_notes(PatientID, Notes), 
     HasDiagnosis = llm:generate(
         "Review the clinical notes for patient ${arg_1}: ${arg_2}. Determine if there is a diagnosis.",
@@ -135,14 +135,14 @@ diagnose_with_args(PatientID, HasDiagnosis, Explanation) :-
 **Multiple output types:**
 ```prolog
 % String output for descriptions (default)
-product_description(Product, Description) :- 
+product_description(Product, Description) <- 
     product(Product, Features, Price), 
     Description = llm:generate(
         "Create a marketing description for ${Product} with features ${Features} priced at ${Price}"
     ).
 
 % Boolean output for classification
-is_positive_feedback(FeedbackID, IsPositive) :- 
+is_positive_feedback(FeedbackID, IsPositive) <- 
     feedback(FeedbackID, Text), 
     IsPositive = llm:generate(
         "Is this feedback positive? ${Text}",
@@ -153,7 +153,7 @@ is_positive_feedback(FeedbackID, IsPositive) :-
 **Model selection for load balancing and quality control:**
 ```prolog
 % Use only gpt-4o models for critical analysis (comma-separated options)
-critical_analysis(PatientID, Diagnosis) :- 
+critical_analysis(PatientID, Diagnosis) <- 
     patient(PatientID, Symptoms), 
     Diagnosis = llm:generate(
         "Based on symptoms ${arg_1}, provide a preliminary diagnosis.",
@@ -162,7 +162,7 @@ critical_analysis(PatientID, Diagnosis) :-
     ).
 
 % Use fast models only (defaults to string output)
-quick_category(Doc, Category) :- 
+quick_category(Doc, Category) <- 
     document(Doc, Text), 
     Category = llm:generate(
         "Classify this document into one category: ${Text}",
@@ -170,7 +170,7 @@ quick_category(Doc, Category) :-
     ).
 
 % Specify both output type and models explicitly
-urgent_check(Text, IsUrgent) :- 
+urgent_check(Text, IsUrgent) <- 
     feedback(Text), 
     IsUrgent = llm:generate(
         "Is this urgent? ${Text}",
@@ -178,7 +178,7 @@ urgent_check(Text, IsUrgent) :-
     ).
 
 % Balance across multiple model types with data arguments
-balanced_processing(Item, Result) :- 
+balanced_processing(Item, Result) <- 
     items(Item, Data), 
     Result = llm:generate(
         "Process this item: ${arg_1}",
@@ -187,7 +187,7 @@ balanced_processing(Item, Result) :-
     ).
 
 % Large-scale processing with many model types
-large_scale(Data, Analysis) :- 
+large_scale(Data, Analysis) <- 
     dataset(Data), 
     Analysis = llm:generate(
         "Analyze: ${Data}",
@@ -242,11 +242,11 @@ By default, `#LLM` uses all configured LLM endpoints. Use `selected_models` to f
 
 ```prolog
 % Use only gpt-4o endpoints (skip slower/experimental models)
-answer(Q, A) :- 
+answer(Q, A) <- 
     #LLM(question, "prompt=Answer: {arg_1},selected_models=gpt-4o").
 
 % Use multiple model types
-fast_analysis(Q, A) :- 
+fast_analysis(Q, A) <- 
     #LLM(question, "prompt=Analyze: {arg_1},selected_models=gpt-4o;gpt-4o-mini").
 ```
 
@@ -275,7 +275,7 @@ Process customer feedback with automatic output type (defaults to `string`):
 
 ```prolog
 % Classify customer sentiment
-sentiment_analysis(FeedbackID, Text, Sentiment) :- 
+sentiment_analysis(FeedbackID, Text, Sentiment) <- 
     #LLM(feedback, "prompt=Classify the sentiment of this feedback as positive, neutral, or negative: {arg_2}").
 
 % Usage with input data:
@@ -295,7 +295,7 @@ Generate multiple insights with type-specific outputs:
 
 ```prolog
 % Analyze product reviews with multiple outputs
-review_analysis(ProductID, Review, Sentiment, Rating, Keywords) :- 
+review_analysis(ProductID, Review, Sentiment, Rating, Keywords) <- 
     #LLM(reviews, 
         "prompt_1=What is the sentiment: {arg_2}?,
          prompt_2=Rate this review from 1-10 (just the number): {arg_2},
@@ -323,7 +323,7 @@ Reorder output columns to match your head predicate:
 
 ```prolog
 % Place LLM results before input columns
-enriched_data(Summary, OriginalText, WordCount) :- 
+enriched_data(Summary, OriginalText, WordCount) <- 
     #LLM(documents, 
         "prompt_1=Summarize in one sentence: {arg_1},
          prompt_2=Count words in: {arg_1} (answer with just the number),
@@ -348,7 +348,7 @@ Use compact `prompts` format when all outputs share the same type:
 
 ```prolog
 % Multiple text analyses with single output_type
-text_processing(Text, Translation, Paraphrase, Summary) :- 
+text_processing(Text, Translation, Paraphrase, Summary) <- 
     #LLM(sentences, 
         "prompts=prompt_1:Translate to French: {arg_1};
                  prompt_2:Paraphrase this: {arg_1};
@@ -371,21 +371,21 @@ Choose specific models based on your quality, speed, and cost requirements:
 
 ```prolog
 % High-quality analysis: Use only gpt-4o
-detailed_analysis(Doc, Analysis) :- 
+detailed_analysis(Doc, Analysis) <- 
     #LLM(documents, 
         "prompt=Provide a detailed analysis of: {arg_1},
          output_type=string,
          selected_models=gpt-4o").
 
 % Fast classification: Use faster models for simple tasks
-quick_category(Text, Category) :- 
+quick_category(Text, Category) <- 
     #LLM(items, 
         "prompt=Classify this into one category: {arg_1},
          output_type=string,
          selected_models=gpt-4o-mini").
 
 % Balanced approach: Use multiple model types
-balanced_processing(Data, Result) :- 
+balanced_processing(Data, Result) <- 
     #LLM(dataset, 
         "prompt=Process: {arg_1},
          output_type=string,
@@ -406,7 +406,7 @@ For specific performance tuning on very large datasets, you can override automat
 
 ```prolog
 % Process millions of records with explicit partition control
-batch_classification(DocID, Text, Category) :- 
+batch_classification(DocID, Text, Category) <- 
     #LLM(documents, 
         "prompt=Categorize this document: {arg_2},
          output_type=string,
@@ -431,14 +431,14 @@ Combine embeddings with LLM for intelligent document retrieval:
 
 ```prolog
 % Find and summarize similar documents
-similar_documents(Doc1, Doc2, Score, Summary) :- 
+similar_documents(Doc1, Doc2, Score, Summary) <- 
     document(Doc1, Content1), 
     document(Doc2, Content2), 
     Vec1 = embeddings:vectorize(Content1), 
     Vec2 = embeddings:vectorize(Content2), 
     Score = embeddings:cosine_sim(Vec1, Vec2), 
     Score > 0.8,
-    result(_, _, Summary) :- #LLM(document, "prompt=Summarize the key similarities between these documents: {arg_2},output_type=string").
+    result(_, _, Summary) <- #LLM(document, "prompt=Summarize the key similarities between these documents: {arg_2},output_type=string").
 ```
 
 ### Content Classification
@@ -447,7 +447,7 @@ Classify large volumes of text in parallel with optimized model selection:
 
 ```prolog
 % Classify customer feedback at scale using fast models
-classify_feedback(FeedbackID, Text, Category, IsUrgent) :- 
+classify_feedback(FeedbackID, Text, Category, IsUrgent) <- 
     #LLM(feedback, 
         "prompt_1=Classify this feedback as positive, neutral, or negative: {arg_2},
          prompt_2=Is this feedback urgent? Answer yes or no: {arg_2},
@@ -466,7 +466,7 @@ Generate missing information for entire datasets with quality-focused model sele
 
 ```prolog
 % Enrich product catalog with AI-generated content using high-quality models
-enrich_product(ProductID, Name, Category, Description, TargetAge, Keywords) :- 
+enrich_product(ProductID, Name, Category, Description, TargetAge, Keywords) <- 
     #LLM(product, 
         "prompt_1=Generate a marketing description for {arg_2} in {arg_3} category,
          prompt_2=What age group is {arg_2} best suited for? Answer with a number (e.g., 25),
@@ -488,7 +488,7 @@ Multi-faceted analysis of clinical data using high-quality models for critical h
 
 ```prolog
 % Analyze patient records with multiple AI insights using only gpt-4o
-patient_analysis(PatientID, Notes, RiskLevel, Recommendations, FollowUpDays) :- 
+patient_analysis(PatientID, Notes, RiskLevel, Recommendations, FollowUpDays) <- 
     #LLM(clinical_notes, 
         "prompt_1=Assess risk level (low/medium/high) for: {arg_2},
          prompt_2=Provide 3 key recommendations for: {arg_2},

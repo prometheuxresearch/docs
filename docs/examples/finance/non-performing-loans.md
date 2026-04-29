@@ -38,18 +38,18 @@ Example: When NFC1 defaults, it exposes:
 
 @bind("npl","csv useHeaders=true","disk/data/non_performing_loan","npl.csv").
 
-debit(Bank2, Bank1) :- loan(Bank1,Bank2).
-key_person(Person, Bank) :- bank(Bank), own(Person, Bank, Shares), Shares > 0.3.
+debit(Bank2, Bank1) <- loan(Bank1,Bank2).
+key_person(Person, Bank) <- bank(Bank), own(Person, Bank, Shares), Shares > 0.3.
 
-default(Bank, DefaultId) :- bank(Bank), npl(Bank).
-default(Bank2, DefaultId) :- default(Bank1, DefaultId), debit(Bank1, Bank2).
+default(Bank, DefaultId) <- bank(Bank), npl(Bank).
+default(Bank2, DefaultId) <- default(Bank1, DefaultId), debit(Bank1, Bank2).
 
-investigation(Person, Bank, InvestigationId) :- default(Bank, DefaultId), key_person(Person, Bank).
+investigation(Person, Bank, InvestigationId) <- default(Bank, DefaultId), key_person(Person, Bank).
 
-InvestigationId1 = InvestigationId2 :- key_person(Person1, Bank), key_person(Person2, Bank),
+InvestigationId1 = InvestigationId2 <- key_person(Person1, Bank), key_person(Person2, Bank),
                                        investigation(Person1, Bank, InvestigationId1), investigation(Person2, Bank, InvestigationId2).
 
-InvestigationId1 = InvestigationId2  :- investigation(Person1, Bank1, InvestigationId1), investigation(Person2, Bank2, InvestigationId2),
+InvestigationId1 = InvestigationId2  <- investigation(Person1, Bank1, InvestigationId1), investigation(Person2, Bank2, InvestigationId2),
                                         debit(Bank1, Bank2).
 
 @output("default").

@@ -27,7 +27,7 @@ company("Apple", "Redwood City, CA").
 company("Google", "Mountain View, CA").
 company("Microsoft", "Redmond, WA").
 
-location(Location) :- company(_,Location).
+location(Location) <- company(_,Location).
 
 @output("location").
 """
@@ -104,7 +104,7 @@ curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/concepts/
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
   -d '{
-    "definition": "@output(\"ordered_products\").\nordered_products(Product, Price) :- products(Product, Price), Price > 100.",
+    "definition": "@output(\"ordered_products\").\nordered_products(Product, Price) <- products(Product, Price), Price > 100.",
     "scope": "user",
     "python_scripts": {
       "data_processor": "def process_data(df):\n    return df.sort_values(\"price\")"
@@ -155,7 +155,7 @@ def main():
 # Define the concept that uses Python script execution
 concept_def = """
 @output("test_python").
-test_python(Numbers,Total,Average,Maximum,Minimum,Count) :- python:run("python_script").
+test_python(Numbers,Total,Average,Maximum,Minimum,Count) <- python:run("python_script").
 """
 
 # Save the concept with Python script injection
@@ -176,7 +176,7 @@ curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/concepts/
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
   -d '{
-    "definition": "@output(\"test_python\").\ntest_python(Numbers,Total,Average,Maximum,Minimum,Count) :- python:run(\"python_script\").",
+    "definition": "@output(\"test_python\").\ntest_python(Numbers,Total,Average,Maximum,Minimum,Count) <- python:run(\"python_script\").",
     "scope": "user",
     "python_scripts": {
       "python_script": "import json\n\ndef main():\n    numbers = [1, 2, 3, 4, 5]\n    return [{\"Numbers\": numbers, \"Total\": sum(numbers)}]"
@@ -225,7 +225,7 @@ Output column names must match the parameters in the concept head:
 results = [{"Numbers": [1, 2, 3], "Total": 6, "Average": 2.0}]
 
 # Vadalog concept head must match:
-test_python(Numbers, Total, Average) :- python:run("python_script").
+test_python(Numbers, Total, Average) <- python:run("python_script").
 ```
 
 ### 4. Standalone Concept Rule
@@ -234,11 +234,11 @@ Python script concepts must be **standalone**:
 ```python
 # ✅ Correct - standalone Python script concept
 @output("my_python_concept").
-my_python_concept(Col1, Col2) :- python:run("my_script").
+my_python_concept(Col1, Col2) <- python:run("my_script").
 
 # ❌ Incorrect - cannot combine with other logic
 @output("mixed_concept").
-mixed_concept(Col1, Col2) :- python:run("my_script"), other_predicate(Col1).
+mixed_concept(Col1, Col2) <- python:run("my_script"), other_predicate(Col1).
 ```
 
 ---
@@ -564,7 +564,7 @@ company("Apple", "Redwood City, CA").
 company("Google", "Mountain View, CA").
 company("Microsoft", "Redmond, WA").
 
-location(Location) :- company(_,Location).
+location(Location) <- company(_,Location).
 
 @output("location").
 """
@@ -607,7 +607,7 @@ curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/concepts/
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
   -d '{
-    "definition": "company(\"Apple\", \"Redwood City, CA\").\ncompany(\"Google\", \"Mountain View, CA\").\nlocation(Location) :- company(_,Location).\n@output(\"location\").",
+    "definition": "company(\"Apple\", \"Redwood City, CA\").\ncompany(\"Google\", \"Mountain View, CA\").\nlocation(Location) <- company(_,Location).\n@output(\"location\").",
     "scope": "user"
   }'
 

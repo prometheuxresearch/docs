@@ -48,7 +48,7 @@ curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/vadalingo
 {
   "data": {
     "domain_knowledge": "Find all companies that are transitively controlled by @owner...",
-    "vadalog_program": "control(X, Y) :- owner(X, Y, S), S > 0.5.\ncontrol(X, Z) :- control(X, Y), owner(Y, Z, S), S > 0.5.",
+    "vadalog_program": "control(X, Y) <- owner(X, Y, S), S > 0.5.\ncontrol(X, Z) <- control(X, Y), owner(Y, Z, S), S > 0.5.",
     "project_id": "my-project-id",
     "concepts_used": ["owner"],
     "concepts_source": "tagged"

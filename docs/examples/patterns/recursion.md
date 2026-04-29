@@ -12,8 +12,8 @@ Consider a graph of nodes and edges between them. A path can be defined as:
 2. The list of such edges between any 2 nodes, via N-2 other nodes.
 
 ```prolog showLineNumbers
-path(Start, End) :- edge(Start, End). % Base case
-path(Start, End) :- path(Start, Via), edge(Via, End). % Recursive case
+path(Start, End) <- edge(Start, End). % Base case
+path(Start, End) <- path(Start, Via), edge(Via, End). % Recursive case
 ```
 
 See how `path` can be a simple hop from one node to another, or requires
@@ -39,10 +39,10 @@ edge("d","h").
 edge("f","g").
 
 % base case: if there is and edge from the node X to the node Y then there is a path from X to Y %
-path(X,Y) :- edge(X,Y).
+path(X,Y) <- edge(X,Y).
 
 % recursive case: if there is a path from the node X to the node Y and there is an edge from the node Y to the node Z, then there is a path from the node X to the node Z %
-path(X,Z) :- path(X,Y),edge(Y,Z).
+path(X,Z) <- path(X,Y),edge(Y,Z).
 
 @output("path").
 ```

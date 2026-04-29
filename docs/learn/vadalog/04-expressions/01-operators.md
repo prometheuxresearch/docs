@@ -103,7 +103,7 @@ a(2).
 a(3).
 a(4).
 a(5).
-b(X, IsIn) :- a(X), IsIn=and(X>2, X<5, X==3).
+b(X, IsIn) <- a(X), IsIn=and(X>2, X<5, X==3).
 ```
 
 **Expected output:**
@@ -130,7 +130,7 @@ a(2).
 a(3).
 a(4).
 a(5).
-b(X, IsIn) :- a(X), IsIn=or(X<2, X==4, X==6).
+b(X, IsIn) <- a(X), IsIn=or(X<2, X==4, X==6).
 ```
 
 **Expected output:**
@@ -155,7 +155,7 @@ This example demonstrates the use of the `not` operator to negate a condition.
 a(1).
 a(2).
 a(3).
-b(X, IsNotTwo) :- a(X), IsNotTwo=not(X==2).
+b(X, IsNotTwo) <- a(X), IsNotTwo=not(X==2).
 ```
 
 **Expected output:**
@@ -178,7 +178,7 @@ This example shows the exclusive or operation between two conditions.
 a(1).
 a(2).
 a(3).
-b(X, IsExclusive) :- a(X), IsExclusive=xor(X>1, X<3).
+b(X, IsExclusive) <- a(X), IsExclusive=xor(X>1, X<3).
 ```
 
 **Expected output:**
@@ -201,7 +201,7 @@ This example demonstrates the NAND operation.
 a(1).
 a(2).
 a(3).
-b(X, IsNand) :- a(X), IsNand=nand(X>1, X<3).
+b(X, IsNand) <- a(X), IsNand=nand(X>1, X<3).
 ```
 
 **Expected output:**
@@ -224,7 +224,7 @@ This example demonstrates the NOR operation.
 a(1).
 a(2).
 a(3).
-b(X, IsNor) :- a(X), IsNor=nor(X>1, X<3).
+b(X, IsNor) <- a(X), IsNor=nor(X>1, X<3).
 ```
 
 **Expected output:**
@@ -247,7 +247,7 @@ This example demonstrates the XNOR operation.
 a(1).
 a(2).
 a(3).
-b(X, IsXnor) :- a(X), IsXnor=xnor(X>1, X<3).
+b(X, IsXnor) <- a(X), IsXnor=xnor(X>1, X<3).
 ```
 
 **Expected output:**
@@ -270,7 +270,7 @@ This example demonstrates logical implication.
 a(1).
 a(2).
 a(3).
-b(X, IsImplied) :- a(X), IsImplied=implies(X>1, X<3).
+b(X, IsImplied) <- a(X), IsImplied=implies(X>1, X<3).
 ```
 
 **Expected output:**
@@ -293,7 +293,7 @@ This example demonstrates the if and only if operation.
 a(1).
 a(2).
 a(3).
-b(X, IsIff) :- a(X), IsIff=iff(X>1, X<3).
+b(X, IsIff) <- a(X), IsIff=iff(X>1, X<3).
 ```
 
 **Expected output:**
@@ -315,7 +315,7 @@ This example demonstrates conditional logic using the `if` operator to classify 
 @output("b").
 a(1).
 a(-1).
-b(Result, Value) :- a(Value), GTZero=Value>0, Result=if(GTZero, "positive", "non-positive").
+b(Result, Value) <- a(Value), GTZero=Value>0, Result=if(GTZero, "positive", "non-positive").
 ```
 
 **Expected output:**
@@ -334,7 +334,7 @@ This example uses the `if` operator to check if a string is empty and return app
 a("").
 a("NonEmpty").
 a(" ").
-b(El, IsEmpty) :- a(El), IsEmpty=if(is_empty(El), "is_empty", "is_not_empty").
+b(El, IsEmpty) <- a(El), IsEmpty=if(is_empty(El), "is_empty", "is_not_empty").
 ```
 
 **Expected output:**
@@ -353,7 +353,7 @@ This example uses the `if` operator to check if a string is not null and return 
 @output("b").
 a("hello").
 a("not_null").
-b(El, State) :- a(El), State=if(is_not_null(El), "not_null", "is_null").
+b(El, State) <- a(El), State=if(is_not_null(El), "not_null", "is_null").
 ```
 
 **Expected output:**
@@ -377,7 +377,7 @@ credit_score(820.0).
 credit_score(850.0).
 credit_score(920.0).
 
-credit_rating(Val) :- credit_score(Score), Val = if(Score < 500.0, -3.250,
+credit_rating(Val) <- credit_score(Score), Val = if(Score < 500.0, -3.250,
                                                     if(and(Score >= 500.0, Score < 600.0), -2.150,
                                                     if(and(Score >= 600.0, Score < 700.0), -1.200,
                                                     if(and(Score >= 700.0, Score < 750.0), -0.500,
@@ -413,7 +413,7 @@ a(2).
 a(3).
 a(4).
 a(5).
-b(X) :- a(X), IsIn=and(X>2, X<5, X==3), IsIn==#T.
+b(X) <- a(X), IsIn=and(X>2, X<5, X==3), IsIn==#T.
 ```
 
 **Expected output:**
@@ -430,7 +430,7 @@ The String operators are `substring`, `contains`, `contains_any`, `rlike`, `star
 A rule using `substring` returns a substring from the specified `start` to `end` index, using zero-based indexing:
 
 ```prolog
-q(K1, K2, Kn, J) :- body, J = substring(x, start, end).
+q(K1, K2, Kn, J) <- body, J = substring(x, start, end).
 ```
 
 Example:
@@ -438,7 +438,7 @@ Example:
 ```prolog showLineNumbers {3}
 a("prometheux").
 b("oxford").
-q(Y,J) :- a(X), b(Y), J = substring(X,4,10).
+q(Y,J) <- a(X), b(Y), J = substring(X,4,10).
 @output("q").
 ```
 
@@ -452,7 +452,7 @@ q("oxford", "metheux").
 A rule with `contains` returns true if the `string` contains `substring`:
 
 ```prolog
-q(K1, K2, Kn, J) :- body, J = contains(string, substring).
+q(K1, K2, Kn, J) <- body, J = contains(string, substring).
 ```
 
 Example:
@@ -460,7 +460,7 @@ Example:
 ```prolog showLineNumbers {3}
 a("prometheux engine").
 b("engine").
-q(X, Y, J) :- a(X), b(Y), J = contains(X, Y).
+q(X, Y, J) <- a(X), b(Y), J = contains(X, Y).
 @output("q").
 ```
 
@@ -476,7 +476,7 @@ q("prometheux engine", "engine", #T).
 A rule with `starts_with` returns true if the `string` starts with `start_string`:
 
 ```prolog
-q(K1, K2, Kn, J) :- body, J = starts_with(string, start_string).
+q(K1, K2, Kn, J) <- body, J = starts_with(string, start_string).
 ```
 
 Example:
@@ -484,7 +484,7 @@ Example:
 ```prolog showLineNumbers {3}
 a("prometheux").
 b("prom").
-q(X,Y,J) :- a(X), b(Y), J = starts_with(X,Y).
+q(X,Y,J) <- a(X), b(Y), J = starts_with(X,Y).
 @output("q").
 ```
 
@@ -498,7 +498,7 @@ q("prometheux", "prom", #T).
 A rule with `ends_with` returns true if the `string` ends with `end_string`:
 
 ```prolog
-q(K1, K2, Kn, J) :- body, J = ends_with(string, end_string).
+q(K1, K2, Kn, J) <- body, J = ends_with(string, end_string).
 ```
 
 Example:
@@ -506,7 +506,7 @@ Example:
 ```prolog showLineNumbers {3}
 a("prometheux").
 b("theux").
-q(X, Y, J) :- a(X), b(Y), J = ends_with(X,Y).
+q(X, Y, J) <- a(X), b(Y), J = ends_with(X,Y).
 @output("q").
 ```
 
@@ -520,7 +520,7 @@ q("prometheux", "theux", #T).
 A rule with `contains_any` returns true if the `string` contains any of the keywords in the `keywords_array`:
 
 ```prolog
-q(K1, K2, Kn, J) :- body, J = contains_any(string, keywords_array).
+q(K1, K2, Kn, J) <- body, J = contains_any(string, keywords_array).
 ```
 
 Example:
@@ -528,8 +528,8 @@ Example:
 ```prolog showLineNumbers {4-5}
 a("hello world", ["world", "foo"]).
 b("hello world", ["bar", "baz"]).
-c(Result) :- a(Text, Keywords), Result = contains_any(Text, Keywords).
-d(Result) :- b(Text, Keywords), Result = contains_any(Text, Keywords).
+c(Result) <- a(Text, Keywords), Result = contains_any(Text, Keywords).
+d(Result) <- b(Text, Keywords), Result = contains_any(Text, Keywords).
 @output("c").
 @output("d").
 ```
@@ -545,7 +545,7 @@ d(#F).
 A rule with `rlike` returns true if the `string` matches the given regular expression `pattern`:
 
 ```prolog
-q(K1, K2, Kn, J) :- body, J = rlike(string, pattern).
+q(K1, K2, Kn, J) <- body, J = rlike(string, pattern).
 ```
 
 Example:
@@ -554,7 +554,7 @@ Example:
 a("foo bar").
 a("the foobar case").
 keyword("foo").
-b(Name, Matches) :- a(Name), keyword(K), Matches = rlike(Name, concat("(^| )", K, "( |$)")).
+b(Name, Matches) <- a(Name), keyword(K), Matches = rlike(Name, concat("(^| )", K, "( |$)")).
 @output("b").
 ```
 
@@ -569,7 +569,7 @@ b("the foobar case", #F).
 A rule with `concat` returns the concatenation of `string` and `concat_string`:
 
 ```prolog
-q(K1, K2, Kn, J) :- body, J = concat(string, concat_string).
+q(K1, K2, Kn, J) <- body, J = concat(string, concat_string).
 ```
 
 Example:
@@ -577,7 +577,7 @@ Example:
 ```prolog showLineNumbers {3}
 a("prometheux").
 b("engine").
-q(X,Y,J) :- a(X), b(Y), J = concat(X,Y).
+q(X,Y,J) <- a(X), b(Y), J = concat(X,Y).
 @output("q").
 ```
 
@@ -591,14 +591,14 @@ q("prometheux", "engine", "prometheuxengine").
 A rule with `string_length` returns an integer representing the length of the `string`:
 
 ```prolog
-q(K1, K2, Kn, J) :- body, J = string_length(string).
+q(K1, K2, Kn, J) <- body, J = string_length(string).
 ```
 
 Example:
 
 ```prolog showLineNumbers {2}
 a("prometheux").
-q(X, J) :- a(X), J = string_length(X).
+q(X, J) <- a(X), J = string_length(X).
 @output("q").
 ```
 
@@ -612,14 +612,14 @@ q("prometheux", 10).
 A rule with `to_lower` converts `string` to lowercase:
 
 ```prolog
-q(K1, K2, Kn, J) :- body, J = to_lower(string).
+q(K1, K2, Kn, J) <- body, J = to_lower(string).
 ```
 
 Example:
 
 ```prolog showLineNumbers {2}
 a("Prometheux").
-q(X, J) :- a(X), J = to_lower(X).
+q(X, J) <- a(X), J = to_lower(X).
 @output("q").
 ```
 
@@ -633,14 +633,14 @@ q("Prometheux", "prometheux").
 A rule with `to_upper` converts `string` to uppercase:
 
 ```prolog
-q(K1, K2, Kn, J) :- body, J = to_upper(string).
+q(K1, K2, Kn, J) <- body, J = to_upper(string).
 ```
 
 Example:
 
 ```prolog showLineNumbers {2}
 a("prometheux").
-q(X, J) :- a(X), J = to_upper(X).
+q(X, J) <- a(X), J = to_upper(X).
 @output("q").
 ```
 
@@ -654,14 +654,14 @@ q("prometheux", "PROMETHEUX").
 A rule with `split` divides `string` by a specified delimiter, producing a list of substrings:
 
 ```prolog
-q(K1, K2, Kn, J) :- body, J = split(string, delimiter).
+q(K1, K2, Kn, J) <- body, J = split(string, delimiter).
 ```
 
 Example:
 
 ```prolog showLineNumbers {2}
 a("prometheux engine").
-q(X, J) :- a(X), J = split(X, " ").
+q(X, J) <- a(X), J = split(X, " ").
 @output("q").
 ```
 
@@ -675,7 +675,7 @@ q("prometheux engine", ["prometheux", "engine"]).
 A rule with `index_of` finds the index of `substring` within `string`, returning -1 if not found:
 
 ```prolog
-q(K1, K2, Kn, J) :- body, J = index_of(string, substring).
+q(K1, K2, Kn, J) <- body, J = index_of(string, substring).
 ```
 
 Example:
@@ -683,7 +683,7 @@ Example:
 ```prolog showLineNumbers {3}
 a("prometheux").
 b("theux").
-q(X, Y, J) :- a(X), b(Y), J = index_of(X,Y).
+q(X, Y, J) <- a(X), b(Y), J = index_of(X,Y).
 @output("q").
 ```
 
@@ -697,14 +697,14 @@ q("prometheux", "theux", 4).
 You can also use `substring` with a single parameter to get the substring from a starting position to the end:
 
 ```prolog
-q(K1, K2, Kn, J) :- body, J = substring(string, start).
+q(K1, K2, Kn, J) <- body, J = substring(string, start).
 ```
 
 Example:
 
 ```prolog showLineNumbers {2}
 a("Elizabeth").
-b(Name, Substring) :- a(Name), Substring = substring(Name, 6).
+b(Name, Substring) <- a(Name), Substring = substring(Name, 6).
 @output("b").
 ```
 
@@ -718,14 +718,14 @@ b("Elizabeth", "beth").
 A rule with `concat_ws` concatenates strings with a specified separator:
 
 ```prolog
-q(K1, K2, Kn, J) :- body, J = concat_ws(separator, string1, string2, ...).
+q(K1, K2, Kn, J) <- body, J = concat_ws(separator, string1, string2, ...).
 ```
 
 Example:
 
 ```prolog showLineNumbers {2}
 a("Laura", "Wilson").
-b(FirstName, LastName, FullName) :- a(FirstName, LastName), FullName = concat_ws(" ", FirstName, LastName).
+b(FirstName, LastName, FullName) <- a(FirstName, LastName), FullName = concat_ws(" ", FirstName, LastName).
 @output("b").
 ```
 
@@ -739,14 +739,14 @@ b("Laura", "Wilson", "Laura Wilson").
 A rule with `replace` replaces occurrences of a substring with another string:
 
 ```prolog
-q(K1, K2, Kn, J) :- body, J = replace(string, search, replacement).
+q(K1, K2, Kn, J) <- body, J = replace(string, search, replacement).
 ```
 
 Example:
 
 ```prolog showLineNumbers {2}
 a("The quick brown fox").
-b(Result) :- a(Input), Result = replace(Input, "fox", "dog").
+b(Result) <- a(Input), Result = replace(Input, "fox", "dog").
 @output("b").
 ```
 
@@ -760,14 +760,14 @@ b("The quick brown dog").
 A rule with `join` joins array elements into a string with a specified delimiter:
 
 ```prolog
-q(K1, K2, Kn, J) :- body, J = join(array, delimiter).
+q(K1, K2, Kn, J) <- body, J = join(array, delimiter).
 ```
 
 Example:
 
 ```prolog showLineNumbers {2}
 a(["apple", "banana", "cherry"]).
-b(JoinedString) :- a(Array), JoinedString = join(Array, ";").
+b(JoinedString) <- a(Array), JoinedString = join(Array, ";").
 @output("b").
 ```
 
@@ -781,7 +781,7 @@ b("apple;banana;cherry").
 A rule with `is_empty` checks if a string is empty or contains only whitespace:
 
 ```prolog
-q(K1, K2, Kn, J) :- body, J = is_empty(string).
+q(K1, K2, Kn, J) <- body, J = is_empty(string).
 ```
 
 Example:
@@ -790,7 +790,7 @@ Example:
 a("").
 a("NonEmpty").
 a(" ").
-b(El, IsEmpty) :- a(El), IsEmpty = is_empty(El).
+b(El, IsEmpty) <- a(El), IsEmpty = is_empty(El).
 @output("b").
 ```
 
@@ -806,7 +806,7 @@ b(" ", #T).
 A rule with `strip` removes leading and trailing whitespace from a `string`:
 
 ```prolog
-q(K1, K2, Kn, J) :- body, J = strip(string).
+q(K1, K2, Kn, J) <- body, J = strip(string).
 ```
 
 Example:
@@ -814,7 +814,7 @@ Example:
 ```prolog showLineNumbers {3}
 a("  hello world  ").
 a("no_spaces").
-b(Original, Stripped) :- a(Original), Stripped = strip(Original).
+b(Original, Stripped) <- a(Original), Stripped = strip(Original).
 @output("b").
 ```
 
@@ -834,7 +834,7 @@ The union operator combines two arrays, removing duplicates:
 
 ```prolog showLineNumbers {2}
 a([1, 2, 3], 4).
-b(Result) :- a(Set1, Value), Result = Set1 | Value.
+b(Result) <- a(Set1, Value), Result = Set1 | Value.
 @output("b").
 ```
 
@@ -849,7 +849,7 @@ The intersection operator finds common elements between two arrays:
 
 ```prolog showLineNumbers {2}
 a([1, 2, 3], [2, 3, 4]).
-b(Result) :- a(Set1, Set2), Result = Set1 & Set2.
+b(Result) <- a(Set1, Set2), Result = Set1 & Set2.
 @output("b").
 ```
 
@@ -868,7 +868,7 @@ Boolean-returning functions can be used directly as conditions in rule bodies wi
 ```prolog showLineNumbers {3}
 a(1, "Alice").
 a(2, "Bob").
-out(X) :- a(X, Y), contains(Y, "Alice").
+out(X) <- a(X, Y), contains(Y, "Alice").
 @output("out").
 ```
 
@@ -885,7 +885,7 @@ Use `!` to negate boolean expressions directly in conditions:
 ```prolog showLineNumbers {4}
 a(1, "Alice").
 a(2, "Bob").
-out(X) :- a(X, Y), !contains(Y, "Alice").
+out(X) <- a(X, Y), !contains(Y, "Alice").
 @output("out").
 ```
 
@@ -904,8 +904,8 @@ out(2).
 person(1, "Alice").
 person(2, "Bob").
 blocked(2).
-activeAlice(ID, Name) :- person(ID, Name), not blocked(ID), starts_with(Name, "Ali").
-activeNonAlice(ID, Name) :- person(ID, Name), not blocked(ID), !starts_with(Name, "Ali").
+activeAlice(ID, Name) <- person(ID, Name), not blocked(ID), starts_with(Name, "Ali").
+activeNonAlice(ID, Name) <- person(ID, Name), not blocked(ID), !starts_with(Name, "Ali").
 @output("activeAlice").
 @output("activeNonAlice").
 ```

@@ -6,10 +6,10 @@ slug: /learn/vadalog/language-primitives
 
 At the core of your ontology is a set of rules.
 
-A rule is an expression of the form `h :- b1, … , bn.`, where
+A rule is an expression of the form `h <- b1, … , bn.`, where
 
-- The symbol `:-` can be read as "is derived by",
-- The part that comes before `:-`, the `h`, is known as the **head**,
+- The symbol `<-` can be read as "is derived by",
+- The part that comes before `<-`, the `h`, is known as the **head**,
 - And the part after, `b1, … , bn`, is known as the **body**.
 - All rules must be terminated with a period (`.`).
 
@@ -30,7 +30,7 @@ that Plato is indeed a student.
 A rule is a way to derive new facts from existing ones. It says that if certain conditions of a predicate are true, then another predicate must also be true.
 
 ```
-a(X) :- b(X).
+a(X) <- b(X).
 ```
 
 This rule generates facts for atom `a`, given facts for atom `b`. `X` is a
@@ -40,14 +40,14 @@ for which `b` is true, `a(X)` is also true.
 Consider this next rule:
 
 ```
-c(X,Z) :- a(X,Y), b(Y,Z).
+c(X,Z) <- a(X,Y), b(Y,Z).
 ```
 
 For every two facts `a` and `b`, where the facts are joined by some common term,
 `Y`, a third fact, `c` can be derived. An example of this might exist in family trees:
 
 ```
-is_nephew(Person, Child) :- is_sibling(Person, Sibling),
+is_nephew(Person, Child) <- is_sibling(Person, Sibling),
                             is_son(Sibling, Child).
 ```
 
@@ -58,11 +58,11 @@ The following is an example that shows a simple Vadalog program.
 ```prolog showLineNumbers
 a(1).
 c(1,2).
-b(Y,X) :- a(X), c(X,Y).
+b(Y,X) <- a(X), c(X,Y).
 @output("b").
 ```
 
-`a(1)` is a fact, `b(Y,X) :- a(X),c(X,Y)` is a rule. Observe that `@output("b")`
+`a(1)` is a fact, `b(Y,X) <- a(X),c(X,Y)` is a rule. Observe that `@output("b")`
 is an annotation and specifies that the facts for `b` are in the output. We will take a look at [annotations](/learn/vadalog/annotations) later.
 
 When a rule's head predicate can be successfully derived by all variables of the body, we say that it has been **activated**.
@@ -118,7 +118,7 @@ In the first statement, if were to consider every human father, then the
 statement is true.
 
 ```
-man(X) :- father(X, Y).
+man(X) <- father(X, Y).
 ```
 
 However, if X were to take the value of the male parent of a pet dog Fluffy,
@@ -130,7 +130,7 @@ statement, if there exists one `X`, namely "Luke Skywalker", who has a father,
 Y, then our statement would be true.
 
 ```
-father(X, Y) :- father("Luke Skywalker", Y).
+father(X, Y) <- father("Luke Skywalker", Y).
 ```
 
 :::note
@@ -161,7 +161,7 @@ with the underscore symbol (`_`). Such as in the following example:
 ```prolog showLineNumbers {3}
 t("Text", 1, 2).
 t("Text2", 1, 2).
-b(X) :- t(X, _, _).
+b(X) <- t(X, _, _).
 @output("b").
 ```
 
@@ -190,7 +190,7 @@ indeed possible and important in ontological reasoning.
 ```prolog showLineNumbers {3}
 employee(1).
 employee(2).
-manager(Y,X) :- employee(X).
+manager(Y,X) <- employee(X).
 @output("manager").
 ```
 
@@ -214,9 +214,9 @@ employee("Ruth").
 contract("Ruth").
 employee("Ann").
 
-manager(Y,X) :- employee(X).
-hired(Y,X) :- manager(Y,X), contract(X).
-contractSigned(X) :- hired(Y,X), manager(Y,Z).
+manager(Y,X) <- employee(X).
+hired(Y,X) <- manager(Y,X), contract(X).
+contractSigned(X) <- hired(Y,X), manager(Y,Z).
 @output("contractSigned").
 ```
 

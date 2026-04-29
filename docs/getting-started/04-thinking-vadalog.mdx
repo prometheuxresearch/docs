@@ -45,12 +45,12 @@ Declaratively, we simply say: a user is engaged if they have 10 or more events
 in the past 30 days
 
 ```prolog showLineNumbers
-eventsCountSince(UserId, SinceTime, Count) :-
+eventsCountSince(UserId, SinceTime, Count) <-
   event(EventId, UserId, Timestamp),
   Timestamp > SinceTime,
   Count = mcount(EventId).
 
-isEngaged(UserId) :-
+isEngaged(UserId) <-
   eventsCountSince(UserId, now() - 30 * 24 * 60 * 60, Count),
   Count > 10.
 ```
@@ -104,8 +104,8 @@ verbs, such as "owns", "works at", "parents", or "controls".
 owns("Yum", "KFC", 0.6).
 owns("Yum", "Pizza Hut", 0.7).
 
-controls("Yum", "KFC") :- owns("Yum", "KFC", 0.6).
-controls("Yum", "Pizza Hut") :- owns("Yum", "Pizza Hut", 0.7).
+controls("Yum", "KFC") <- owns("Yum", "KFC", 0.6).
+controls("Yum", "Pizza Hut") <- owns("Yum", "Pizza Hut", 0.7).
 ```
 
 Let's make these statements into a generic rule, replacing "KFC" and "Pizza Hut"
@@ -117,7 +117,7 @@ owns("Yum", "KFC", 0.6).
 owns("Yum", "Pizza Hut", 0.7).
 
 % Yum! controls some brand if it owns more than 50% of the shares of that brand.
-controls("Yum", SomeBrand) :- owns("Yum", SomeBrand, Shares), Shares > 0.5.
+controls("Yum", SomeBrand) <- owns("Yum", SomeBrand, Shares), Shares > 0.5.
 ```
 
 Let's introduce a new company called `FastFoodsGroup`, and some ownership facts.
@@ -131,7 +131,7 @@ owns("Yum", "FastFoodsGroup", 0.7).
 owns("Yum", "McDonalds", 0.1).
 
 % Yum! controls some brand if it owns more than 50% of the shares of that brand.
-controls("Yum", SomeBrand) :- owns("Yum", SomeBrand, Shares), Shares > 0.5.
+controls("Yum", SomeBrand) <- owns("Yum", SomeBrand, Shares), Shares > 0.5.
 ```
 
 Yum also owns 10% of McDonalds, but simply according to rule 1, it does not
@@ -147,11 +147,11 @@ owns("Yum", "FastFoodsGroup", 0.7).
 owns("Yum", "McDonalds", 0.1).
 
 % Yum! controls some brand if it owns more than 50% of the shares of that brand.
-controls("Yum", SomeBrand) :- owns("Yum", SomeBrand, Shares), Shares > 0.5.
+controls("Yum", SomeBrand) <- owns("Yum", SomeBrand, Shares), Shares > 0.5.
 
 % Yum! controls McDonalds if it owns more than 50% an intermediary FastFoodsGroup,
 % who in turn owns more than 50% of McDonalds
-controls("Yum", "McDonalds") :- controls("Yum", "FastFoodsGroup"),
+controls("Yum", "McDonalds") <- controls("Yum", "FastFoodsGroup"),
                                 owns("FastFoodsGroup", "McDonalds", Shares),
                                 Shares > 0.5.
 ```
@@ -175,11 +175,11 @@ owns("Yum", "FastFoodsGroup", 0.7).
 owns("Yum", "McDonalds", 0.1).
 
 % Yum! controls some brand if it owns more than 50% of the shares of that brand.
-controls("Yum", SomeBrand) :- owns("Yum", SomeBrand, Shares), Shares > 0.5.
+controls("Yum", SomeBrand) <- owns("Yum", SomeBrand, Shares), Shares > 0.5.
 
 % Yum! controls some brand if it controls an intemediary who in turn owns more
 % than 50% of that brand.
-controls("Yum", SomeBrand) :- controls("Yum", Intermediary),
+controls("Yum", SomeBrand) <- controls("Yum", Intermediary),
                               owns(Intermediary, SomeBrand, Shares),
                               Shares > 0.5.
 ```
@@ -207,17 +207,17 @@ owns("Yum", "FastFoodsGroup", 0.7).
 owns("Yum", "McDonalds", 0.1).
 
 % Yum! controls some brand if it owns more than 50% of the shares of that brand.
-controls("Yum", SomeBrand) :- owns("Yum", SomeBrand, Shares), Shares > 0.5.
+controls("Yum", SomeBrand) <- owns("Yum", SomeBrand, Shares), Shares > 0.5.
 
 % Yum! controls some brand if it controls an intemediary who in turn owns more
 % than 50% of that brand.
-controls("Yum", SomeBrand) :- controls("Yum", Intermediary),
+controls("Yum", SomeBrand) <- controls("Yum", Intermediary),
                               owns(Intermediary, SomeBrand, Shares),
                               Shares > 0.5.
 
 % Yum! controls some brand if its joint ownership of that company's shares is
 % above 50%.
-controls("Yum", SomeBrand) :- has_shares("Yum", SomeBrand, Shares),
+controls("Yum", SomeBrand) <- has_shares("Yum", SomeBrand, Shares),
                               Shares > 0.5.
 ```
 
@@ -234,17 +234,17 @@ owns("Yum", "FastFoodsGroup", 0.7).
 owns("Yum", "McDonalds", 0.1).
 
 % Yum! has `Shares` amount of a brand if it owns that amount of shares in the brand.
-has_shares("Yum", SomeBrand, Shares) :- owns("Yum", SomeBrand, Shares).
+has_shares("Yum", SomeBrand, Shares) <- owns("Yum", SomeBrand, Shares).
 
 % Yum! has `Shares` amount of a brand if it controls an intermediary who has that
 % amount of shares in the brand.
-has_shares("Yum", Intermediary, SomeBrand, Shares) :-
+has_shares("Yum", Intermediary, SomeBrand, Shares) <-
   controls("Yum", Intermediary),
   owns(Intermediary, SomeBrand, Shares).
 
 % Yum! controls some brand if its joint ownership of that company's shares is
 % above 50%.
-controls("Yum", SomeBrand) :- has_shares("Yum", SomeBrand, Shares),
+controls("Yum", SomeBrand) <- has_shares("Yum", SomeBrand, Shares),
                               Shares > 0.5.
 ```
 
@@ -266,23 +266,23 @@ owns("Yum", "FastFoodsGroup", 0.7).
 owns("Yum", "McDonalds", 0.1).
 
 % Yum! has `Shares` amount of a brand if it owns that amount of shares in the brand.
-has_shares("Yum", SomeBrand, Shares) :- owns("Yum", SomeBrand, Shares).
+has_shares("Yum", SomeBrand, Shares) <- owns("Yum", SomeBrand, Shares).
 
 % Yum! has `Shares` amount of a brand if it controls an intermediary who has that
 % amount of shares in the brand.
-has_shares("Yum", Intermediary, SomeBrand, Shares) :-
+has_shares("Yum", Intermediary, SomeBrand, Shares) <-
   controls("Yum", Intermediary),
   owns(Intermediary, SomeBrand, Shares).
 
 % Sum all the direct (line 8) and indirect shares (lines 12-14) of some brand
 % that Yum has.
-has_total_shares("Yum", SomeBrand, TotalShares) :-
+has_total_shares("Yum", SomeBrand, TotalShares) <-
   has_shares("Yum", Intermediary, SomeBrand, Shares),
   TotalShares = msum(Shares).
 
 % Yum! controls some brand if its joint ownership of that company's shares is
 % above 50%.
-controls("Yum", SomeBrand) :- has_total_shares("Yum", SomeBrand, Shares),
+controls("Yum", SomeBrand) <- has_total_shares("Yum", SomeBrand, Shares),
                               Shares > 0.5.
 ```
 
@@ -311,23 +311,23 @@ owns("Yum", "FastFoodsGroup", 0.7).
 owns("Yum", "McDonalds", 0.1).
 
 % Yum! has `Shares` amount of a brand if it owns that amount of shares in the brand.
-has_shares("Yum", _, SomeBrand, Shares) :- owns("Yum", SomeBrand, Shares).
+has_shares("Yum", _, SomeBrand, Shares) <- owns("Yum", SomeBrand, Shares).
 
 % Yum! has `Shares` amount of a brand if it controls an intermediary who has that
 % amount of shares in the brand.
-has_shares("Yum", Intermediary, SomeBrand, Shares) :-
+has_shares("Yum", Intermediary, SomeBrand, Shares) <-
   controls("Yum", Intermediary),
   owns(Intermediary, SomeBrand, Shares).
 
 % Sum all the direct (line 8) and indirect shares (lines 12-14) of some brand
 % that Yum has.
-has_total_shares("Yum", SomeBrand, TotalShares) :-
+has_total_shares("Yum", SomeBrand, TotalShares) <-
   has_shares("Yum", Intermediary, SomeBrand, Shares),
   TotalShares = msum(Shares).
 
 % Yum! controls some brand if its joint ownership of that company's shares is
 % above 50%.
-controls("Yum", SomeBrand) :- has_total_shares("Yum", SomeBrand, Shares),
+controls("Yum", SomeBrand) <- has_total_shares("Yum", SomeBrand, Shares),
                               Shares > 0.5.
 ```
 
@@ -341,11 +341,11 @@ will often result in unexpected output.
 The following are considered different, and not 2 branches of the same rule!
 
 ```
-someHead(A) :- someBody().
-someHead(A, B) :- someBody().
+someHead(A) <- someBody().
+someHead(A, B) <- someBody().
 
-ruleOne(A) :- someHead(A).
-ruleTwo(A, B) :- someHead(A, B).
+ruleOne(A) <- someHead(A).
+ruleTwo(A, B) <- someHead(A, B).
 ```
 
 `ruleOne` will only activate `someHead(A)` and `ruleTwo` will only activate `someHead(A, B)`.
@@ -355,11 +355,11 @@ than the number of arguments in the definition of that predicate. Prometheux
 will simply set the remaining variables to be `null.
 
 ```
-someHead(A, B, C) :- someBody().
-someHead(A, B, C) :- anotherBody().
+someHead(A, B, C) <- someBody().
+someHead(A, B, C) <- anotherBody().
 
-ruleOne(A) :- someHead(A). % Equivalent to someHead(A, null, null).
-ruleTwo(A, B) :- someHead(A, B). % Equivalent to someHead(A, B, null).
+ruleOne(A) <- someHead(A). % Equivalent to someHead(A, null, null).
+ruleTwo(A, B) <- someHead(A, B). % Equivalent to someHead(A, B, null).
 ```
 
 `ruleOne` and `ruleTwo` are defined by the both `someHead` rules, and each will
@@ -378,24 +378,24 @@ owns("Yum", "McDonalds", 0.1).
 
 % Rule 1: Conglomerate has `Shares` amount of a brand if it owns that amount of shares
 % in the brand.
-has_shares(Conglomerate, _, SomeBrand, Shares) :-
+has_shares(Conglomerate, _, SomeBrand, Shares) <-
   owns(Conglomerate, SomeBrand, Shares).
 
 % Rule 2: Conglomerate has `Shares` amount of a brand if it controls an intermediary
 % who has that amount of shares in the brand.
-has_shares(Conglomerate, Intermediary, SomeBrand, Shares) :-
+has_shares(Conglomerate, Intermediary, SomeBrand, Shares) <-
   controls(Conglomerate, Intermediary),
   owns(Intermediary, SomeBrand, Shares).
 
 % Sum all the direct (line 8-9) and indirect shares (lines 14-16) of some brand
 % that the conglomerate has.
-has_total_shares(Conglomerate, SomeBrand, TotalShares) :-
+has_total_shares(Conglomerate, SomeBrand, TotalShares) <-
   has_shares(Conglomerate, Intermediary, SomeBrand, Shares),
   TotalShares = msum(Shares).
 
 % Conglomerate controls some brand if its joint ownership of that company's
 % shares is above 50%.
-controls(Conglomerate, SomeBrand) :-
+controls(Conglomerate, SomeBrand) <-
   has_total_shares(Conglomerate, SomeBrand, Shares),
   Shares > 0.5.
 
@@ -441,14 +441,14 @@ owns("Yum", "FastFoodsGroup", 0.7).
 owns("Yum", "McDonalds", 0.1).
 
 % Rule 1: Yum! controls a brand if it owns > 50% of the shares in the brand.
-controls(Conglomerate, SomeBrand) :-
+controls(Conglomerate, SomeBrand) <-
   owns(Conglomerate, SomeBrand, Shares),
   Shares > 0.5.
 
 % Rule 2: Yum! controls a brand if the sum of its direct shares, and the
 % shares it owns indirectly via any intermediary that it owns > 50% of,
 % is more than 50%.
-controls(Conglomerate, SomeBrand) :-
+controls(Conglomerate, SomeBrand) <-
   owns(Conglomerate, Intermediary, IntermediaryShares),
   owns(Intermediary, SomeBrand, JointShares),
   owns(Conglomerate, SomeBrand, DirectShares),
@@ -483,8 +483,8 @@ Models are simply abstractions of some more complex system. The Vadalog rules th
 
 If we were to trace a family tree, we can keep going up the tree, finding an individual's parents, grandparents, great-grandparents and so on. If we can't abstract away this never-ending relationship, we'd have to model all of humanity just to conceptualise what a family tree is!
 
-For every predicate, the head atom (the thing before `:-`) declares what the rule's
-intention. We can read it as "ignore everything after `:-` for that is an implementation
+For every predicate, the head atom (the thing before `<-`) declares what the rule's
+intention. We can read it as "ignore everything after `<-` for that is an implementation
 detail". We don't care _how_ the rule is implemented just _what_ it represents.
 
 **The head atom is the abstraction of its definition in the rule's body.** Abstractions allow us to ignore how a rule is defined, and simply use it in the current context.
@@ -492,18 +492,18 @@ detail". We don't care _how_ the rule is implemented just _what_ it represents.
 Consider our ontology again:
 
 ```prolog showLineNumbers
-has_shares(Conglomerate, _, SomeBrand, Shares) :-
+has_shares(Conglomerate, _, SomeBrand, Shares) <-
   owns(Conglomerate, SomeBrand, Shares).
 
-has_shares(Conglomerate, Intermediary, SomeBrand, Shares) :-
+has_shares(Conglomerate, Intermediary, SomeBrand, Shares) <-
   controls(Conglomerate, Intermediary, IntermediateShares),
   owns(Intermediary, SomeBrand, Shares).
 
-has_total_shares(Conglomerate, SomeBrand, TotalShares) :-
+has_total_shares(Conglomerate, SomeBrand, TotalShares) <-
   has_shares(Conglomerate, Intermediary, SomeBrand, Shares),
   TotalShares = msum(Shares).
 
-controls(Conglomerate, SomeBrand) :-
+controls(Conglomerate, SomeBrand) <-
   has_total_shares(Conglomerate, SomeBrand, Shares),
   Shares > 0.5.
 ```
@@ -536,7 +536,7 @@ recursive programme to stop going in circles.
 This is why we have a base case, or a condition at which we tell the recursion to terminate. For us, this is the rule
 
 ```
-has_shares(Conglomerate, _, SomeBrand, Shares) :-
+has_shares(Conglomerate, _, SomeBrand, Shares) <-
   owns(Conglomerate, SomeBrand, Shares).
 ```
 
@@ -579,14 +579,14 @@ It actually feels more natural to write:
     owns("Yum", "McDonalds", 0.1).
 
     % Rule 1: Conglomerate controls a brand if it owns > 50% of the shares in the brand.
-    controls(Conglomerate, SomeBrand) :-
+    controls(Conglomerate, SomeBrand) <-
       owns(Conglomerate, SomeBrand, Shares),
       Shares > 0.5.
 
     % Rule 2: Conglomerate controls a brand if the sum of its direct shares, and the
     % shares it owns indirectly via any intermediary that it controls,
     % is more than 50%.
-    controls(Conglomerate, SomeBrand) :-
+    controls(Conglomerate, SomeBrand) <-
       controls(Conglomerate, Intermediary, IntermediaryShares),
       owns(Intermediary, SomeBrand, JointShares),
       owns(Conglomerate, SomeBrand, DirectShares),
@@ -605,14 +605,14 @@ It actually feels more natural to write:
     owns("Yum", "McDonalds", 0.1).
 
     % Rule 1: Conglomerate controls a brand if it owns > 50% of the shares in the brand.
-    controls(Conglomerate, SomeBrand) :-
+    controls(Conglomerate, SomeBrand) <-
       owns(Conglomerate, SomeBrand, Shares),
       Shares > 0.5.
 
     % Rule 2: Conglomerate controls a brand if the sum of its direct shares, and the
     % shares it owns indirectly via any intermediary that it owns > 50% of,
     % is more than 50%.
-    controls(Conglomerate, SomeBrand) :-
+    controls(Conglomerate, SomeBrand) <-
       owns(Conglomerate, Intermediary, IntermediaryShares),
       owns(Intermediary, SomeBrand, JointShares),
       owns(Conglomerate, SomeBrand, DirectShares),
@@ -708,7 +708,7 @@ the database.
     @qbind("controls", "postgresql", "database", "select controller,controllee from controls").
     @qbind("owns", "postgresql", "database", "select owner,owned,shares from ownership").
 
-    has_shares(Conglomerate, Intermediary, SomeBrand, Shares) :-
+    has_shares(Conglomerate, Intermediary, SomeBrand, Shares) <-
       controls(Conglomerate, Intermediary, IntermediateShares),
       owns(Intermediary, SomeBrand, Shares).
     ```
@@ -750,7 +750,7 @@ event(3, 1720643409, ".").
 state("", 0).
 
 % Next state is defined by the current state with the next event applied to it.
-state(NewValue, NewTime) :- state(Value, Time), 
+state(NewValue, NewTime) <- state(Value, Time), 
                             event(EventId, EventTime, Payload), 
                             NewTime = EventTime,
                             NewValue = Value + Payload,

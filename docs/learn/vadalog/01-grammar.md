@@ -26,7 +26,7 @@ clause: annotation | fact | rule
 
 1. **Annotation**: Configuration directives (e.g., `@bind`, `@output`)
 2. **Fact**: Ground truth statements (e.g., `person("john", 25).`)
-3. **Rule**: Logical inference rules (e.g., `adult(X) :- person(X, Age), Age >= 18.`)
+3. **Rule**: Logical inference rules (e.g., `adult(X) <- person(X, Age), Age >= 18.`)
 
 ---
 
@@ -52,7 +52,7 @@ company("acme", "technology").
 Rules define logical inference patterns:
 
 ```prolog
-rule: annotationBody* head ':-' body '.'
+rule: annotationBody* head '<-' body '.'
 ```
 
 ### Rule Head
@@ -69,16 +69,16 @@ head: atom (',' atom)* | egdHead | falseHead
 **Examples:**
 ```prolog
 % Regular head
-adult_customer(Name) :- customer(Name, Age), Age >= 18.
+adult_customer(Name) <- customer(Name, Age), Age >= 18.
 
 % Multiple heads
-high_value(Name), vip(Name) :- customer(Name, _, Balance), Balance > 10000.
+high_value(Name), vip(Name) <- customer(Name, _, Balance), Balance > 10000.
 
 % EGD head
-X = Y :- person(X, Age1), person(Y, Age2), Age1 = Age2.
+X = Y <- person(X, Age1), person(Y, Age2), Age1 = Age2.
 
 % Constraint (false head)
-#F :- employee(Name, Dept), Dept = "invalid".
+#F <- employee(Name, Dept), Dept = "invalid".
 ```
 
 ### Rule Body
@@ -104,13 +104,13 @@ literal: atom          # Positive literal
 **Examples:**
 ```prolog
 % Positive literal
-employee(Name, Dept) :- person(Name), works_in(Name, Dept).
+employee(Name, Dept) <- person(Name), works_in(Name, Dept).
 
 % Negative literal
-available(Name) :- employee(Name), not on_vacation(Name).
+available(Name) <- employee(Name), not on_vacation(Name).
 
 % Domain literal
-all_values(X) :- dom(*), X = value.
+all_values(X) <- dom(*), X = value.
 ```
 
 ---
@@ -140,10 +140,10 @@ notInCondition: varTerm NOTIN expression % !in
 
 **Examples:**
 ```prolog
-high_salary(Name) :- employee(Name, Salary), Salary > 100000.
-young_adult(Name) :- person(Name, Age), Age >= 18, Age < 30.
-tech_employee(Name) :- employee(Name, Dept), Dept == "technology".
-valid_dept(Name) :- employee(Name, Dept), Dept in {"engineering", "sales", "marketing"}.
+high_salary(Name) <- employee(Name, Salary), Salary > 100000.
+young_adult(Name) <- person(Name, Age), Age >= 18, Age < 30.
+tech_employee(Name) <- employee(Name, Dept), Dept == "technology".
+valid_dept(Name) <- employee(Name, Dept), Dept in {"engineering", "sales", "marketing"}.
 ```
 
 ---
@@ -190,15 +190,15 @@ expression NEQ expression     % !=
 
 **Examples:**
 ```prolog
-total_compensation(Name, Total) :- 
+total_compensation(Name, Total) <- 
     employee(Name, Salary, Bonus), 
     Total = Salary + Bonus.
 
-senior_employee(Name) :- 
+senior_employee(Name) <- 
     employee(Name, Years), 
     Years >= 5.
 
-department_union(Dept) :- 
+department_union(Dept) <- 
     engineering_dept(Dept) | sales_dept(Dept).
 ```
 
@@ -236,40 +236,40 @@ maxcount(expression?)          % Maximum count
 **Examples:**
 ```prolog
 % Calculate total salary by department (Dept is the group-by variable)
-dept_total(Dept, Total) :- 
+dept_total(Dept, Total) <- 
     employee(Name, Dept, Salary), 
     Total = msum(Salary).
 
 % Average age by department (Dept appears in both head and body for grouping)
-dept_avg_age(Dept, AvgAge) :- 
+dept_avg_age(Dept, AvgAge) <- 
     employee(Name, Dept, Age), 
     AvgAge = mavg(Age).
 
 % Median salary by department (robust to outliers)
-dept_median_salary(Dept, Median) :- 
+dept_median_salary(Dept, Median) <- 
     employee(Name, Dept, Salary), 
     Median = mmedian(Salary, "exact").
 
 % Approximate median for large datasets
-dept_approx_median(Dept, Median) :- 
+dept_approx_median(Dept, Median) <- 
     employee(Name, Dept, Salary), 
     Median = mmedian(Salary, "reservoir_sampling").
 
 % Count employees per department (Dept is the grouping variable)
-dept_count(Dept, Count) :- 
+dept_count(Dept, Count) <- 
     employee(Name, Dept), 
     Count = mcount().
 
 % Global aggregation (no group-by variables in head)
-total_employees(Count) :- 
+total_employees(Count) <- 
     employee(Name, _, _), 
     Count = mcount().
 
 % IMPORTANT: Group-by variables appear in the head AND body
 % The aggregation function takes ONLY the expression to aggregate
 % ❌ WRONG: mavg(Age, [Dept]) 
-% ✅ CORRECT: avg_age(Dept, Avg) :- employee(_, Dept, Age), Avg = mavg(Age).
-% ✅ CORRECT: median_age(Dept, Med) :- employee(_, Dept, Age), Med = mmedian(Age, "exact").
+% ✅ CORRECT: avg_age(Dept, Avg) <- employee(_, Dept, Age), Avg = mavg(Age).
+% ✅ CORRECT: median_age(Dept, Med) <- employee(_, Dept, Age), Med = mmedian(Age, "exact").
 ```
 
 ---
@@ -300,11 +300,11 @@ strip(string)                      % Remove leading/trailing whitespace
 
 **Examples:**
 ```prolog
-full_name(FullName) :- 
+full_name(FullName) <- 
     person(FirstName, LastName), 
     FullName = concat(FirstName, " ", LastName).
 
-email_domain(Domain) :- 
+email_domain(Domain) <- 
     user(Email), 
     Parts = split(Email, "@"), 
     Domain = collections:get(Parts, 2).
@@ -344,11 +344,11 @@ _between_(value, min, max)  % Both inclusive
 
 **Examples:**
 ```prolog
-young_adult(Name) :- 
+young_adult(Name) <- 
     person(Name, Age), 
     _between_(Age, 18, 25).
 
-working_hours(Hour) :- 
+working_hours(Hour) <- 
     time_entry(Hour), 
     _between_(Hour, 9, 17).
 ```
@@ -420,13 +420,13 @@ functionCall: ID('(' (expression (',' expression)*)? ')')
 **Examples:**
 ```prolog
 % Math functions
-sqrt_value(Result) :- number(X), Result = math:sqrt(X).
+sqrt_value(Result) <- number(X), Result = math:sqrt(X).
 
 % Date functions  
-tomorrow(Date) :- today(Today), Date = date:next_day(Today).
+tomorrow(Date) <- today(Today), Date = date:next_day(Today).
 
 % Hash functions
-user_hash(Hash) :- user(Data), Hash = hash:sha1(Data).
+user_hash(Hash) <- user(Data), Hash = hash:sha1(Data).
 ```
 
 ---
@@ -441,7 +441,7 @@ paramOperation: '${' paramTerm '}'
 
 **Example:**
 ```prolog
-filtered_data(X) :- data(X, Value), Value > ${threshold}.
+filtered_data(X) <- data(X, Value), Value > ${threshold}.
 ```
 
 ---

@@ -14,21 +14,21 @@ event(3, "multiply", 4).
 event(4, "add", 6).
 
 % As always, recursive rules always need a base case that's grounded in facts.
-state(Time, Value) :- initialState(Time,Value).
+state(Time, Value) <- initialState(Time,Value).
 
-state(Time, Value) :- state(InitialTime, InitialValue),
+state(Time, Value) <- state(InitialTime, InitialValue),
                       event(EventTime, "add", ValueToAdd),
                       Value = InitialValue + ValueToAdd,
                       EventTime = InitialTime + 1,
                       Time = EventTime.
 
-state(Time, Value) :- state(InitialTime, InitialValue),
+state(Time, Value) <- state(InitialTime, InitialValue),
                       event(EventTime,"subtract", ValueToSubtract),
                       Value = InitialValue - ValueToSubtract,    
                       EventTime = InitialTime + 1
                       Time = EventTime.
 
-state(Time, Value) :- state(InitialTime, InitialValue),
+state(Time, Value) <- state(InitialTime, InitialValue),
                       event(EventTime,"multiply", ValueToMultiply),
                       Value = InitialValue * ValueToMultiply,    
                       EventTime = InitialTime + 1
@@ -58,13 +58,13 @@ To fix this, we simply add an alias to the head predicate (line 8), and assign
 it the same value (line 12).
 ```prolog showLineNumbers {2,3,5,8,12}
 % This does not work yet
-state(EventTime,Value) :- state(InitialTime, InitialValue),
+state(EventTime,Value) <- state(InitialTime, InitialValue),
                           event(EventTime, "add", ValueToAdd),
                           Value = InitialValue + ValueToAdd,
                           EventTime == InitialTime + 1.
 
 % Adding an alias on line 12 fixes this problem.
-state(NextTime,Value) :- state(InitialTime, InitialValue),
+state(NextTime,Value) <- state(InitialTime, InitialValue),
                          input(EventTime, "add", ValueToAdd),
                          Value = InitialValue + ValueToAdd,
                          EventTime = InitialTime + 1,

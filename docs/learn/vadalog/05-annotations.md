@@ -16,13 +16,13 @@ Stand-alone annotations adopt the following syntax:
 Rule-level annotations adopt the following syntax:
 
 ```
-@annotationName(p1, …, pn) a(X) :- b(X,Y),c(Y).
+@annotationName(p1, …, pn) a(X) <- b(X,Y),c(Y).
 ```
 
 Multiple rule-level annotations are also supported:
 
 ```
-@annotationName1(p1, …, pm) @annotationName2(p1, …, pn) a(X) :- b(X,Y),c(Y).
+@annotationName1(p1, …, pm) @annotationName2(p1, …, pn) a(X) <- b(X,Y),c(Y).
 ```
 
 The fact-level annotations adopt the following syntax:
@@ -89,7 +89,7 @@ Consider this simple example:
 
 ```prolog showLineNumbers {4}
 b(1, "2", 1.0, "Davide").
-a(A, B, C, D) :- b(A, B, C, D).
+a(A, B, C, D) <- b(A, B, C, D).
 
 @model("a", "['first:string', 'second:string', 'third:double', 'fourth:string']").
 @output("a").
@@ -141,7 +141,7 @@ Assume to have a parquet dataset containing the following row:
 4. Define the rules using the schema-defined predicates:
 
    ```prolog
-   a(A, B, C, D) :- b(A, B, C, D).
+   a(A, B, C, D) <- b(A, B, C, D).
    @output("a").
    ```
 
@@ -296,7 +296,7 @@ event(1, "start state A", "end state A", 0.1).
 state("start state A", "positive", 10.0).
 state("end state A", "negative", -10.0).
 
-out_event(StartState, EndState, Prob) :- event(Id, StartState, EndState, Prob).
+out_event(StartState, EndState, Prob) <- event(Id, StartState, EndState, Prob).
 @output("out_event").
 ```
 
@@ -318,13 +318,13 @@ event("E3", "nbalance", "lost", 0.8).
 event("E4", "lost", "lost", 1.0).
 risk("NBRisk", ["E1", "~E1", "E2", "E3", "E4"]).
 
-risk_path_prob(RiskId, StartStateId, StartStateId, NumSteps, Events, Prob) :- 
+risk_path_prob(RiskId, StartStateId, StartStateId, NumSteps, Events, Prob) <- 
    risk(RiskId, Events), 
    NumSteps = 1,
    StartStateId = "pbalance", 
    Prob=1.0.
 
-risk_path_prob(RiskId, StartStateId, EndStateId, NumStepsNew, Events, ProbNew) :- 
+risk_path_prob(RiskId, StartStateId, EndStateId, NumStepsNew, Events, ProbNew) <- 
    risk_path_prob(RiskId, StartStateId, MidStateId, NumStepsOld, Events, ProbOld), 
    event(EventId, MidStateId, EndStateId, ProbEvent), 
    NumStepsNew = NumStepsOld + 1, 
@@ -363,7 +363,7 @@ Let's take a look at this example:
 @output("m").
 @bind("m","postgres","doctors_source","Medprescriptions").
 @bind("q","sqlite","doctors_source","Medprescriptions").
-m(X) :- b(X),q(X).
+m(X) <- b(X),q(X).
 ```
 
 This example reads the facts for `m` from a Postgres data source, specifically
@@ -379,8 +379,8 @@ result the facts from the two sources are merged into `edge`.
 
 ```prolog showLineNumbers
 @output("path").
-path(X,Y) :- edge(X,Y).
-path(X,Z) :- edge(X,Y),path(Y,Z).
+path(X,Y) <- edge(X,Y).
+path(X,Z) <- edge(X,Y),path(Y,Z).
 @bind("edge","csv","path/to/myCsv1/","graph_partition_1.csv").
 @bind("edge","postgres","graph_source_db","graph_partition_2_table").
 ```
@@ -509,7 +509,7 @@ Consider this example:
 t(1,"b",5).
 t(1,"a",1).
 t(1,"c",1).
-p(X,Y,Z) :- t(X,Y,Z).
+p(X,Y,Z) <- t(X,Y,Z).
 @output("p").
 @post("p","orderby(3,-2)").
 ```
@@ -541,7 +541,7 @@ position in atomName (starting from 1).
 t(1,"b",5).
 t(1,"b",1).
 t(1,"c",1).
-p(X,Y,Z) :- t(X,Y,Z).
+p(X,Y,Z) <- t(X,Y,Z).
 @output("p").
 @post("p","min(3)").
 ```
@@ -561,7 +561,7 @@ annotation.
 t(1,"b",1).
 t(2,"c",1).
 t(1,"a",1).
-q(X,Y,Z) :- t(X,Y,Z).
+q(X,Y,Z) <- t(X,Y,Z).
 @output("q").
 @post("q","min(1,2)").
 ```
@@ -594,7 +594,7 @@ position in atomName (starting from 1).
 t(1,"b",5).
 t(1,"b",1).
 t(1,"c",1).
-p(X,Y,Z) :- t(X,Y,Z).
+p(X,Y,Z) <- t(X,Y,Z).
 @output("p").
 @post("p","max(3)").
 ```
@@ -614,7 +614,7 @@ annotation.
 t(2,"b",1).
 t(1,"c",1).
 t(2,"a",1).
-q(X,Y,Z) :- t(X,Y,Z).
+q(X,Y,Z) <- t(X,Y,Z).
 @output("q").
 @post("q","max(2,1)").
 ```
@@ -654,7 +654,7 @@ f(3,6,"b", 9).
 @post("g","argmin(4,<2,3>)").
 @post("g","orderby(1)").
 
-g(X,Y,Z,K) :- f(X,Y,Z,K).
+g(X,Y,Z,K) <- f(X,Y,Z,K).
 ```
 
 The expected result is:
@@ -685,7 +685,7 @@ f(4,3,"a", 5).
 f(2,6,"b", 7).
 f(2,6,"b", 8).
 f(3,6,"b", 9).
-g(X,Y,Z,K) :- f(X,Y,Z,K).
+g(X,Y,Z,K) <- f(X,Y,Z,K).
 @output("g").
 @post("g","argmax(4,<2,3>)").
 @post("g","orderby(1)").
@@ -775,7 +775,7 @@ connection("B", "D", 7).
 connection("C", "D", 12).
 connection("D", "E", 5).
 
-valid_path(Start, End, Distance) :- 
+valid_path(Start, End, Distance) <- 
     connection(Start, End, Distance), 
     Distance >= ${min_distance}, 
     Distance <= ${max_distance}.
@@ -805,7 +805,7 @@ task("TaskA", "TaskC", 2).
 task("TaskB", "TaskD", 1).
 task("TaskC", "TaskD", 5).
 
-high_priority_task(Start, End, Priority) :- 
+high_priority_task(Start, End, Priority) <- 
     task(Start, End, Priority), 
     AllowedPriorities = ${priority_levels}, 
     IsHighPriority = collections:contains(AllowedPriorities, Priority), 

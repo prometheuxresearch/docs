@@ -39,7 +39,7 @@ curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/vadalog/a
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
   -d '{
-    "program": "@input(\"products\").\n@output(\"expensive_products\").\nexpensive_products(Product, Price) :- products(Product, Price), Price > 100."
+    "program": "@input(\"products\").\n@output(\"expensive_products\").\nexpensive_products(Product, Price) <- products(Product, Price), Price > 100."
   }'
 ```
 
@@ -79,7 +79,7 @@ curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/vadalog/p
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
   -d '{
-    "program": "@bind(\"data\",\"csv useHeaders=true\",\"/tmp\",\"test.csv\").\nresult(X) :- data(X).\n@output(\"result\").",
+    "program": "@bind(\"data\",\"csv useHeaders=true\",\"/tmp\",\"test.csv\").\nresult(X) <- data(X).\n@output(\"result\").",
     "outputPredicate": "result"
   }'
 ```
@@ -154,7 +154,7 @@ curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/vadalog/e
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
   -d '{
-    "program": "@input(\"products\").\n@output(\"expensive_products\").\nexpensive_products(Product, Price) :- products(Product, Price), Price > ?threshold.",
+    "program": "@input(\"products\").\n@output(\"expensive_products\").\nexpensive_products(Product, Price) <- products(Product, Price), Price > ?threshold.",
     "params": {
       "threshold": 100
     }
@@ -256,19 +256,19 @@ REST-only flow: analyze structure, optionally parse binds, then evaluate.
 curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/vadalog/analyze" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
-  -d '{"program": "@input(\"products\").\n@output(\"expensive_products\").\nexpensive_products(Product, Price) :- products(Product, Price), Price > ?threshold."}'
+  -d '{"program": "@input(\"products\").\n@output(\"expensive_products\").\nexpensive_products(Product, Price) <- products(Product, Price), Price > ?threshold."}'
 
 # 2. Parse binds (skip if the program has no @bind / @qbind)
 curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/vadalog/parse-binds" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
-  -d '{"program": "@input(\"products\").\n@output(\"expensive_products\").\nexpensive_products(Product, Price) :- products(Product, Price), Price > ?threshold.", "outputPredicate": "expensive_products"}'
+  -d '{"program": "@input(\"products\").\n@output(\"expensive_products\").\nexpensive_products(Product, Price) <- products(Product, Price), Price > ?threshold.", "outputPredicate": "expensive_products"}'
 
 # 3. Evaluate with parameters
 curl -X POST "https://api.prometheux.ai/jarvispy/my-org/my-user/api/v1/vadalog/evaluate" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
-  -d '{"program": "@input(\"products\").\n@output(\"expensive_products\").\nexpensive_products(Product, Price) :- products(Product, Price), Price > ?threshold.", "params": {"threshold": 100}}'
+  -d '{"program": "@input(\"products\").\n@output(\"expensive_products\").\nexpensive_products(Product, Price) <- products(Product, Price), Price > ?threshold.", "params": {"threshold": 100}}'
 ```
 
 Replace `YOUR_JWT_TOKEN` and the org/user path with your values.

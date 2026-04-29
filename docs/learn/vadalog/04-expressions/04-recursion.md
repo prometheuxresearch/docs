@@ -24,8 +24,8 @@ edge(1, 2).
 edge(2, 3).
 edge(1, 4).
 edge(4, 5).
-path(X, Y) :- edge(X, Y).
-path(X, Z) :- path(Y, Z), edge(X, Y).
+path(X, Y) <- edge(X, Y).
+path(X, Z) <- path(Y, Z), edge(X, Y).
 @output("path").
 ```
 

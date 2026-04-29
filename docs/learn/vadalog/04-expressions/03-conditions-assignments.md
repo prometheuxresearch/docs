@@ -21,7 +21,7 @@ Each rule can have multiple comma-separated conditions.
 ```prolog showLineNumbers {3}
 contract("Mark",14).
 contract("Jeff",22).
-rich(X) :- contract(X,Y),Y>=20.
+rich(X) <- contract(X,Y),Y>=20.
 @output("rich").
 ```
 
@@ -37,7 +37,7 @@ Consider this next example:
 ```prolog showLineNumbers {3}
 balanceItem(1, 7, 2, 5).
 balanceItem(2, 2, 2, 7).
-error(E, I) :- balanceItem(I, X, Y, Z), X <> Y+Z.
+error(E, I) <- balanceItem(I, X, Y, Z), X <> Y+Z.
 @output("error").
 ```
 
@@ -64,7 +64,7 @@ player(3, "Chelsea").
 age(3, 18).
 team("Chelsea").
 team("Bayern").
-seniorEnglish(X) :- player(X, Y), team(Y), age(X, A), Y=="Chelsea", A > 20.
+seniorEnglish(X) <- player(X, Y), team(Y), age(X, A), Y=="Chelsea", A > 20.
 @output("seniorEnglish").
 ```
 
@@ -88,7 +88,7 @@ Each rule can have multiple comma-separated assignments.
 ```prolog showLineNumbers {3,4}
 balanceItem("loans", 23.0).
 balanceItem("deposits", 20.0).
-operations(Q, Z, A) :- balanceItem(I1,X), balanceItem(I2,Y),
+operations(Q, Z, A) <- balanceItem(I1,X), balanceItem(I2,Y),
                        I1=="loans", I2=="deposits", 
                        Z=X+Y, 
                        A=(X+Y)/2.

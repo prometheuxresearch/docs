@@ -21,21 +21,21 @@ This problem can be modeled via the following set of recursive Vadalog rules.
 ```prolog showLineNumbers
 % base case: if a company X owns Y with shares Q then there is direct a
 % controlled_share relationship from X to Y with share Q
-controlled_shares(X,Y,Y,Q) :- own(X,Y,Q), X<>Y.
+controlled_shares(X,Y,Y,Q) <- own(X,Y,Q), X<>Y.
 
 % recursive case: if a company X controls Y with shares K
 % and the company Y owns Z with share Q, then there there is a indirect
 % controlled_share relationship from X to Y via Z with share Q
-controlled_shares(X,Z,Y,Q) :- control(X,Y), own(Y,Z,Q), X<>Z, Z<>Y, X<>Y.
+controlled_shares(X,Z,Y,Q) <- control(X,Y), own(Y,Z,Q), X<>Z, Z<>Y, X<>Y.
 
 % if X has controlled_shares of Y, via any company Z with shares Q, then the total
 % controlled share are computed with an aggregation msum, that groups
 % by X and Z and aggregates the sum of Q
-total_controlled_shares(X,Y,S) :- controlled_shares(X,Y,Z,Q), S=msum(Q).
+total_controlled_shares(X,Y,S) <- controlled_shares(X,Y,Z,Q), S=msum(Q).
 
 % if the total controlled shares Q of Y by X is greater than 0.5, then X
 % control Y with shares Q.
-control(X,Y) :- total_controlled_shares(X,Y,Q), Q>0.5.
+control(X,Y) <- total_controlled_shares(X,Y,Q), Q>0.5.
 
 @output("control").
 ```
@@ -102,13 +102,13 @@ own("A", "C", 0.2).
 % the visited node X and the visited node Y, then there is a closeLinkPaths of X
 % over Y with shares W and we bring the list of visited nodes P. We bring in the
 % head the list and we will use it in recursive rule
-closeLinkPaths(X,Y,W,P) :- own(X,Y,W), P={}|X|Y, X<>Y.
+closeLinkPaths(X,Y,W,P) <- own(X,Y,W), P={}|X|Y, X<>Y.
 
 % if there is a closeLinkPath from X to Y with shares W1 with a set of visited
 % nodes P1, and the node Z is not in the list of the visited nodes, the node Z is
 % added in the set of visited nodes, then there is a closeLinkPaths from X,Z
 % with visited nodes P
-closeLinkPaths(X,Z,J,P) :- closeLinkPaths(X,Y,W1,P1),
+closeLinkPaths(X,Z,J,P) <- closeLinkPaths(X,Y,W1,P1),
                            own(Y,Z,W2),
                            J = W1\*W2,
                            P = P1|Z,
@@ -117,11 +117,11 @@ closeLinkPaths(X,Z,J,P) :- closeLinkPaths(X,Y,W1,P1),
 % if there is a closeLinkPaths from the company X to the company Y with shares W
 % and the set of visited nodes P, then there is a close_link_sum by grouping by
 % X and Y with totale share J, by aggregating the sum of W
-close_link_sum(X,Y,J) :- closeLinkPaths(X,Y,W,P), J = msum(W).
+close_link_sum(X,Y,J) <- closeLinkPaths(X,Y,W,P), J = msum(W).
 
 % if there is a close_link_sum of X over Y with shares W, and the shares is
 % greater than 0.2, then the companies X and Y are in close link with shares W
-close_link(X,Y,W) :- close_link_sum(X,Y,W), W >= 0.2.
+close_link(X,Y,W) <- close_link_sum(X,Y,W), W >= 0.2.
 @output("close_link").
 ```
 

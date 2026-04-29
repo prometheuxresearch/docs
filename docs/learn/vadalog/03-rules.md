@@ -12,7 +12,7 @@ the head predicate, given facts of the single body predicate.
 ```prolog showLineNumbers {3}
 employee(1).
 employee(2).
-department(Y,X) :- employee(X).
+department(Y,X) <- employee(X).
 @output("department").
 ```
 
@@ -38,7 +38,7 @@ _Join rules_ are rules with multiple atoms in the body. They basically define
 facts of the head predicate, given facts of the body.
 
 ```
-project(Z,X) :- employee(X), department(Y,X).
+project(Z,X) <- employee(X), department(Y,X).
 ```
 
 For each employee X in a department Y, there exists a project Z in which they
@@ -52,7 +52,7 @@ employee("Jack").
 employee("Ruth").
 department("science").
 department("finance").
-canWork(X, Y, Z) :- employee(X), department(Y).
+canWork(X, Y, Z) <- employee(X), department(Y).
 @output("canWork").
 ```
 
@@ -79,7 +79,7 @@ criteria, to be applied to the facts considered in the rule.
 ```prolog showLineNumbers {3}
 employee("Mark").
 junior("Mark").
-contract(X, "basic", 20) :- employee(X), junior(X).
+contract(X, "basic", 20) <- employee(X), junior(X).
 @output("contract").
 ```
 
@@ -95,8 +95,8 @@ For this next example:
 ```prolog showLineNumbers {3,4}
 employee("Mark","junior").
 employee("Ruth","senior").
-contract(X,"basic", 20) :- employee(X, "junior").
-contract(X,"advanced", 40) :- employee(X, "senior").
+contract(X,"basic", 20) <- employee(X, "junior").
+contract(X,"advanced", 40) <- employee(X, "senior").
 @output("contract").
 ```
 

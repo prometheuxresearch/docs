@@ -20,10 +20,10 @@ edge("d","h").
 edge("f","g").
 
 % base case: if there is and edge from the node X to the node Y then there is a path from X to Y %
-path(X,Y) :- edge(X,Y).
+path(X,Y) <- edge(X,Y).
 
 % recursive case: if there is a path from the node X to the node Y and there is an edge from the node Y to the node Z, then there is a path from the node X to the node Z %
-path(X,Z) :- path(X,Y),edge(Y,Z).
+path(X,Z) <- path(X,Y),edge(Y,Z).
 
 @output("path").
 ```
@@ -46,20 +46,20 @@ edge("d","h").
 edge("f","g").
 
 % create undirected edges from directed edges
-edge_undirected(X,Y) :- edge(X,Y).
-edge_undirected(Y,X) :- edge(X,Y).
+edge_undirected(X,Y) <- edge(X,Y).
+edge_undirected(Y,X) <- edge(X,Y).
 
 % define all nodes in the graph
-node(X) :- edge_undirected(X,Y).
+node(X) <- edge_undirected(X,Y).
 
 % count the total number of nodes
-num_nodes(Num) :- node(X), Num = mcount(). 
+num_nodes(Num) <- node(X), Num = mcount(). 
 
 % calculate the degree of each node
-node_degree(N1,Degree) :- edge_undirected(N1,N2), Degree = mcount().
+node_degree(N1,Degree) <- edge_undirected(N1,N2), Degree = mcount().
 
 % calculate normalized degree centrality for each node
-degree_centrality(N,DC) :- 
+degree_centrality(N,DC) <- 
     node_degree(N,Degree),
     num_nodes(Num),
     Nodes = Num-1,
@@ -89,17 +89,17 @@ edge("d","h").
 edge("f","g").
 
 % create undirected edges from directed edges
-edge_undirected(X,Y) :- edge(X,Y).
-edge_undirected(Y,X) :- edge(X,Y).
+edge_undirected(X,Y) <- edge(X,Y).
+edge_undirected(Y,X) <- edge(X,Y).
 
 % define all nodes in the graph
-node(X) :- edge_undirected(X,Y).
+node(X) <- edge_undirected(X,Y).
 
 % each node belongs to a community
-community(X, C) :- node(X).
+community(X, C) <- node(X).
 
 % if two nodes are connected by an (undirected) edge, they belong to the same community
-C1 = C2 :- edge_undirected(X, Y), community(X, C1), community(Y, C2), X!=Y.
+C1 = C2 <- edge_undirected(X, Y), community(X, C1), community(Y, C2), X!=Y.
 
 @post("community", "orderby(1)").
 ```

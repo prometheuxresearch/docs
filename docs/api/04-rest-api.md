@@ -28,7 +28,7 @@ result values] }, "types" : { "atom_name" : { list of result types } },
 
 - **Sample Call**:
   ```bash
-  curl -X POST 'http://localhost:8080/evaluate' --data 'program=a(1,3).b(X,Y):-a(X,Y).@output("b").'
+  curl -X POST 'http://localhost:8080/evaluate' --data 'program=a(1,3).b(X,Y)<-a(X,Y).@output("b").'
   ```
   gives the following response:
   ```json
@@ -41,7 +41,7 @@ result values] }, "types" : { "atom_name" : { list of result types } },
   ```
 - **Sample Call with modules**:
   ```bash
-  curl 'http://localhost:8080/evaluate?program=@module(%22m1%22).@include(%22m2%22).a(1).&otherPrograms=@module(%22m2%22).b(X):-a(X).@output(%22b%22).&modules=@module(%22m3%22).b(X):-a(X).@output(%22b%22).'
+  curl 'http://localhost:8080/evaluate?program=@module(%22m1%22).@include(%22m2%22).a(1).&otherPrograms=@module(%22m2%22).b(X)<-a(X).@output(%22b%22).&modules=@module(%22m3%22).b(X)<-a(X).@output(%22b%22).'
   ```
   gives the following response:
   ```json

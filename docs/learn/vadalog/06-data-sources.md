@@ -160,7 +160,7 @@ Simply reading a csv file into a relation:
 
 ```prolog showLineNumbers
 @bind("myCsv", "csv", "/path_to_csv/folder", "csv_name.csv").
-myAtom(X,Y,Z) :- myCsv(X,Y,Z).
+myAtom(X,Y,Z) <- myCsv(X,Y,Z).
 @output("myAtom").
 ```
 
@@ -172,13 +172,13 @@ We can also map the columns:
 @mapping("myCsv", 1, "var2", "string").
 @mapping("myCsv", 2, "var3", "string").
 
-myAtom(X,Y,Z) :- myCsv(X,Y,Z).
+myAtom(X,Y,Z) <- myCsv(X,Y,Z).
 @output("myAtom").
 ```
 
-**Selecting columns and filtering with SQL body rules**
+**Selecting columns and filtering with SQL**
 
-To select specific columns or filter rows, bind the full CSV with `useHeaders=true` and use a SQL body rule over the bound predicate. The SQL query can reference column names directly from the CSV header:
+To select specific columns or filter rows, bind the full CSV with `useHeaders=true` and use a rule with a SQL body over the bound predicate. The SQL query can reference column names directly from the CSV header:
 
 ```prolog showLineNumbers
 @bind("users", "csv useHeaders=true", "/path_to_csv/folder", "users.csv").
@@ -193,7 +193,7 @@ To store results into another CSV file, bind the output predicate:
 ```prolog
 @bind("users", "csv useHeaders=true", "/path_to_csv/folder", "users.csv").
 
-% Filter users using a SQL body rule
+% Filter users using SQL
 young_users() <- SELECT Name, Surname, Age FROM users WHERE Age < 25.
 
 @output("young_users").
@@ -212,7 +212,7 @@ young_users() <- SELECT Name, Surname, Age FROM users WHERE Age < 25.
 
 % Define a rule that extracts the 'OrderId' and 'ShippingDate' from the 'shipping_parquet' data
 % The 'shipping_parquet_test' concept is created from the data in the 'shipping_parquet' input
-shipping_parquet_test(OrderId, ShippingDate) :- shipping_parquet(OrderId, ShippingDate).
+shipping_parquet_test(OrderId, ShippingDate) <- shipping_parquet(OrderId, ShippingDate).
 
 % Declare the output concept 'shipping_parquet_test', making the processed data available for output
 @output("shipping_parquet_test").
@@ -232,7 +232,7 @@ In this example, we will read data from a CSV file and populate an Excel file wi
 @model("shipping_excel", "['OrderId:int','ShippingDate:date']").
 
 % Rule to populate the 'shipping_excel' concept by extracting OrderId and ShippingDate from 'shipping_excel_csv'
-shipping_excel(OrderId, ShippingDate) :- shipping_excel_csv(OrderId, ShippingDate).
+shipping_excel(OrderId, ShippingDate) <- shipping_excel_csv(OrderId, ShippingDate).
 
 % Bind the 'shipping_excel' concept to an Excel file 'shipping.xls' in the 'disk/data/input_files' directory
 % Use 'useHeaders=true' to indicate that column headers should be included in the Excel file
@@ -250,7 +250,7 @@ In this example, we will read data from the previously populated Excel file.
 @bind("shipping_excel", "excel useHeaders=true", "disk/data/input_files", "shipping.xls").
 
 % Define a rule that extracts OrderId and ShippingDate from 'shipping_excel'
-shipping_excel_test(OrderId, ShippingDate) :- shipping_excel(OrderId, ShippingDate).
+shipping_excel_test(OrderId, ShippingDate) <- shipping_excel(OrderId, ShippingDate).
 
 % Declare the output concept 'shipping_excel_test' for making the processed data available
 @output("shipping_excel_test").
@@ -265,7 +265,7 @@ In this example, we will read data from a specific sheet of an Excel file.
 @bind("shipping_excel_sheet", "excel useHeaders=true, dataAddress=''Sheet1'!A1'", "disk/data/input_files", "shipping.xls").      
 
 % Define a rule that extracts OrderId and ShippingDate from 'shipping_excel_sheet'
-shipping_excel_sheet_test(OrderId, ShippingDate) :- shipping_excel_sheet(OrderId, ShippingDate).
+shipping_excel_sheet_test(OrderId, ShippingDate) <- shipping_excel_sheet(OrderId, ShippingDate).
 
 % Declare the output concept 'shipping_excel_sheet_test' for making the processed data available
 @output("shipping_excel_sheet_test").     
@@ -334,7 +334,7 @@ This example demonstrates reading a JSON file without any query:
 @bind("orders", "json", "data/orders", "orders.json").
 
 % Access the data in Vadalog rules
-all_orders(OrderId, CustomerName, Total) :- orders(OrderId, _, CustomerName, _, _, Total, _).
+all_orders(OrderId, CustomerName, Total) <- orders(OrderId, _, CustomerName, _, _, Total, _).
 
 @output("all_orders").
 ```
@@ -456,7 +456,7 @@ For accessing individual nested fields in Vadalog rules (without SQL), you can u
 
 % Extract nested fields using struct:get
 % Syntax: Variable = struct:get("fieldName", StructField)
-order_customers(OrderId, CustomerName, Email) :- 
+order_customers(OrderId, CustomerName, Email) <- 
     orders(OrderId, _, Customer, _, _, _, _), 
     CustomerName = struct:get("name", Customer), 
     Email = struct:get("email", Customer).
@@ -470,7 +470,7 @@ order_customers(OrderId, CustomerName, Email) :-
 @bind("orders", "json", "data/orders", "orders.json").
 
 % Filter orders by status using struct:get
-shipped_orders(OrderId, CustomerName) :- 
+shipped_orders(OrderId, CustomerName) <- 
     orders(OrderId, _, Customer, _, _, _, Status), 
     OrderId = struct:get("order_id", orders),
     CustomerName = struct:get("name", Customer), 
@@ -485,7 +485,7 @@ shipped_orders(OrderId, CustomerName) :-
 @bind("orders", "json", "data/orders", "orders.json").
 
 % Access both 'customer' and 'shipping_address' structs
-order_shipping_info(OrderId, CustomerName, City, State) :- 
+order_shipping_info(OrderId, CustomerName, City, State) <- 
     orders(_, _, Customer, ShippingAddress, _, _, _), 
     OrderId = struct:get("order_id", orders),
     CustomerName = struct:get("name", Customer), 
@@ -506,7 +506,7 @@ Alternatively, you can specify SQL queries directly in the `@bind` annotation us
       "data/orders", 
       "orders.json").
 
-result(OrderId, CustomerName, Amount) :- high_value_orders(OrderId, CustomerName, Amount).
+result(OrderId, CustomerName, Amount) <- high_value_orders(OrderId, CustomerName, Amount).
 
 @output("result").
 ```
@@ -664,7 +664,7 @@ For extracts shipped with IBM's variable‑length framing (RDW‑prefixed record
       "/data/cobol",
       "transactions.bin").
 
-high_value_tx(Id, Amount) :-
+high_value_tx(Id, Amount) <-
     transactions(Id, _, _, Amount, _),
     Amount > 10000.
 
@@ -688,7 +688,7 @@ When the file uses a non‑standard framing (e.g. RDW whose length field is *not
       "s3a://my-legacy-bucket/cobol",
       "legacy.bin").
 
-result(Id, Code) :- legacy_stream(Id, Code, _).
+result(Id, Code) <- legacy_stream(Id, Code, _).
 @output("result").
 ```
 
@@ -705,12 +705,36 @@ If you prefer to query nested groups with `struct:get` (as you already do for JS
       "customer_master.dat").
 
 % CUST-ADDRESS is now a struct column; reach into it with struct:get.
-customer_city(Id, City) :-
+customer_city(Id, City) <-
     customer_master(Id, _, _, Address, _, _, _, _),
     City = struct:get("CUST_CITY", Address).
 
 @output("customer_city").
 ```
+
+### Querying COBOL data with SQL
+
+Like any file-based datasource, COBOL binds support SQL queries via the `<-` operator. The COBOL connector reads the binary file into a Spark Dataset, and Spark SQL executes the query in memory. This is useful for previewing, paginating, counting, or filtering mainframe data without writing COBOL-specific logic:
+
+```prolog
+@bind("customer_master",
+      "cobol copybook='/data/cobol/customer_master.cpy', cobolPreset='flat-fixed-ebcdic'",
+      "/data/cobol",
+      "customer_master.dat").
+
+% Preview the first 10 records
+customer_preview() <- SELECT * FROM customer_master LIMIT 10 OFFSET 0.
+
+% Count total records in the file
+customer_count(Total) <- SELECT COUNT(*) AS total FROM customer_master.
+
+@output("customer_preview").
+@output("customer_count").
+```
+
+:::tip End-to-end example
+For a complete example showing COBOL data preview, cross-source JOINs with PostgreSQL, and compliance rules, see [From Mainframe to Modern: Migrating Card Clearing](/examples/finance/card-clearing-migration).
+:::
 
 ### Tips
 
@@ -730,7 +754,7 @@ In this example, we read data from a CSV file and populate the customer table in
 @bind("customer_postgres_csv", "csv useHeaders=true", "disk/data/generated_data", "customer_postgres.csv").
 
 % Define a rule that extracts CustomerID, Name, Surname, and Email from the CSV and assigns them to the 'customer_postgres' concept
-customer_postgres(CustomerID, Name, Surname, Email) :- 
+customer_postgres(CustomerID, Name, Surname, Email) <- 
         customer_postgres_csv(CustomerID, Name, Surname, Email).
 
 % Define the data model for the 'customer_postgres' concept (mapping column names to types)
@@ -754,7 +778,7 @@ This example demonstrates reading the full customer table from PostgreSQL.
       "prometheux", "customer").
 
 % Define a rule to extract CustomerID, Name, Surname, and Email from the 'customer' table in PostgreSQL
-customer_postgres_test(CustomerID, Name, Surname, Email) :- 
+customer_postgres_test(CustomerID, Name, Surname, Email) <- 
         customer_postgres(CustomerID, Name, Surname, Email).
 
 % Declare the output concept 'customer_postgres_test' to make the processed data available
@@ -771,7 +795,7 @@ In this example, we read specific columns and filter data using a SQL query.
       "", "select CustomerID, Email from customer where CustomerID > 0").
 
 % Define a rule to filter the emails that end with 'prometheux.ai'
-customer_postgres_test(CustomerID, Email) :- 
+customer_postgres_test(CustomerID, Email) <- 
         customer_postgres(CustomerID, Email), OnlyPx = ends_with(Email, "prometheux.ai"), OnlyPx = #T.
 
 % Declare the output concept 'customer_postgres_test' to make the filtered data available
@@ -810,7 +834,7 @@ This example demonstrates how to read data from a Supabase PostgreSQL table usin
       "postgres", "owns").
 
 % Define a rule to extract data from the 'owns' table
-out(X, Y, Z) :- owns(X, Y, Z).
+out(X, Y, Z) <- owns(X, Y, Z).
 
 % Declare the output concept 'out' for making the processed data available
 @output("out").
@@ -826,7 +850,7 @@ Alternatively, instead of using the `url` parameter, you can specify the connect
       "postgres", "owns").
 
 % Define a rule to extract data from the 'owns' table
-out(X, Y, Z) :- owns(X, Y, Z).
+out(X, Y, Z) <- owns(X, Y, Z).
 
 % Declare the output concept 'out' for making the processed data available
 @output("out").
@@ -897,7 +921,7 @@ Once the read-only user is created, use it in your connection string:
 @bind("owns", "postgresql host='aws-1-eu-west-1.pooler.supabase.com', port='6543', username='vadalog_reader', password='[YOUR_SECURE_PASSWORD]'",
       "postgres", "ownerships").
 
-out(X, Y, Z) :- owns(X, Y, Z).
+out(X, Y, Z) <- owns(X, Y, Z).
 @output("out").
 ```
 
@@ -933,7 +957,7 @@ This example demonstrates how to read data from a simple Supabase table using th
                "https://[YOUR_PROJECT_ID].supabase.co/rest/v1/", "owns").
 
 % Define a rule to extract data from the 'owns' table
-out(X, Y, Z) :- owns(X, Y, Z).
+out(X, Y, Z) <- owns(X, Y, Z).
 
 % Declare the output concept 'out' for making the processed data available
 @output("out").
@@ -949,7 +973,7 @@ MariaDB is a popular open-source relational database, highly compatible with MyS
       "prometheux", "order_customer").
 
 % Define a rule that extracts OrderId, CustomerId, and Cost from the 'order_customer' table
-order_mariadb_test(OrderId, CustomerId, Cost) :- 
+order_mariadb_test(OrderId, CustomerId, Cost) <- 
         order_mariadb(OrderId, CustomerId, Cost).
 
 % Declare the output concept 'order_mariadb_test', making the processed data available
@@ -966,7 +990,7 @@ This example shows how to read data from a CSV file, populate Neo4j with Person 
 @bind("persons_order_neo4j_csv", "csv useHeaders=true", "disk/data/generated_data", "persons_order_neo4j.csv").
 
 % Define the 'person_neo4j' concept by extracting customer details from the CSV file
-person_neo4j(CustomerId, Name, Surname, Email) :- 
+person_neo4j(CustomerId, Name, Surname, Email) <- 
         persons_order_neo4j_csv(CustomerId, Name, Surname, Email, OrderId, Cost).
 
 % Bind the 'person_neo4j' concept to a Neo4j node with label 'Person'
@@ -977,7 +1001,7 @@ person_neo4j(CustomerId, Name, Surname, Email) :-
 @model("person_neo4j", "['customerId(ID):int', 'name:string', 'surname:string', 'email:string']").
 
 % Define the 'order' concept by extracting order details from the CSV file
-order(OrderId, Cost) :- 
+order(OrderId, Cost) <- 
         persons_order_neo4j_csv(CustomerId, Name, Surname, Email, OrderId, Cost).
 
 % Bind the 'order' concept to a Neo4j node with label 'Order'
@@ -989,7 +1013,7 @@ order(OrderId, Cost) :-
 @mapping("order", 1, "cost", "string").
 
 % Define the 'order_person_rel_neo4j' concept for creating a relationship between Order and Person
-order_person_rel_neo4j(OrderId, CustomerId) :- 
+order_person_rel_neo4j(OrderId, CustomerId) <- 
         persons_order_neo4j_csv(CustomerId, Name, Surname, Email, OrderId, Cost).
 
 % Bind the 'order_person_rel_neo4j' concept to create a relationship between the 'Order' and 'Person' nodes in Neo4j
@@ -1009,7 +1033,7 @@ In this example, we query Neo4j to retrieve the relationship between Person and 
        "MATCH (o:Order)-[r:IS_RELATED_TO]->(p:Person) RETURN o.orderId, p.customerId").
 
 % Define a rule to store the result of the Cypher query into the 'persons_order_neo4j_test' concept
-persons_order_neo4j_test(CustomerId, OrderId) :- 
+persons_order_neo4j_test(CustomerId, OrderId) <- 
         persons_order_neo4j(CustomerId, OrderId).
 
 % Declare the output concept 'persons_order_neo4j_test' to make the query result available
@@ -1029,7 +1053,7 @@ Bind a Neo4j node label and read all its data:
 ```prolog
 @bind("person_db", "neo4j username='neo4j', password='myPassw', host='neo4j-host', port=7680", "neo4j", "(:Person)").
 
-person_result(Id, Name, Surname, Email) :- person_db(Id, Name, Surname, Email).
+person_result(Id, Name, Surname, Email) <- person_db(Id, Name, Surname, Email).
 
 @output("person_result").
 ```
@@ -1151,7 +1175,7 @@ This example shows how to read data from a CSV file and write it to a DynamoDB t
 @model("users_dynamodb", "['id:string', 'name:string', 'email:string', 'age:int']").
 
 % Define a rule that maps CSV data to the DynamoDB concept
-users_dynamodb(Id, Name, Email, Age) :- 
+users_dynamodb(Id, Name, Email, Age) <- 
         users_csv(Id, Name, Email, Age).
 
 % Declare the output concept for writing to DynamoDB
@@ -1177,7 +1201,7 @@ This example demonstrates reading data from an existing DynamoDB table.
       "us-east-2", "users").
 
 % Define a rule to filter users by age
-young_users(Id, Name, Email) :- 
+young_users(Id, Name, Email) <- 
         users_dynamodb(Id, Name, Email, Age), Age < 30.
 
 % Declare the output concept for the filtered results
@@ -1196,7 +1220,7 @@ This example shows how to use PartiQL (SQL-compatible query language) to query D
        "SELECT user_id, order_date, total_amount FROM orders WHERE user_id = 'u123' AND begins_with(order_date, '2025')").
 
 % Define a rule to process the query results
-recent_orders(UserId, OrderDate, Amount) :- 
+recent_orders(UserId, OrderDate, Amount) <- 
         user_orders(UserId, OrderDate, Amount).
 
 % Declare the output concept
@@ -1215,7 +1239,7 @@ This example demonstrates creating a table with both partition and sort keys, pl
 @model("orders_dynamodb", "['customer_id:string', 'order_date:string', 'order_id:string', 'total_amount:double', 'status:string']").
 
 % Define a rule to map CSV data to the DynamoDB concept
-orders_dynamodb(CustomerId, OrderDate, OrderId, TotalAmount, Status) :- 
+orders_dynamodb(CustomerId, OrderDate, OrderId, TotalAmount, Status) <- 
         orders_csv(CustomerId, OrderDate, OrderId, TotalAmount, Status).
 
 % Declare the output concept
@@ -1236,7 +1260,7 @@ This example shows how to use temporary AWS credentials with session tokens.
 @bind("products_csv", "csv useHeaders=true", "disk/data/input", "products.csv").
 
 % Define the product concept
-products_dynamodb(ProductId, Name, Price, Category) :- 
+products_dynamodb(ProductId, Name, Price, Category) <- 
         products_csv(ProductId, Name, Price, Category).
 
 % Declare output
@@ -1257,7 +1281,7 @@ This example shows how to connect to DynamoDB Local for development and testing.
 @bind("test_data_csv", "csv useHeaders=true", "test/data", "sample_data.csv").
 
 % Define test data concept
-test_data(Id, Name, Value) :- 
+test_data(Id, Name, Value) <- 
         test_data_csv(Id, Name, Value).
 
 % Declare output
@@ -1307,7 +1331,7 @@ In this example, we first read data from a CSV file stored locally and then writ
 @bind("user_csv", "csv useHeaders=true", "disk/datasources", "users.csv").
 
 % Define a rule to map the data from 'user_csv' to the 'user' concept
-user(X) :- user_csv(X).
+user(X) <- user_csv(X).
 
 % Declare the output concept 'user' for writing the data to an S3 bucket
 @output("user").
@@ -1323,7 +1347,7 @@ In this example, we demonstrate how to read data from a CSV file stored in an S3
 @bind("user_s3", "csv", "s3a://your-s3-bucket/", "user.csv").
 
 % Define a rule to map the data from 'user_s3' to the 'user' concept
-user(X) :- user_s3(X).
+user(X) <- user_s3(X).
 
 % Declare the output concept 'user' for making the data available after reading from S3
 @output("user").
@@ -1338,7 +1362,7 @@ You can use a similar approach to bind predicates to CSV files stored in Amazon 
 @bind("user_s3", "csv", "s3a://your-s3-bucket/", "user.csv").
 
 % Map the data as needed
-user(X) :- user_s3(X).
+user(X) <- user_s3(X).
 
 % Declare the output concept
 @output("user").
@@ -1375,7 +1399,7 @@ result() <- SELECT SIZE(teams) AS team_count FROM teams.
 **Query Prometheus Metrics:**
 ```prolog
 @bind("metrics", "api", "http://prometheus-server:9090/api/v1/", "query?query=up").
-result(Status, ResultType) :- metrics(Data, Status), 
+result(Status, ResultType) <- metrics(Data, Status), 
                               ResultType = struct:get("resultType", Data).
 @output("result").
 ```
@@ -1469,14 +1493,14 @@ Prometheus is a popular monitoring system that exposes metrics via REST API. Her
 @bind("up_metric", "api", "http://prometheus-server:9090/api/v1/", "query?query=up").
 
 % Explode the results array to process individual metrics
-result_linear(Result) :-
+result_linear(Result) <-
     up_metric(Data, Status),
     Status = "success",
     Results = struct:get("result", Data),
     Result = collections:explode(Results).
 
 % Extract metric labels and values
-result(Job, Instance, Timestamp, Value) :-
+result(Job, Instance, Timestamp, Value) <-
     result_linear(Result),
     Metric = struct:get("metric", Result),
     Job = struct:get("job", Metric),
@@ -1497,14 +1521,14 @@ Query Prometheus targets to get detailed information about scrape targets:
 @bind("targets", "api", "http://prometheus-server:9090/api/v1/", "targets").
 
 % Explode active targets array
-active_targets_linear(Target) :-
+active_targets_linear(Target) <-
     targets(Data, Status),
     Status = "success",
     ActiveTargets = struct:get("activeTargets", Data),
     Target = collections:explode(ActiveTargets).
 
 % Extract target details
-result(Job, Address, Health, ScrapeUrl) :-
+result(Job, Address, Health, ScrapeUrl) <-
     active_targets_linear(Target),
     DiscoveredLabels = struct:get("discoveredLabels", Target),
     Job = struct:get("job", DiscoveredLabels),
@@ -1524,14 +1548,14 @@ Query and extract goroutine counts from Prometheus:
 @bind("goroutines", "api", "http://prometheus-server:9090/api/v1/", "query?query=go_goroutines").
 
 % Explode results to process each metric
-result_linear(Result) :-
+result_linear(Result) <-
     goroutines(Data, Status),
     Status = "success",
     Results = struct:get("result", Data),
     Result = collections:explode(Results).
 
 % Extract goroutine count for each instance
-result(Job, Instance, GoroutineCount) :-
+result(Job, Instance, GoroutineCount) <-
     result_linear(Result),
     Metric = struct:get("metric", Result),
     Job = struct:get("job", Metric),
@@ -1551,20 +1575,20 @@ Query Prometheus alert rule definitions (works even when no alerts are firing):
 @bind("rules_api", "api", "http://prometheus-server:9090/api/v1/", "rules").
 
 % Extract alert rule groups
-groups_linear(Group) :- 
+groups_linear(Group) <- 
     rules_api(Data, Status),
     Status = "success",
     GroupsArray = struct:get("groups", Data),
     Group = collections:explode(GroupsArray).
 
 % Explode rules array within each group
-rules_linear(Rule) :- 
+rules_linear(Rule) <- 
     groups_linear(Group),
     Rules = struct:get("rules", Group),
     Rule = collections:explode(Rules).
 
 % Extract alert details
-result(AlertName, State, Query, Severity, Description) :-
+result(AlertName, State, Query, Severity, Description) <-
     rules_linear(Rule),
     AlertName = struct:get("name", Rule),
     State = struct:get("state", Rule),
@@ -1586,13 +1610,13 @@ Query Prometheus to get all available metric names and filter them:
 @bind("metric_names", "api", "http://prometheus-server:9090/api/v1/", "label/__name__/values").
 
 % Explode the data array to get individual metric names
-metrics_linear(MetricName) :-
+metrics_linear(MetricName) <-
     metric_names(Data, Status),
     Status = "success",
     MetricName = collections:explode(Data).
 
 % Filter for metrics containing "prometheus"
-result(MetricName) :-
+result(MetricName) <-
     metrics_linear(MetricName),
     contains(MetricName, "prometheus").
 
@@ -1606,7 +1630,7 @@ You can also count the total number of metrics:
 @bind("all_metrics", "api", "http://prometheus-server:9090/api/v1/", "label/__name__/values").
 
 % Count total metrics
-result(TotalCount) :-
+result(TotalCount) <-
     all_metrics(Data, Status),
     Status = "success",
     TotalCount = SIZE(Data).
@@ -1623,14 +1647,14 @@ Query Prometheus build information to get version details:
 @bind("build_info", "api", "http://prometheus-server:9090/api/v1/", "query?query=prometheus_build_info").
 
 % Explode results to access build info
-result_linear(Result) :-
+result_linear(Result) <-
     build_info(Data, Status),
     Status = "success",
     Results = struct:get("result", Data),
     Result = collections:explode(Results).
 
 % Extract version information
-result(Version, GoVersion, Instance) :-
+result(Version, GoVersion, Instance) <-
     result_linear(Result),
     Metric = struct:get("metric", Result),
     Version = struct:get("version", Metric),
@@ -1749,11 +1773,11 @@ alert_summary() <- SELECT SIZE(alerts_api) AS total_alerts.
       "http://databases.prometheux.ai:9093/api/v2/", "alerts").
 
 % Extract alert information using collections:explode for array processing
-alerts_linear(Alert) :- alerts(AlertsArray),
+alerts_linear(Alert) <- alerts(AlertsArray),
                         Alert = collections:explode(AlertsArray).
 
 % Extract fields from each alert using struct:get
-critical_alerts(AlertName, Status, StartsAt) :- 
+critical_alerts(AlertName, Status, StartsAt) <- 
     alerts_linear(Alert),
     Labels = struct:get("labels", Alert),
     AlertName = struct:get("alertname", Labels),
@@ -2075,11 +2099,11 @@ Most public APIs (TheSportsDB, CoinGecko, etc.) return objects with nested array
 @bind("leagues_api", "api", "https://www.thesportsdb.com/api/v1/json/3/", "all_leagues.php").
 
 % Explode the leagues array into individual rows
-leagues_linear(League) :- leagues_api(LeaguesArray), 
+leagues_linear(League) <- leagues_api(LeaguesArray), 
                           League = collections:explode(LeaguesArray).
 
 % Extract fields from each league struct using struct:get
-result(LeagueId, LeagueName) :- leagues_linear(League), 
+result(LeagueId, LeagueName) <- leagues_linear(League), 
                                  LeagueId = struct:get("idLeague", League), 
                                  LeagueName = struct:get("strLeague", League).
 
@@ -2095,17 +2119,17 @@ Transform array elements using lambda expressions before exploding:
 @bind("leagues_api", "api", "https://www.thesportsdb.com/api/v1/json/3/", "all_leagues.php").
 
 % Transform each league struct into a simpler array [id, name]
-leagues_transformed(TransformedArray) :- 
+leagues_transformed(TransformedArray) <- 
     leagues_api(LeaguesArray), 
     TransformedArray = collections:transform(LeaguesArray, "x -> array(x.idLeague, x.strLeague)").
 
 % Explode the transformed array into rows
-leagues_linear(LeagueData) :- 
+leagues_linear(LeagueData) <- 
     leagues_transformed(TransformedArray), 
     LeagueData = collections:explode(TransformedArray).
 
 % Access array elements using collections:get (1-indexed)
-result(LeagueId, LeagueName) :- 
+result(LeagueId, LeagueName) <- 
     leagues_linear(LeagueData), 
     LeagueId = collections:get(LeagueData, 1), 
     LeagueName = collections:get(LeagueData, 2).
@@ -2120,11 +2144,11 @@ result(LeagueId, LeagueName) :-
 @bind("crypto_list", "api", "https://api.coingecko.com/api/v3/", "coins/list").
 
 % Explode cryptocurrency array
-crypto_linear(Crypto) :- crypto_list(CryptoArray), 
+crypto_linear(Crypto) <- crypto_list(CryptoArray), 
                          Crypto = collections:explode(CryptoArray).
 
 % Extract crypto information
-result(CryptoId, Symbol, Name) :- 
+result(CryptoId, Symbol, Name) <- 
     crypto_linear(Crypto), 
     CryptoId = struct:get("id", Crypto), 
     Symbol = struct:get("symbol", Crypto), 
@@ -2316,7 +2340,7 @@ regional_stats() <- SELECT region,
 2. **Use `struct:get` in Vadalog rules**:
    ```prolog
    % Access nested fields after binding
-   result(MetricName) :- 
+   result(MetricName) <- 
        api_data(..., MetricStruct, ...),
        MetricName = struct:get("instance", MetricStruct).
    ```
@@ -2353,7 +2377,7 @@ This example demonstrates how to read from a text file and extract structured in
 @bind("location","text","/path/to/file","hansel_gretel_excerpt.txt").
 
 % Define a rule to extract Name and Description from the text file
-location_head(Name,Description) :- location(Name,Description).
+location_head(Name,Description) <- location(Name,Description).
 
 % Declare the output concept 'location_head' for making the processed data available
 @output("location_head").
@@ -2371,7 +2395,7 @@ This example demonstrates how to read from a PDF file and extract structured inf
 @bind("person","binaryfile","/path/to/file","hansel_gretel_excerpt.pdf").
 
 % Define a rule to extract Name and Role from the PDF file
-person_head(Name,Role) :- person(Name,Role).
+person_head(Name,Role) <- person(Name,Role).
 
 % Declare the output concept 'person_head' for making the processed data available
 @output("person_head").
@@ -2395,7 +2419,7 @@ This example demonstrates how to read from an invoice PDF and extract structured
 @bind("iNV_pdf","binaryfile documentType='invoice'","/path/to/invoice","INV.pdf").
 
 % Define a rule to extract comprehensive invoice information from the PDF file
-iNV__pdf_head(CustomerName,CustomerId,PurchaseOrder,InvoiceId,InvoiceDate,DueDate,VendorName,VendorAddress,VendorAddressRecipient,CustomerAddress,CustomerAddressRecipient,BillingAddress,BillingAddressRecipient,ShippingAddress,ShippingAddressRecipient,SubTotal,TotalDiscount,TotalTax,InvoiceTotal,AmountDue,PreviousUnpaidBalance,RemittanceAddress,RemittanceAddressRecipient,ServiceAddress,ServiceAddressRecipient,ServiceStartDate,ServiceEndDate,VendorTaxId,CustomerTaxId,PaymentTerm,KVKNumber,PaymentUrl,PaymentDetails,TaxDetails,PaidInFourInstallements,Items) :- iNV_pdf(CustomerName,CustomerId,PurchaseOrder,InvoiceId,InvoiceDate,DueDate,VendorName,VendorAddress,VendorAddressRecipient,CustomerAddress,CustomerAddressRecipient,BillingAddress,BillingAddressRecipient,ShippingAddress,ShippingAddressRecipient,SubTotal,TotalDiscount,TotalTax,InvoiceTotal,AmountDue,PreviousUnpaidBalance,RemittanceAddress,RemittanceAddressRecipient,ServiceAddress,ServiceAddressRecipient,ServiceStartDate,ServiceEndDate,VendorTaxId,CustomerTaxId,PaymentTerm,KVKNumber,PaymentUrl,PaymentDetails,TaxDetails,PaidInFourInstallements,Items).
+iNV__pdf_head(CustomerName,CustomerId,PurchaseOrder,InvoiceId,InvoiceDate,DueDate,VendorName,VendorAddress,VendorAddressRecipient,CustomerAddress,CustomerAddressRecipient,BillingAddress,BillingAddressRecipient,ShippingAddress,ShippingAddressRecipient,SubTotal,TotalDiscount,TotalTax,InvoiceTotal,AmountDue,PreviousUnpaidBalance,RemittanceAddress,RemittanceAddressRecipient,ServiceAddress,ServiceAddressRecipient,ServiceStartDate,ServiceEndDate,VendorTaxId,CustomerTaxId,PaymentTerm,KVKNumber,PaymentUrl,PaymentDetails,TaxDetails,PaidInFourInstallements,Items) <- iNV_pdf(CustomerName,CustomerId,PurchaseOrder,InvoiceId,InvoiceDate,DueDate,VendorName,VendorAddress,VendorAddressRecipient,CustomerAddress,CustomerAddressRecipient,BillingAddress,BillingAddressRecipient,ShippingAddress,ShippingAddressRecipient,SubTotal,TotalDiscount,TotalTax,InvoiceTotal,AmountDue,PreviousUnpaidBalance,RemittanceAddress,RemittanceAddressRecipient,ServiceAddress,ServiceAddressRecipient,ServiceStartDate,ServiceEndDate,VendorTaxId,CustomerTaxId,PaymentTerm,KVKNumber,PaymentUrl,PaymentDetails,TaxDetails,PaidInFourInstallements,Items).
 
 % Declare the output concept 'iNV_2026_002_000521_pdf_head' for making the processed data available
 @output("iNV_2026_002_000521_pdf_head").
@@ -2411,7 +2435,7 @@ HDFS (Hadoop Distributed File System) is designed for distributed storage and la
 @bind("user_csv", "csv useHeaders=true", "hdfs://hdfs-host:9000/user", "users.csv").
 
 % Define a rule to map the data from 'user_csv' to the 'user' concept
-user(X) :- user_csv(X).
+user(X) <- user_csv(X).
 
 % Declare the output concept 'user' for making the processed data available
 @output("user").
@@ -2426,7 +2450,7 @@ Sybase (now SAP ASE) is a relational database management system used for online 
       "myDatabase", "orders").
 
 % Define a rule that extracts OrderId, CustomerId, and Amount from the 'orders' table in Sybase
-order_sybase_test(OrderId, CustomerId, Amount) :- 
+order_sybase_test(OrderId, CustomerId, Amount) <- 
         order_sybase(OrderId, CustomerId, Amount).
 
 % Declare the output concept 'order_sybase_test' to make the processed data available
@@ -2441,7 +2465,7 @@ Teradata is a highly scalable relational database often used in enterprise data 
       "myDatabase", "sales").
 
 % Define a rule to extract SaleId, ProductId, and SaleAmount from the 'sales' table in Teradata
-sales_teradata_test(SaleId, ProductId, SaleAmount) :- 
+sales_teradata_test(SaleId, ProductId, SaleAmount) <- 
         sales_teradata(SaleId, ProductId, SaleAmount).
 
 % Declare the output concept 'sales_teradata_test' for making the processed data available
@@ -2458,7 +2482,7 @@ Amazon Redshift is a fully managed data warehouse service designed for large-sca
       "analyticsDB", "analytics").
 
 % Define a rule to extract data from the 'analytics' table in Redshift
-analytics_redshift_test(AnalysisId, Metric, Value) :- 
+analytics_redshift_test(AnalysisId, Metric, Value) <- 
         analytics_redshift(AnalysisId, Metric, Value).
 
 % Declare the output concept 'analytics_redshift_test' for making the processed data available
@@ -2575,7 +2599,7 @@ Enable token-based authMode by setting set the `bigquery.authMode` in the `px.pr
       "bigquery-public-data.thelook_ecommerce.order_items").
 
 % Rule to project the first three columns from the BigQuery table
-bigquery_table(X,Y,Z) :- table(X,Y,Z).
+bigquery_table(X,Y,Z) <- table(X,Y,Z).
 
 % Post-process the BigQuery table to limit the results to 10
 @post("bigquery_table","limit(10)").
@@ -2594,7 +2618,7 @@ bigquery_table(X,Y,Z) :- table(X,Y,Z).
       "bigquery-public-data.thelook_ecommerce.order_items").
 
 % Rule to project the first three columns from the BigQuery table
-bigquery_table(X,Y,Z) :- table(X,Y,Z).
+bigquery_table(X,Y,Z) <- table(X,Y,Z).
 
 % Define the output for the BigQuery table
 @output("bigquery_table").
@@ -2613,7 +2637,7 @@ bigquery_table(X,Y,Z) :- table(X,Y,Z).
         WHERE sale_price > 100 GROUP BY product_id ORDER BY revenue DESC LIMIT 10").
 
 % Define a rule to map the query results to the bigquery_query predicate
-bigquery_query(X,Y) :- query(X,Y).
+bigquery_query(X,Y) <- query(X,Y).
 
 % Declare the output for the bigquery_query predicate
 @output("bigquery_query").
@@ -2739,7 +2763,7 @@ This example demonstrates reading data from a Snowflake table using password aut
       "TEST", "transaction_data").
 
 % Define a rule to extract TransactionId, CustomerId, and Amount from the 'transactions' table in Snowflake
-transactions_snowflake_test(TransactionId, CustomerId, Amount) :- 
+transactions_snowflake_test(TransactionId, CustomerId, Amount) <- 
         transactions_snowflake(TransactionId, CustomerId, Amount).
 
 % Declare the output concept 'transactions_snowflake_test' for making the processed data available
@@ -2757,7 +2781,7 @@ This example demonstrates reading data from a Snowflake table using Programmatic
       "TEST", "transaction_data").
 
 % Define a rule to extract TransactionId, CustomerId, and Amount from the 'transactions' table in Snowflake
-transactions_snowflake_test(TransactionId, CustomerId, Amount) :- 
+transactions_snowflake_test(TransactionId, CustomerId, Amount) <- 
         transactions_snowflake(TransactionId, CustomerId, Amount).
 
 % Declare the output concept 'transactions_snowflake_test' for making the processed data available
@@ -2777,7 +2801,7 @@ This example demonstrates writing data to a Databricks table.
       "postgres", "select sale_id, product_id, sale_amount from sales").
 
 % Define a rule to extract SaleId, ProductId, and SaleAmount from the 'sales' table in Postgres
-sales_databricks(SaleId, ProductId, SaleAmount) :- 
+sales_databricks(SaleId, ProductId, SaleAmount) <- 
         sales_postgres(SaleId, ProductId, SaleAmount).
 
 % Declare the output concept 'sales_databricks' to write data to the Databricks table   
@@ -2797,7 +2821,7 @@ This example demonstrates reading data from a Databricks table.
       "/sql/1.0/warehouses/3283xxxx", "select sale_id, productId from sales").
 
 % Define a rule to extract ProductId from the 'sales' table in Databricks
-sales(Product) :- 
+sales(Product) <- 
         sales_databricks(Sale, Product).
 
 % Declare the output concept 'sales' to return the processed data

@@ -35,7 +35,7 @@ rule generating the chase fact, respectively. Consider this example:
 arc(1,2).
 arc(1,3).
 
-path(X,Y) :- arc(X,Y).
+path(X,Y) <- arc(X,Y).
 @chase("csv", "disk/data", "chase.csv").
 @output("path").
 ```
@@ -46,8 +46,8 @@ distributed evaluation, with the following rows:
 
 ```csv title="Chase graph at: disk/data/chase.csv" showLineNumbers
 Fact,ProvenanceLeft,ProvenanceRight,Rule
-"path(1,2)","arc(1,2)","","path(X,Y) :- arc(X,Y)"
-"path(1,3)","arc(1,3)", "","path(X,Y) :- arc(X,Y)"
+"path(1,2)","arc(1,2)","","path(X,Y) <- arc(X,Y)"
+"path(1,3)","arc(1,3)", "","path(X,Y) <- arc(X,Y)"
 ```
 
 ### Handling Aggregations
@@ -64,8 +64,8 @@ As an example, the following program:
 ```prolog showLineNumbers
 own(1,2,0.3).
 own(1,2,0.4).
-path_own(X,Y,Z) :- own(X,Y,Z), Z > 0.
-path_own_agg(X,Y,C) :- path_own(X,Y,Z), C = msum(Z).
+path_own(X,Y,Z) <- own(X,Y,Z), Z > 0.
+path_own_agg(X,Y,C) <- path_own(X,Y,Z), C = msum(Z).
 @chase("csv coalesce=true", "disk/data", "chase.csv").
 @output("path_own_agg").
 ```
@@ -74,11 +74,11 @@ produces a csv containing the following rows:
 
 ```csv title="Chase graph at: disk/data/chase.csv" showLineNumbers
 Fact,ProvenanceLeft,ProvenanceRight,Rule
-"path_own(1,2,0.3)","own(1,2,0.3)","","path_own(X,Y,Z) :- own(X,Y,Z), Z>0."
-"path_own(1,2,0.4)","own(1,2,0.4)","","path_own(X,Y,Z) :- own(X,Y,Z), Z>0."
-"aggregated_explainability_path_own_agg(1,2)","path_own(1,2,0.3)","","path_own_agg(X,Y,C) :- path_own(X,Y,Z), C=msum(Z)."
-"aggregated_explainability_path_own_agg(1,2)","path_own(1,2,0.4)","","path_own_agg(X,Y,C) :- path_own(X,Y,Z), C=msum(Z)."
-"path_own_agg(1,2,0.7)","aggregated_explainability_path_own_agg(1,2)","","path_own_agg(X,Y,C) :- path_own(X,Y,Z), C=msum(Z)."
+"path_own(1,2,0.3)","own(1,2,0.3)","","path_own(X,Y,Z) <- own(X,Y,Z), Z>0."
+"path_own(1,2,0.4)","own(1,2,0.4)","","path_own(X,Y,Z) <- own(X,Y,Z), Z>0."
+"aggregated_explainability_path_own_agg(1,2)","path_own(1,2,0.3)","","path_own_agg(X,Y,C) <- path_own(X,Y,Z), C=msum(Z)."
+"aggregated_explainability_path_own_agg(1,2)","path_own(1,2,0.4)","","path_own_agg(X,Y,C) <- path_own(X,Y,Z), C=msum(Z)."
+"path_own_agg(1,2,0.7)","aggregated_explainability_path_own_agg(1,2)","","path_own_agg(X,Y,C) <- path_own(X,Y,Z), C=msum(Z)."
 ```
 
 ### Materializing the Chase Graph on CSV using Neo4j Bulk Import
@@ -96,7 +96,7 @@ columns "id:ID", ":Label". The CSV of the edges has the following columns
 arc(1,2).
 arc(1,3).
 
-path(X,Y) :- arc(X,Y).
+path(X,Y) <- arc(X,Y).
 @chase("csv forNeo4jBulkImport=true, compression=gzip", "neo4j-import", "chase").
 @output("path").
 ```
@@ -121,8 +121,8 @@ with the following entries:
 
 ```csv title="Chase graph at: neo4j-import/chase/edges/part-0.csv" showLineNumbers
 :START_ID, :END_ID, rule:string, :TYPE
-"path(1,2)", "arc(1,2)", "path(X,Y) :- arc(X,Y)", "DERIVED_BY"
-"path(1,3)", "arc(1,3)", "path(X,Y) :- arc(X,Y)", "DERIVED_BY"
+"path(1,2)", "arc(1,2)", "path(X,Y) <- arc(X,Y)", "DERIVED_BY"
+"path(1,3)", "arc(1,3)", "path(X,Y) <- arc(X,Y)", "DERIVED_BY"
 ```
 
 Notice that "rule:string" is an attribute of the edge relationship having type
@@ -152,7 +152,7 @@ Consider this example:
 arc(1,2).
 arc(1,3).
 
-path(X,Y) :- arc(X,Y).
+path(X,Y) <- arc(X,Y).
 @chase("neo4j", "", "").
 @output("path").
 ```
@@ -184,8 +184,8 @@ CHASE_NODE(fact: 'arc(1,3)')
 and two `DERIVED_BY` edges
 
 ```cypher
-CHASE_NODE(fact: 'path(1,2)') -[DERIVED_BY(rule: path(X,Y) :- arc(X,Y))]->CHASE_NODE(fact: arc(1,2))
-CHASE_NODE(fact: 'path(1,3)') -[DERIVED_BY(rule: path(X,Y) :- arc(X,Y))]->CHASE_NODE(fact: arc(1,3))
+CHASE_NODE(fact: 'path(1,2)') -[DERIVED_BY(rule: path(X,Y) <- arc(X,Y))]->CHASE_NODE(fact: arc(1,2))
+CHASE_NODE(fact: 'path(1,3)') -[DERIVED_BY(rule: path(X,Y) <- arc(X,Y))]->CHASE_NODE(fact: arc(1,3))
 ```
 
 ### Retrieving the Chase from Neo4j
@@ -195,7 +195,7 @@ Connectors with the following annotations:
 
 ```prolog showLineNumbers
 @qbind("chase_neo4j", "neo4j", "\", "MATCH(n:CHASE_NODE) -[r:DERIVED_BY]->(m:CHASE_NODE) RETURN n.fact, m.fact, r.rule").
-chase_edge(X,Y,R) :- chase_neo4j(X,Y,R).
+chase_edge(X,Y,R) <- chase_neo4j(X,Y,R).
 @output("chase_edge").
 ```
 
@@ -233,7 +233,7 @@ fact 'a(1,2)':
 ```prolog showLineNumbers
 @qbind("chase_neo4j", "neo4j", "\", "MATCH (root:CHASE_NODE {fact: 'a(1,2)' }) CALL apoc.path.subgraphNodes(root, {relationshipFilter: 'DERIVED_BY>', limit: 1000}) YIELD node MATCH (node)-[r]->(m) RETURN node.fact, m.fact, r.rule").
 
-chase_edge(X,Y,R) :- chase_neo4j(X,Y,R).
+chase_edge(X,Y,R) <- chase_neo4j(X,Y,R).
 @output("chase_edge").
 ```
 

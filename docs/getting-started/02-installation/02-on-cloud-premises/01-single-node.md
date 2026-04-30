@@ -1,150 +1,88 @@
 # Single Node
 
-> Deploy Prometheux on a single VM (AWS EC2, Azure VM, GCP Compute Engine, or
-> bare metal) using Docker Compose.
+> Deploy Prometheux on a single VM in AWS, Azure, GCP, or your own data centre
+> using Docker Compose.
 
 ## Overview
 
-The Docker deploy method lets you run Prometheux on infrastructure you control.
-It packages the core reasoning engine and a JupyterLab environment into
-containers managed by Docker Compose, making it suitable for cloud VMs and
-on-premises servers alike.
+The single-node deployment runs the full Prometheux platform on one machine
+using Docker Compose. It takes minutes to set up and is the easiest way to run
+Prometheux on infrastructure you control.
 
-## Prerequisites
+The deployment is fully containerised — no manual dependency installation, no
+complex networking, and no cluster management required.
 
-- **Docker** and **Docker Compose** installed on the target machine
-- **PROMETHEUX_PULL_IMAGE_TOKEN** — a token required to pull Docker images from
-  the Prometheux container registry (contact the Prometheux team to obtain one)
-- Minimum recommended hardware: 4 vCPUs, 16 GB RAM, 50 GB disk
+## What You Need
 
-## Quick Start
+- A Linux VM (or bare metal server) with **Docker** and **Docker Compose**
+  installed
+- Minimum recommended hardware: **4 vCPUs, 16 GB RAM, 50 GB disk**
+- An image pull token from the Prometheux team
 
-### 1. Clone the Repository
+:::tip Guided setup
+The Prometheux team will walk you through the initial setup and provide your
+credentials. [Book a call](https://calendly.com/prometheux/prometheux-intro?utm_source=docs)
+to get started.
+:::
+
+## How It Works
+
+1. **Clone** the deployment repository
+2. **Add your token** to a single configuration file
+3. **Run one command** to start the platform
 
 ```bash
 git clone git@github.com:prometheuxresearch/prometheux-deploy.git
 cd prometheux-deploy
-```
-
-### 2. Configure the Image Pull Token
-
-Obtain the **PROMETHEUX_PULL_IMAGE_TOKEN** from the Prometheux team and replace
-the content of the `prometheux-image-pull-token.txt` file with the provided
-token.
-
-### 3. Start the Services
-
-```bash
 ./docker-compose-up.sh
 ```
 
-This script reads the image pull token and starts all services in detached
-mode.
+That's it. The script pulls the container images and starts all services
+automatically.
 
-### 4. Access the Services
+## What Gets Deployed
 
-Once started, the following services are available:
+| Component | Description |
+| --- | --- |
+| **Prometheux Engine** | The core ontology engine for building and querying knowledge graphs |
+| **Platform UI** | Web-based interface for managing ontologies, data sources, and queries |
 
-| Service | Port | Description |
-| --- | --- | --- |
-| **vadalog-parallel** | `8080` | The [core reasoning engine](/learn/getting-started) of Prometheux |
-| **JupyterLab** | `8888` | Notebook environment with Python and Vadalog kernels |
+All services run inside Docker containers and are fully managed by the
+provided scripts.
 
-To install the Python SDK inside JupyterLab:
+## Supported Environments
 
-```bash
-pip install --upgrade prometheux_chain
-```
+The single-node deployment works on any machine that can run Docker:
 
-## Configuration
-
-You can modify the configuration files for vadalog-parallel. These are mounted
-from the host in the `prometheux/vadalog-parallel/` folder.
-
-For a full list of engine configuration properties, see the
-[Configuration Reference](/getting-started/installation/on-cloud-premises/cluster#configuration-reference).
-
-:::tip
-Ensure that the paths specified in `docker-compose.yml` match your directory
-structure. Modify the `.sh` scripts as needed to fit your environment.
-:::
-
-## Cloud-Specific Tips
-
-<details>
-<summary><strong>AWS EC2</strong></summary>
-
-- **Recommended instance**: `m5.xlarge` (4 vCPU, 16 GB) or larger
-- **Security group**: Allow inbound TCP on ports `8080` and `8888` from your IP
-  range
-- Install Docker on Amazon Linux 2:
-  ```bash
-  sudo yum update -y
-  sudo yum install -y docker
-  sudo service docker start
-  sudo usermod -aG docker ec2-user
-  ```
-- Install Docker Compose following the
-  [official instructions](https://docs.docker.com/compose/install/linux/)
-
-</details>
-
-<details>
-<summary><strong>Azure VM</strong></summary>
-
-- **Recommended size**: `Standard_D4s_v3` (4 vCPU, 16 GB) or larger
-- **Network Security Group (NSG)**: Add inbound rules for ports `8080` and
-  `8888`
-- Install Docker on Ubuntu:
-  ```bash
-  sudo apt-get update
-  sudo apt-get install -y docker.io docker-compose-v2
-  sudo usermod -aG docker $USER
-  ```
-
-</details>
-
-<details>
-<summary><strong>GCP Compute Engine</strong></summary>
-
-- **Recommended machine type**: `e2-standard-4` (4 vCPU, 16 GB) or larger
-- **Firewall rules**: Allow TCP on ports `8080` and `8888` with an appropriate
-  source range
-- Install Docker on Debian/Ubuntu:
-  ```bash
-  sudo apt-get update
-  sudo apt-get install -y docker.io docker-compose-v2
-  sudo usermod -aG docker $USER
-  ```
-
-</details>
+| Cloud | Recommended Instance |
+| --- | --- |
+| **AWS** | `m5.xlarge` (4 vCPU, 16 GB) or larger |
+| **Azure** | `Standard_D4s_v3` (4 vCPU, 16 GB) or larger |
+| **GCP** | `e2-standard-4` (4 vCPU, 16 GB) or larger |
+| **On-premises** | Any Linux server meeting the hardware requirements |
 
 ## Management
 
-**Stop all services:**
+Simple scripts are provided for day-to-day operations:
 
 ```bash
-./docker-compose-down.sh
+./docker-compose-up.sh     # Start the platform
+./docker-compose-down.sh   # Stop the platform
+docker compose logs -f     # View logs
 ```
 
-**View logs:**
+Updating to a new version is just as simple — stop, pull the latest images,
+and restart.
 
-```bash
-docker compose logs -f
-```
+## Configuration
 
-**Update to a new version:**
-
-Pull the latest images with a valid token and restart:
-
-```bash
-./docker-compose-down.sh
-./docker-compose-up.sh
-```
+Engine configuration files are mounted from the host, making them easy to
+adjust. For the full list of available properties, see the
+[Configuration Reference](/getting-started/installation/on-cloud-premises/cluster#configuration-reference).
 
 ## Next Steps
 
 - [REST API](/api/rest-api) — Interact with the engine programmatically
 - [Python SDK](/api) — Use `prometheux_chain` from notebooks or scripts
-- [Configuration Reference](/getting-started/installation/on-cloud-premises/cluster#configuration-reference) — Tune engine
-  properties
+- [Cluster deployment](/getting-started/installation/on-cloud-premises/cluster) — Scale to
+  distributed Yarn or Kubernetes clusters
